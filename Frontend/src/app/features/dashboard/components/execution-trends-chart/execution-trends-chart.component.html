@@ -1,0 +1,21 @@
+<div id="chart">
+  <apx-chart
+    *ngIf="chartOptions && trends.length > 0"
+    [series]="chartOptions.series!"
+    [chart]="chartOptions.chart!"
+    [xaxis]="chartOptions.xaxis!"
+    [yaxis]="chartOptions.yaxis!"
+    [dataLabels]="chartOptions.dataLabels!"
+    [stroke]="chartOptions.stroke!"
+    [grid]="chartOptions.grid!"
+    [tooltip]="chartOptions.tooltip!"
+    [fill]="chartOptions.fill!"
+    [colors]="chartOptions.colors!"
+    [legend]="chartOptions.legend!"
+  ></apx-chart>
+  <div *ngIf="!chartOptions || trends.length === 0" class="flex flex-col items-center justify-center py-16 text-gray-400">
+    <span class="material-symbols-outlined text-5xl mb-3">bar_chart</span>
+    <p class="text-sm font-medium">No execution data for this project yet</p>
+    <p class="text-xs mt-1">Run some tests to see trends here</p>
+  </div>
+</div>

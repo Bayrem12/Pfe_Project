@@ -1,0 +1,146 @@
+<div class="tag-modal-backdrop fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/35 p-4 md:p-6" (click)="close()">
+  <div class="tag-modal-panel w-full max-w-2xl overflow-hidden rounded-[2rem] border border-white/70 bg-white/95 shadow-[0_32px_120px_rgba(15,23,42,0.24)] backdrop-blur-xl" (click)="$event.stopPropagation()">
+    <div class="relative overflow-hidden border-b border-slate-100 px-6 py-6 md:px-8 md:py-7">
+      <div class=""></div>
+      <div class="relative flex items-start justify-between gap-4">
+        <div>
+          <span class="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/10 bg-primary/5 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-primary">
+            <span class="material-symbols-outlined text-sm">sell</span>
+            New Tag
+          </span>
+          <h3 class="text-2xl font-black tracking-tight text-slate-900 md:text-[2rem]">Create Tag</h3>
+          <p class="mt-2 max-w-xl text-sm leading-relaxed text-slate-500">
+            Organize scenarios with elegant labels, color accents and optional context for your team.
+          </p>
+        </div>
+        <button type="button" (click)="close()" class="rounded-full border border-slate-200 bg-white p-2 text-slate-400 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-500">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="grid gap-0 md:grid-cols-[1.2fr_0.8fr]">
+      <form class="space-y-6 px-6 py-6 md:px-8 md:py-8" [formGroup]="tagForm" (ngSubmit)="submit()" novalidate>
+        <div *ngIf="errorMessage" class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 shadow-sm">
+          {{ errorMessage }}
+        </div>
+
+        <div *ngIf="!canCreate" class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-700">
+          You do not have permission to create tags for this project.
+        </div>
+
+        <div>
+          <label class="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">
+            Tag name <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="name"
+            placeholder="e.g. Critical Flow"
+            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/10"
+          />
+          <div *ngIf="controls.name.touched && controls.name.invalid" class="mt-2 space-y-1 pl-1 text-xs text-red-500">
+            <p *ngIf="controls.name.errors?.['required']">A tag name is required.</p>
+            <p *ngIf="controls.name.errors?.['minlength']">Use at least 3 characters.</p>
+            <p *ngIf="controls.name.errors?.['maxlength']">Use 50 characters maximum.</p>
+          </div>
+        </div>
+
+        <div>
+          <label class="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">
+            Description
+          </label>
+          <textarea
+            rows="4"
+            formControlName="description"
+            placeholder="A short note to explain when this tag should be used..."
+            class="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/10"
+          ></textarea>
+          <div class="mt-2 flex items-center justify-between px-1 text-xs text-slate-400">
+            <span>Optional helper text for the team.</span>
+            <span>{{ controls.description.value?.length || 0 }}/240</span>
+          </div>
+          <p *ngIf="controls.description.touched && controls.description.errors?.['maxlength']" class="mt-1 pl-1 text-xs text-red-500">
+            Description must stay under 240 characters.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+          <button
+            type="button"
+            (click)="close()"
+            [disabled]="isSubmitting"
+            class="flex-1 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-500 transition-all hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="isSubmitting || tagForm.invalid || !canCreate"
+            class="flex-1 rounded-2xl bg-[linear-gradient(135deg,#1d4ed8_0%,#7c3aed_100%)] px-4 py-3 text-sm font-black text-white shadow-[0_18px_40px_rgba(79,70,229,0.28)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(79,70,229,0.34)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+          >
+            <span *ngIf="!isSubmitting">Create Tag</span>
+            <span *ngIf="isSubmitting" class="inline-flex items-center gap-2">
+              <span class="inline-block h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
+              Creating...
+            </span>
+          </button>
+        </div>
+      </form>
+
+      <aside [formGroup]="tagForm" class="border-t border-slate-100 bg-[linear-gradient(180deg,#f8faff_0%,#f7f5ff_100%)] px-6 py-6 md:border-l md:border-t-0 md:px-7 md:py-8">
+        <label class="mb-3 block text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">
+          Color accent <span class="text-red-500">*</span>
+        </label>
+
+        <div class="grid grid-cols-4 gap-3">
+          <button
+            *ngFor="let preset of colorPresets"
+            type="button"
+            (click)="selectColor(preset)"
+            class="tag-color-swatch group relative aspect-square rounded-2xl border-2 transition-all"
+            [class.border-slate-200]="controls.color.value !== preset"
+            [class.border-slate-900]="controls.color.value === preset"
+            [style.background]="preset"
+          >
+            <span *ngIf="controls.color.value === preset" class="material-symbols-outlined text-lg text-white drop-shadow-md">check</span>
+          </button>
+        </div>
+
+        <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div class="flex items-center gap-4">
+            <input type="color" formControlName="color" class="h-14 w-14 cursor-pointer rounded-2xl border-none bg-transparent p-0" />
+            <div>
+              <p class="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Custom value</p>
+              <input
+                type="text"
+                formControlName="color"
+                placeholder="#6366F1"
+                class="mt-1 w-28 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold uppercase tracking-wide text-slate-800 outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10"
+              />
+            </div>
+          </div>
+          <p *ngIf="controls.color.touched && controls.color.invalid" class="mt-2 text-xs text-red-500">
+            Please enter a valid color like <strong>#6366F1</strong>.
+          </p>
+        </div>
+
+        <div class="mt-6 rounded-[1.75rem] border border-white/70 bg-white/85 p-5 shadow-[0_18px_40px_rgba(15,23,42,0.07)]">
+          <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Live preview</p>
+          <div class="mt-4 space-y-4">
+            <div class="inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-bold shadow-sm"
+              [style.borderColor]="(controls.color.value || '#6366F1') + '33'"
+              [style.backgroundColor]="(controls.color.value || '#6366F1') + '14'"
+              [style.color]="controls.color.value || '#6366F1'">
+              <span class="h-2.5 w-2.5 rounded-full" [style.backgroundColor]="controls.color.value || '#6366F1'"></span>
+              {{ controls.name.value || 'Tag preview' }}
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              {{ controls.description.value || 'Your optional description will appear here to help teammates understand when this tag should be used.' }}
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>

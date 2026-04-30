@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Technical Trace · {{ scenario_name }}</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#0b1020;--bg-2:#0f172a;--card:#111a33;--card-2:#0c1428;
+  --text:#e5e7eb;--muted:#94a3b8;--dim:#64748b;
+  --line:#1f2a44;
+  --ok:#10b981;--ok-2:#064e3b;
+  --fail:#ef4444;--fail-2:#7f1d1d;
+  --warn:#f59e0b;--warn-2:#78350f;
+  --indigo:#6366f1;--indigo-2:#312e81;
+  --violet:#8b5cf6;--violet-2:#4c1d95;
+  --blue:#3b82f6;--blue-2:#1e3a8a;
+  --rose:#f43f5e;--rose-2:#881337;
+  --r:10px;--r-sm:6px;
+  --mono:'JetBrains Mono','Cascadia Code','Fira Code',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.5;font-feature-settings:'cv11','ss01'}
+body{background-image:radial-gradient(ellipse at top,#1a1f4d 0%,#0b1020 50%);min-height:100vh}
+a{color:#a5b4fc;text-decoration:none}
+a:hover{color:#c7d2fe}
+code,pre{font-family:var(--mono);font-size:.78rem}
+
+/* HEADER */
+.hdr{padding:32px 40px 24px;border-bottom:1px solid var(--line)}
+.hdr-top{display:flex;align-items:center;gap:14px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.18em;color:var(--violet)}
+.hdr-top::before{content:'';width:6px;height:6px;background:var(--violet);border-radius:50%;box-shadow:0 0 10px var(--violet)}
+.hdr-top span.tag{background:var(--violet-2);color:#ddd6fe;padding:3px 9px;border-radius:999px;font-size:.65rem;letter-spacing:.1em}
+h1{font-size:1.7rem;font-weight:800;margin-top:8px;letter-spacing:-.02em}
+.hdr-meta{margin-top:10px;display:flex;gap:24px;flex-wrap:wrap;font-size:.83rem;color:var(--muted)}
+.hdr-meta .pill{padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:700}
+.pill.ok{background:var(--ok-2);color:#6ee7b7}
+.pill.fail{background:var(--fail-2);color:#fca5a5}
+
+/* WRAP */
+.wrap{max-width:1280px;margin:0 auto;padding:28px 40px 80px}
+.section{margin-bottom:34px}
+.section h2{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.section h2::before{content:'';width:3px;height:14px;background:var(--violet);border-radius:2px}
+
+/* STAT TILES */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden}
+.tile::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 50%,rgba(139,92,246,.06));pointer-events:none}
+.tile .lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--dim)}
+.tile .val{font-size:1.7rem;font-weight:800;margin-top:6px;letter-spacing:-.02em}
+.tile .sub{font-size:.7rem;color:var(--muted);margin-top:3px}
+.tile.ok .val{color:#6ee7b7}
+.tile.fail .val{color:#fca5a5}
+.tile.warn .val{color:#fcd34d}
+.tile.violet .val{color:#c4b5fd}
+
+/* MERMAID */
+.mermaid-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px 18px;overflow-x:auto}
+
+/* FILTER CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chip{padding:6px 14px;border-radius:999px;font-size:.78rem;font-weight:600;background:var(--card);border:1px solid var(--line);color:var(--muted);cursor:pointer;transition:all .15s;user-select:none}
+.chip:hover{border-color:var(--violet);color:#c4b5fd}
+.chip.active{background:var(--violet);border-color:var(--violet);color:#fff;box-shadow:0 0 0 3px rgba(139,92,246,.18)}
+
+/* STEP CARD */
+.step{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin-bottom:14px;overflow:hidden;transition:border-color .15s}
+.step:hover{border-color:#2a3a64}
+.step.fail{border-left:3px solid var(--fail)}
+.step.ok{border-left:3px solid var(--ok)}
+.step-head{padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.step-head:hover{background:rgba(99,102,241,.05)}
+.step-num{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--dim);min-width:34px}
+.step-kw{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:3px 8px;border-radius:4px;background:var(--card-2);color:var(--muted)}
+.step-kw.given{background:var(--blue-2);color:#93c5fd}
+.step-kw.when{background:var(--warn-2);color:#fcd34d}
+.step-kw.then{background:var(--ok-2);color:#6ee7b7}
+.step-text{flex:1;font-size:.92rem;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.step-meta{display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--muted)}
+.step-status{padding:2px 8px;border-radius:4px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.step-status.ok{background:var(--ok-2);color:#6ee7b7}
+.step-status.fail{background:var(--fail-2);color:#fca5a5}
+.method-badge{padding:2px 8px;border-radius:4px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:inline-flex;align-items:center;gap:4px}
+.method-badge.direct{background:var(--card-2);color:var(--dim)}
+.method-badge.fallback{background:var(--violet-2);color:#c4b5fd}
+.method-badge.fallback-fail{background:var(--warn-2);color:#fcd34d}
+.method-badge.retry{background:var(--blue-2);color:#93c5fd}
+.eye{font-size:.85em}
+.duration{font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+.caret{margin-left:6px;color:var(--dim);transition:transform .15s}
+.step.open .caret{transform:rotate(90deg)}
+
+/* STEP BODY (collapsible) */
+.step-body{display:none;border-top:1px solid var(--line);background:var(--card-2)}
+.step.open .step-body{display:block}
+
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--line)}
+.tab{padding:12px 20px;font-size:.78rem;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;user-select:none;display:inline-flex;align-items:center;gap:6px}
+.tab:hover{color:var(--text)}
+.tab.active{color:#c4b5fd;border-bottom-color:var(--violet)}
+.tab-panel{display:none;padding:22px 24px}
+.tab-panel.active{display:block}
+
+/* DEBUG TAB CONTENT */
+.kv{display:grid;grid-template-columns:140px 1fr;gap:8px 16px;font-size:.83rem;margin-bottom:16px}
+.kv .k{color:var(--dim);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding-top:3px}
+.kv .v{color:var(--text);word-break:break-word}
+.kv .v.code{font-family:var(--mono);font-size:.78rem;color:#c4b5fd}
+
+.code-block{background:#070b18;border:1px solid var(--line);border-radius:var(--r-sm);padding:14px 16px;overflow-x:auto;margin:8px 0;font-family:var(--mono);font-size:.78rem;line-height:1.7}
+.code-block .ln{color:var(--dim);user-select:none;display:inline-block;width:24px;text-align:right;margin-right:14px}
+.code-block .kwd{color:#c4b5fd}
+.code-block .str{color:#86efac}
+
+.error-box{background:var(--fail-2);border:1px solid var(--fail);border-radius:var(--r-sm);padding:12px 16px;margin-top:10px}
+.error-box .et{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#fca5a5;margin-bottom:4px}
+.error-box .em{font-family:var(--mono);font-size:.78rem;color:#fecaca;word-break:break-all}
+.error-box .ex{font-size:.83rem;color:#fee2e2;margin-top:6px}
+
+.fallback-summary{background:linear-gradient(135deg,var(--violet-2),var(--card));border:1px solid var(--violet);border-radius:var(--r-sm);padding:12px 16px;margin-top:14px;display:flex;align-items:center;gap:14px;font-size:.83rem}
+.fallback-summary .icon{width:32px;height:32px;border-radius:8px;background:var(--violet);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem}
+.fallback-summary strong{color:#c4b5fd}
+
+/* VISION TAB */
+.shots{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.shot{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.shot .lbl{padding:8px 12px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:1px solid var(--line);background:var(--card)}
+.shot img{width:100%;display:block;cursor:zoom-in;transition:opacity .15s}
+.shot img:hover{opacity:.92}
+.shot .empty{padding:30px;text-align:center;color:var(--dim);font-size:.83rem}
+
+.vision-stats{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.vstat{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 14px;font-size:.78rem;display:flex;align-items:center;gap:8px}
+.vstat .dot{width:9px;height:9px;border-radius:50%}
+.vstat .num{font-weight:800;font-size:.95rem}
+.vstat.yolo .dot{background:#ef4444}
+.vstat.dom .dot{background:#3b82f6}
+.vstat.merged .dot{background:#a78bfa}
+.vstat.action .dot{background:#10b981}
+
+.cand-table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px}
+.cand-table th{text-align:left;padding:8px 10px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);border-bottom:1px solid var(--line)}
+.cand-table td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.cand-table tr.winner{background:linear-gradient(90deg,rgba(16,185,129,.18),transparent)}
+.cand-table tr.winner td:first-child{position:relative}
+.cand-table tr.winner td:first-child::before{content:'★';position:absolute;left:-2px;top:7px;color:#34d399}
+.src-badge{padding:1px 7px;border-radius:4px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono)}
+.src-badge.yolo{background:var(--fail-2);color:#fca5a5}
+.src-badge.dom{background:var(--blue-2);color:#93c5fd}
+.src-badge.contour{background:var(--card);color:var(--muted)}
+.bar{display:inline-block;width:90px;height:6px;background:var(--line);border-radius:3px;vertical-align:middle;overflow:hidden;margin-right:6px}
+.bar-fill{height:100%;border-radius:3px}
+.bar-fill.score{background:linear-gradient(90deg,#a78bfa,#6366f1)}
+.bar-fill.conf{background:linear-gradient(90deg,#34d399,#10b981)}
+.cand-table .num{font-family:var(--mono);font-size:.74rem;color:var(--muted);min-width:40px;display:inline-block}
+
+/* No-fallback panel */
+.no-fb{padding:40px 20px;text-align:center;color:var(--dim);font-size:.88rem}
+.no-fb .em{font-size:2rem;display:block;margin-bottom:10px;opacity:.5}
+
+/* LIGHTBOX */
+.lightbox{position:fixed;inset:0;background:rgba(8,12,28,.96);display:none;align-items:center;justify-content:center;z-index:9999;padding:30px;cursor:zoom-out}
+.lightbox.show{display:flex}
+.lightbox img{max-width:100%;max-height:100%;border-radius:var(--r-sm);box-shadow:0 25px 60px rgba(0,0,0,.7)}
+
+/* hidden */
+.hide{display:none !important}
+
+/* footer */
+.footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);text-align:center;font-size:.74rem;color:var(--dim)}
+
+@media (max-width: 760px){
+  .shots{grid-template-columns:1fr}
+  .hdr{padding:24px 18px}
+  .wrap{padding:20px 18px}
+  .step-head{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-top">
+    <span>IA Test Agent</span> ·
+    <span>Technical Trace</span>
+    <span class="tag">Vision Internals</span>
+  </div>
+  <h1>{{ scenario_name }}</h1>
+  <div class="hdr-meta">
+    <span class="pill {{ 'ok' if statut == 'PASSED' else 'fail' }}">{{ statut }}</span>
+    <span>📅 {{ date_generated }}</span>
+    <span>⏱ {{ "%.0f"|format(duree_ms) }} ms</span>
+    {% if url_cible %}<span>🌐 {{ url_cible }}</span>{% endif %}
+    <span style="font-family:var(--mono);font-size:.74rem">id: {{ test_id }}</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- STAT TILES -->
+  <section class="section">
+    <div class="tiles">
+      <div class="tile">
+        <div class="lbl">Total Steps</div>
+        <div class="val">{{ steps_total }}</div>
+      </div>
+      <div class="tile ok">
+        <div class="lbl">Direct OK</div>
+        <div class="val">{{ recovery_stats.steps_ok|default(0) }}</div>
+        <div class="sub">first-try success</div>
+      </div>
+      <div class="tile warn">
+        <div class="lbl">Recovered</div>
+        <div class="val">{{ recovery_stats.steps_recovered|default(0) }}</div>
+        <div class="sub">via retry / fallback</div>
+      </div>
+      <div class="tile fail">
+        <div class="lbl">Failed</div>
+        <div class="val">{{ steps_failed }}</div>
+      </div>
+      <div class="tile violet">
+        <div class="lbl">Visual Fallbacks</div>
+        <div class="val">{{ steps_with_fallback }}</div>
+        <div class="sub">YOLO + DOM diagnostics</div>
+      </div>
+      <div class="tile">
+        <div class="lbl">Recovery Rate</div>
+        <div class="val">{{ "%.0f"|format((recovery_stats.taux_recuperation|default(1)) * 100) }}%</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PIPELINE DIAGRAM -->
+  <section class="section">
+    <h2>Execution Pipeline</h2>
+    <div class="mermaid-wrap">
+      <pre class="mermaid">
+flowchart LR
+    A([Gherkin Step]) --> B[NLP Parse]
+    B --> C[Code Gen]
+    C --> D{Playwright<br/>direct?}
+    D -- success --> Z([OK])
+    D -- locator<br/>fail --> E[YOLO + DOM<br/>Fallback]
+    E --> F{Match<br/>found?}
+    F -- yes --> G[Mouse / KB<br/>action] --> Z
+    F -- no --> H[Retry +<br/>Adaptation]
+    H --> D
+    H -. exhausted .-> X([FAILED])
+    style E fill:#312e81,stroke:#8b5cf6,color:#fff
+    style D fill:#1e3a8a,stroke:#3b82f6,color:#fff
+    style F fill:#1e3a8a,stroke:#3b82f6,color:#fff
+    style Z fill:#064e3b,stroke:#10b981,color:#fff
+    style X fill:#7f1d1d,stroke:#ef4444,color:#fff
+      </pre>
+    </div>
+  </section>
+
+  <!-- FILTER CHIPS -->
+  <section class="section">
+    <h2>Step Trace</h2>
+    <div class="chips">
+      <div class="chip active" data-filter="all">All ({{ steps_total }})</div>
+      <div class="chip" data-filter="failed">Failed ({{ steps_failed }})</div>
+      <div class="chip" data-filter="fallback">Used Fallback ({{ steps_with_fallback }})</div>
+      <div class="chip" data-filter="retry">Retried</div>
+    </div>
+
+    {% for step in steps %}
+    {% set fb = step.fallback_trace %}
+    <div class="step {{ 'fail' if step.statut == 'FAILED' else 'ok' }}"
+         data-statut="{{ step.statut }}"
+         data-fallback="{{ '1' if fb else '0' }}"
+         data-retry="{{ '1' if step.retry_count > 0 else '0' }}">
+      <div class="step-head" onclick="toggleStep(this.parentElement)">
+        <span class="step-num">#{{ step.step_num }}</span>
+        <span class="step-kw {{ step.keyword|lower }}">{{ step.keyword }}</span>
+        <span class="step-text">{{ step.gherkin_text }}</span>
+        <span class="step-meta">
+          {% if fb %}<span class="eye" title="Visual fallback used">👁️</span>{% endif %}
+          {% if step.retry_count > 0 %}<span title="Retried {{ step.retry_count }}×">🔁{{ step.retry_count }}</span>{% endif %}
+          <span class="method-badge {{
+            'direct' if step.method_used == 'playwright_direct' else
+            'fallback' if step.method_used == 'visual_fallback' else
+            'fallback-fail' if step.method_used == 'visual_fallback_tried' else
+            'retry' if step.method_used == 'retry_adaptation' else
+            'fail' if step.statut == 'FAILED' else 'direct'
+          }}">
+            {% if step.method_used == 'playwright_direct' %}⚡ Playwright direct{% endif %}
+            {% if step.method_used == 'visual_fallback' %}👁️ Visual fallback{% endif %}
+            {% if step.method_used == 'visual_fallback_tried' %}⚠️ Fallback tried{% endif %}
+            {% if step.method_used == 'retry_adaptation' %}🔁 Retry · adapt{% endif %}
+            {% if step.method_used == 'direct_failed' %}✕ Direct failed{% endif %}
+          </span>
+          <span class="duration">{{ "%.0f"|format(step.duree_ms) }} ms</span>
+          <span class="step-status {{ 'ok' if step.statut == 'OK' else 'fail' }}">{{ step.statut or 'OK' }}</span>
+          <span class="caret">▶</span>
+        </span>
+      </div>
+
+      <div class="step-body">
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this, 'debug')">🔧 Debug</div>
+          {% if fb %}
+          <div class="tab" onclick="switchTab(this, 'vision')">👁️ Vision Internals</div>
+          {% endif %}
+        </div>
+
+        <!-- DEBUG TAB -->
+        <div class="tab-panel active" data-tab="debug">
+          <div class="kv">
+            <div class="k">Intention</div>
+            <div class="v">{{ step.intention or '—' }}</div>
+            {% if step.entites %}
+            <div class="k">Entités</div>
+            <div class="v">
+              {% for e in step.entites %}
+              <span style="display:inline-block;background:var(--violet-2);color:#c4b5fd;padding:2px 8px;border-radius:4px;font-size:.74rem;margin:0 4px 4px 0;font-family:var(--mono)">{{ e.nom }}={{ e.valeur }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+            <div class="k">Method</div>
+            <div class="v code">{{ step.method_used or 'playwright_direct' }}</div>
+            <div class="k">Duration</div>
+            <div class="v code">{{ "%.0f"|format(step.duree_ms) }} ms</div>
+          </div>
+
+          {% if step.generated_code %}
+          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin-bottom:8px">Generated Playwright code</div>
+          <div class="code-block">
+            {% for line in step.generated_code %}<div><span class="ln">{{ loop.index }}</span>{{ line }}</div>{% endfor %}
+          </div>
+          {% endif %}
+
+          {% if step.playwright_error and fb %}
+          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin:14px 0 6px">Original Playwright error (before fallback)</div>
+          <div class="code-block" style="color:#fca5a5">{{ step.playwright_error }}</div>
+          {% endif %}
+
+          {% if step.erreur %}
+          <div class="error-box">
+            {% if step.erreur_type %}<div class="et">{{ step.erreur_type }}</div>{% endif %}
+            <div class="em">{{ step.erreur }}</div>
+            {% if step.erreur_explication %}<div class="ex">{{ step.erreur_explication }}</div>{% endif %}
+          </div>
+          {% endif %}
+
+          {% if fb %}
+          <div class="fallback-summary">
+            <div class="icon">👁️</div>
+            <div>
+              {% if fb.success %}
+                <strong>Visual fallback recovered the step.</strong>
+                Target <code>"{{ fb.target_text }}"</code> matched
+                {% if fb.winner_rank > 0 %}rank #{{ fb.winner_rank }} {% endif %}
+                via <strong>{{ fb.winner_source|upper }}</strong> ·
+                action <code>{{ fb.action_dispatched }}</code>
+                @ ({{ fb.winner_coords_x }}, {{ fb.winner_coords_y }})
+              {% else %}
+                <strong>Fallback was tried but did not recover.</strong>
+                Target <code>"{{ fb.target_text }}"</code> ·
+                {{ fb.merged_count }} elements considered, no acceptable match.
+              {% endif %}
+              <span style="color:var(--muted);font-size:.78rem;display:block;margin-top:4px">→ open the <em>Vision Internals</em> tab for the full trace.</span>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if fb %}
+        <!-- VISION TAB -->
+        <div class="tab-panel" data-tab="vision">
+          <div class="vision-stats">
+            <div class="vstat yolo"><span class="dot"></span><span>YOLO</span><span class="num">{{ fb.yolo_count }}</span></div>
+            <div class="vstat dom"><span class="dot"></span><span>DOM</span><span class="num">{{ fb.dom_count }}</span></div>
+            <div class="vstat merged"><span class="dot"></span><span>Merged</span><span class="num">{{ fb.merged_count }}</span></div>
+            {% if fb.action_dispatched %}
+            <div class="vstat action"><span class="dot"></span><span>Action</span><span class="num">{{ fb.action_dispatched }}</span></div>
+            {% endif %}
+            <div class="vstat" style="background:{{ 'var(--ok-2)' if fb.success else 'var(--fail-2)' }};color:{{ '#6ee7b7' if fb.success else '#fca5a5' }};border-color:{{ 'var(--ok)' if fb.success else 'var(--fail)' }}">
+              <span>{{ '✓ Success' if fb.success else '✕ No match' }}</span>
+            </div>
+          </div>
+
+          <div class="kv" style="margin-bottom:16px">
+            <div class="k">Target</div><div class="v code">"{{ fb.target_text or '∅ (type-only)' }}"</div>
+            {% if fb.type_filter %}<div class="k">Type filter</div><div class="v code">{{ fb.type_filter|join(' | ') }}</div>{% endif %}
+            {% if fb.success %}
+            <div class="k">Winner</div>
+            <div class="v">rank #{{ fb.winner_rank }} · <span class="src-badge {{ fb.winner_source }}">{{ fb.winner_source }}</span> · @({{ fb.winner_coords_x }}, {{ fb.winner_coords_y }})</div>
+            {% endif %}
+          </div>
+
+          <!-- SCREENSHOTS -->
+          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin-bottom:8px">Screenshots</div>
+          <div class="shots">
+            <div class="shot">
+              <div class="lbl">📸 Raw</div>
+              {% if fb.screenshot_raw %}
+                <img src="../screenshots/{{ fb.screenshot_raw.split('/')[-1] }}" alt="raw" onclick="lightbox(this.src)">
+              {% else %}
+                <div class="empty">No screenshot captured</div>
+              {% endif %}
+            </div>
+            <div class="shot">
+              <div class="lbl">🎯 Annotated · YOLO=red · DOM=blue · Winner=green</div>
+              {% if fb.screenshot_annotated %}
+                <img src="../screenshots/{{ fb.screenshot_annotated.split('/')[-1] }}" alt="annotated" onclick="lightbox(this.src)">
+              {% else %}
+                <div class="empty">No annotation generated</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- CANDIDATES -->
+          {% if fb.candidates %}
+          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin:18px 0 6px">Top {{ fb.candidates|length }} candidates considered</div>
+          <table class="cand-table">
+            <thead>
+              <tr>
+                <th style="width:50px">#</th>
+                <th style="width:80px">Source</th>
+                <th style="width:110px">Type</th>
+                <th>Label / OCR</th>
+                <th style="width:160px">Similarity</th>
+                <th style="width:160px">YOLO conf.</th>
+                <th style="width:130px">Bbox</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for c in fb.candidates %}
+              <tr class="{{ 'winner' if c.was_chosen else '' }}">
+                <td><span class="num">{{ c.rank }}</span></td>
+                <td><span class="src-badge {{ c.source }}">{{ c.source }}</span></td>
+                <td><code>{{ c.type }}</code></td>
+                <td style="max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.texte_ocr or c.label or '—' }}</td>
+                <td>
+                  <span class="bar"><span class="bar-fill score" style="width:{{ ((c.similarity_score|default(0)) * 100)|round(0)|int }}%"></span></span>
+                  <span class="num">{{ "%.2f"|format(c.similarity_score) }}</span>
+                </td>
+                <td>
+                  <span class="bar"><span class="bar-fill conf" style="width:{{ ((c.confiance_detection|default(0)) * 100)|round(0)|int }}%"></span></span>
+                  <span class="num">{{ "%.2f"|format(c.confiance_detection) }}</span>
+                </td>
+                <td><span class="num">{{ c.bbox_w }}×{{ c.bbox_h }} @ {{ c.bbox_x }},{{ c.bbox_y }}</span></td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </section>
+
+  <div class="footer">
+    Generated by IA Test Agent · technical trace · {{ test_id }}
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lb" onclick="this.classList.remove('show')">
+  <img id="lb-img" src="" alt="">
+</div>
+
+<script>
+mermaid.initialize({startOnLoad:true,theme:'dark',themeVariables:{primaryColor:'#312e81',primaryTextColor:'#e5e7eb',lineColor:'#6366f1'}});
+
+function toggleStep(el){ el.classList.toggle('open'); }
+function switchTab(tabEl, name){
+  const card = tabEl.closest('.step-body');
+  card.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  card.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  tabEl.classList.add('active');
+  card.querySelector(`.tab-panel[data-tab="${name}"]`).classList.add('active');
+}
+function lightbox(src){
+  document.getElementById('lb-img').src = src;
+  document.getElementById('lb').classList.add('show');
+}
+// Filter chips
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const f = chip.dataset.filter;
+    document.querySelectorAll('.step').forEach(s => {
+      let show = false;
+      if (f === 'all') show = true;
+      else if (f === 'failed') show = s.dataset.statut === 'FAILED';
+      else if (f === 'fallback') show = s.dataset.fallback === '1';
+      else if (f === 'retry') show = s.dataset.retry === '1';
+      s.classList.toggle('hide', !show);
+    });
+  });
+});
+// Auto-open failed steps for quick triage
+document.querySelectorAll('.step.fail').forEach(s => s.classList.add('open'));
+</script>
+</body>
+</html>

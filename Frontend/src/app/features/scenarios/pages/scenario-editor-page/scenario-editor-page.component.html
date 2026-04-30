@@ -1,0 +1,399 @@
+<!-- ═══════════════════════════════════════════
+     SCENARIO EDITOR
+═══════════════════════════════════════════ -->
+<div class="flex-1 p-8 pb-32">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-10">
+    <div>
+      <h2 class="text-4xl font-extrabold tracking-tight text-on-surface">
+        {{ isEditMode ? 'Edit Scenario' : 'Create Scenario' }}
+      </h2>
+    </div>
+    <div class="flex items-center gap-3">
+      <span *ngIf="autoSaving" class="flex items-center gap-1.5 px-3 py-1 bg-surface-container rounded-full text-xs font-bold text-primary tracking-wider uppercase">
+        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+        Auto-saving
+      </span>
+    </div>
+  </div>
+
+  <!-- Validation Errors -->
+  <div *ngIf="validationErrors.length" class="mb-6 p-4 bg-error-container border border-error/20 rounded-xl text-on-error-container text-sm">
+    <div *ngFor="let e of validationErrors" class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-sm">error</span> {{ e }}
+    </div>
+  </div>
+
+  <div class="grid grid-cols-12 gap-10">
+
+    <!-- ═══ LEFT COLUMN: Editor Form ═══ -->
+    <div class="col-span-12 xl:col-span-7 space-y-8">
+
+      <!-- Basic Info Card -->
+      <section class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_12px_40px_rgba(0,40,142,0.04)] border border-outline-variant/10">
+        <div class="flex items-center gap-2 mb-6">
+          <span class="material-symbols-outlined text-primary">info</span>
+          <h3 class="text-lg font-semibold text-on-surface">Basic Information</h3>
+        </div>
+
+        <form [formGroup]="scenarioForm" class="grid grid-cols-2 gap-6">
+          <!-- Title -->
+          <div class="col-span-2">
+            <label class="block text-xs font-bold text-outline uppercase tracking-widest mb-2">Scenario Title</label>
+            <input
+              formControlName="title"
+              type="text"
+              placeholder="Enter scenario name..."
+              class="w-full bg-transparent border-0 border-b-2 border-surface-container-high focus:ring-0 focus:border-primary px-0 py-2 text-xl font-medium placeholder-outline-variant transition-colors" />
+            <p *ngIf="scenarioForm.get('title')?.touched && scenarioForm.get('title')?.hasError('minlength')" class="mt-1 text-xs text-error">Title must be at least 3 characters.</p>
+          </div>
+
+          <!-- Description -->
+          <div class="col-span-2">
+            <label class="block text-xs font-bold text-outline uppercase tracking-widest mb-2">Description</label>
+            <textarea
+              formControlName="description"
+              rows="3"
+              placeholder="Describe what this scenario tests..."
+              class="w-full bg-surface-container-low border-0 rounded-lg focus:ring-2 focus:ring-primary/20 text-sm py-2.5 px-3 resize-none placeholder-outline-variant transition-colors"></textarea>
+          </div>
+
+          <!-- Module -->
+          <div class="col-span-1">
+            <div class="mb-2 flex items-center justify-between gap-2">
+              <label class="block text-xs font-bold text-outline uppercase tracking-widest">Module</label>
+              <button
+                type="button"
+                (click)="openCreateModuleModal()"
+                class="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-blue-700 transition-colors hover:bg-blue-50">
+                <span class="material-symbols-outlined text-sm">add</span>
+                Add
+              </button>
+            </div>
+            <select
+              [ngModel]="moduleId"
+              [ngModelOptions]="{standalone: true}"
+              (ngModelChange)="onModuleChange($event)"
+              class="w-full bg-surface-container-low border-0 rounded-lg focus:ring-2 focus:ring-primary/20 text-sm py-2.5">
+              <option value="">Select module...</option>
+              <option *ngFor="let m of modules" [value]="m.id">{{ m.name }}</option>
+            </select>
+          </div>
+          <div class="col-span-1"></div>
+
+          <!-- Feature -->
+          <div class="col-span-1">
+            <div class="mb-2 flex items-center justify-between gap-2">
+              <label class="block text-xs font-bold text-outline uppercase tracking-widest">Feature</label>
+              <button
+                type="button"
+                (click)="openCreateFeatureModal()"
+                class="inline-flex items-center gap-1 rounded-md border border-violet-200 bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-violet-700 transition-colors hover:bg-violet-50">
+                <span class="material-symbols-outlined text-sm">add</span>
+                Add
+              </button>
+            </div>
+            <select
+              [ngModel]="featureId"
+              [ngModelOptions]="{standalone: true}"
+              (ngModelChange)="onFeatureChange($event)"
+              class="w-full bg-surface-container-low border-0 rounded-lg focus:ring-2 focus:ring-primary/20 text-sm py-2.5">
+              <option value="">Select feature...</option>
+              <option *ngFor="let f of features" [value]="f.id">{{ f.name }}</option>
+            </select>
+          </div>
+
+          <!-- Status -->
+          <div class="col-span-1">
+            <label class="block text-xs font-bold text-outline uppercase tracking-widest mb-2">Status</label>
+            <div class="flex p-1 bg-surface-container-low rounded-lg w-fit">
+              <button
+                type="button"
+                (click)="activeStatus = true"
+                [class]="activeStatus ? 'px-4 py-1.5 rounded-md text-xs font-bold bg-white shadow-sm text-primary' : 'px-4 py-1.5 rounded-md text-xs font-bold text-outline hover:text-on-surface'">
+                Active
+              </button>
+              <button
+                type="button"
+                (click)="activeStatus = false"
+                [class]="!activeStatus ? 'px-4 py-1.5 rounded-md text-xs font-bold bg-white shadow-sm text-primary' : 'px-4 py-1.5 rounded-md text-xs font-bold text-outline hover:text-on-surface'">
+                Draft
+              </button>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div class="col-span-2">
+            <div class="mb-2 flex items-center justify-between gap-2">
+              <label class="block text-xs font-bold text-outline uppercase tracking-widest">Tags</label>
+              <button
+                type="button"
+                (click)="openCreateTagModal()"
+                class="inline-flex items-center gap-1 rounded-md border border-indigo-200 bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-indigo-700 transition-colors hover:bg-indigo-50">
+                <span class="material-symbols-outlined text-sm">add</span>
+                New Tag
+              </button>
+            </div>
+
+            <!-- Project tags as selectable pills -->
+            <div *ngIf="projectTags.length > 0" class="mb-3">
+              <p class="text-[10px] text-outline uppercase tracking-widest mb-2">Select from project tags:</p>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  *ngFor="let pt of projectTags"
+                  type="button"
+                  (click)="toggleProjectTag(pt.name)"
+                  [class]="'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-all ' +
+                    (isProjectTagSelected(pt.name)
+                      ? 'bg-primary text-on-primary border-primary shadow-sm'
+                      : 'bg-surface-container-low text-on-surface-variant border-outline-variant/30 hover:border-primary/40')">
+                  <span class="w-2 h-2 rounded-full" [style.backgroundColor]="pt.color || '#6366f1'"></span>
+                  {{ pt.name }}
+                  <span *ngIf="isProjectTagSelected(pt.name)" class="material-symbols-outlined text-[12px]">check</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Custom tags + input -->
+            <div class="flex flex-wrap gap-2 p-3 bg-surface-container-low rounded-lg min-h-[44px]">
+              <span
+                *ngFor="let tag of tags; let i = index"
+                class="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs font-bold rounded">
+                {{ tag }}
+                <button (click)="removeTag(i)" class="material-symbols-outlined text-[14px] hover:text-error">close</button>
+              </span>
+              <input
+                [(ngModel)]="newTagInput"
+                [ngModelOptions]="{standalone: true}"
+                (keydown)="onTagKeyPress($event)"
+                placeholder="Type custom tag + Enter"
+                class="bg-transparent border-none text-xs focus:ring-0 outline-none flex-1 min-w-[80px] p-0" />
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Steps Editor Card -->
+      <section class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_12px_40px_rgba(0,40,142,0.04)] border border-outline-variant/10">
+        <div class="flex items-center justify-between mb-8">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">edit_note</span>
+            <h3 class="text-lg font-semibold text-on-surface">Step Definition</h3>
+          </div>
+          <button
+            (click)="addStep()"
+            class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-full text-sm font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+            <span class="material-symbols-outlined">add</span>
+            Add Step
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div
+            *ngFor="let step of steps; let i = index"
+            class="group flex items-center gap-4 p-4 rounded-xl border border-transparent hover:border-surface-container-high hover:bg-surface-container-low/20 transition-all relative">
+            <!-- Drag Handle -->
+            <div class="cursor-grab text-outline-variant group-hover:text-primary transition-colors">
+              <span class="material-symbols-outlined">drag_indicator</span>
+            </div>
+            <!-- Keyword Select -->
+            <div class="w-32">
+              <select
+                [(ngModel)]="step.keyword"
+                [ngModelOptions]="{standalone: true}"
+                [class]="'w-full border-0 rounded text-[10px] font-extrabold py-1.5 focus:ring-0 ' + getKeywordColor(step.keyword)">
+                <option *ngFor="let kw of stepKeywords" [ngValue]="kw.value">{{ kw.label }}</option>
+              </select>
+            </div>
+            <!-- Text Input -->
+            <div class="flex-grow">
+              <input
+                [(ngModel)]="step.text"
+                [ngModelOptions]="{standalone: true}"
+                (keydown)="onStepKeyPress($event, i)"
+                type="text"
+                [placeholder]="'Enter step description...'"
+                class="step-text-input w-full bg-transparent border-0 border-b border-transparent focus:border-primary focus:ring-0 p-1 text-sm text-on-surface-variant font-medium" />
+            </div>
+            <!-- Delete Button -->
+            <button
+              (click)="removeStep(i)"
+              class="text-outline-variant hover:text-error opacity-0 group-hover:opacity-100 transition-all">
+              <span class="material-symbols-outlined">delete</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Add step hint -->
+        <div class="mt-4 flex items-center justify-center gap-2 py-4 border-2 border-dashed border-surface-container-high rounded-xl text-outline-variant text-sm">
+          <span class="material-symbols-outlined text-sm">keyboard</span>
+          Press <kbd class="px-1.5 py-0.5 bg-surface-container rounded text-xs font-bold">Enter</kbd> to add a new step
+        </div>
+      </section>
+
+      <!-- Data Table / Examples Section -->
+      <section class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_12px_40px_rgba(0,40,142,0.04)] border border-outline-variant/10">
+        <button
+          (click)="toggleDataTable()"
+          class="flex items-center justify-between w-full">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">table_chart</span>
+            <h3 class="text-lg font-semibold text-on-surface">Data Table / Examples</h3>
+          </div>
+          <span class="material-symbols-outlined text-outline transition-transform" [class.rotate-180]="showDataTable">expand_more</span>
+        </button>
+
+        <div *ngIf="showDataTable" class="mt-6">
+          <div class="overflow-x-auto">
+            <table class="min-w-full border-collapse">
+              <thead>
+                <tr>
+                  <th
+                    *ngFor="let col of dataTableColumns"
+                    class="px-4 py-3 text-left text-xs font-bold text-outline uppercase tracking-widest border-b border-surface-container-high">
+                    {{ col }}
+                  </th>
+                  <th class="w-10"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of dataTableRows; let ri = index" class="group">
+                  <td *ngFor="let col of dataTableColumns" class="px-4 py-2 border-b border-surface-container-high/50">
+                    <input
+                      [(ngModel)]="row[col]"
+                      [ngModelOptions]="{standalone: true}"
+                      class="w-full bg-transparent border-0 focus:ring-0 text-sm p-0"
+                      placeholder="..." />
+                  </td>
+                  <td class="px-2 py-2 border-b border-surface-container-high/50">
+                    <button
+                      (click)="removeDataTableRow(ri)"
+                      class="text-outline-variant hover:text-error opacity-0 group-hover:opacity-100 transition-all">
+                      <span class="material-symbols-outlined text-sm">close</span>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="flex gap-4 mt-4">
+            <button (click)="addDataTableRow()" class="text-primary text-xs font-bold flex items-center gap-1 hover:underline">
+              <span class="material-symbols-outlined text-sm">add</span> Add Row
+            </button>
+            <button (click)="addDataTableColumn()" class="text-primary text-xs font-bold flex items-center gap-1 hover:underline">
+              <span class="material-symbols-outlined text-sm">view_column</span> Add Column
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ═══ RIGHT COLUMN: Live Preview ═══ -->
+    <div class="col-span-12 xl:col-span-5 relative">
+      <div class="sticky top-24 space-y-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xs font-bold text-outline uppercase tracking-widest">Live Gherkin Preview</h3>
+          <button
+            (click)="copyGherkin()"
+            class="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary-container transition-colors">
+            <span class="material-symbols-outlined text-sm">content_copy</span> Copy Gherkin
+          </button>
+        </div>
+
+        <!-- Preview Terminal -->
+        <div class="bg-slate-900 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+          <div class="absolute -top-12 -right-12 w-32 h-32 bg-secondary opacity-20 blur-3xl pointer-events-none"></div>
+          <div class="font-mono text-sm leading-relaxed text-slate-300 overflow-auto max-h-[500px]">
+            <p *ngIf="tags.length > 0" class="mb-4"><span class="text-purple-400">{{ tags.join(' ') }}</span></p>
+            <p class="mb-4"><span class="text-blue-400">Feature:</span> {{ featureName || 'Untitled Feature' }}</p>
+            <p class="mb-6 ml-4"><span class="text-blue-400">Scenario:</span> {{ scenarioForm.value.title || 'Untitled Scenario' }}</p>
+            <div class="ml-8 space-y-2">
+              <p *ngFor="let step of steps">
+                <ng-container *ngIf="step.text">
+                  <span [class]="getPreviewKeywordClass(step.keyword)">{{ step.keyword }}</span> {{ step.text }}
+                </ng-container>
+              </p>
+            </div>
+            <div *ngIf="showDataTable && dataTableColumns.length > 0 && dataTableRows.length > 0" class="mt-8 ml-8">
+              <p class="mb-2"><span class="text-cyan-400">Examples:</span></p>
+              <div class="border-l-2 border-slate-700 pl-4 space-y-1 text-slate-400">
+                <p>| <span *ngFor="let col of dataTableColumns" class="text-slate-200">{{ col }} | </span></p>
+                <p *ngFor="let row of dataTableRows">| <span *ngFor="let col of dataTableColumns">{{ row[col] || '' }} | </span></p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-10 pt-6 border-t border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div [class]="isGherkinValid ? 'w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'w-2 h-2 rounded-full bg-slate-500'"></div>
+              <span class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">{{ isGherkinValid ? 'Syntax Valid' : steps.length + ' steps' }}</span>
+            </div>
+            <button (click)="validateGherkin()" class="flex items-center gap-2 text-secondary text-[10px] uppercase tracking-widest font-bold hover:text-white transition-colors">
+              <span class="material-symbols-outlined text-sm">auto_awesome</span> AI Optimized
+            </button>
+          </div>
+        </div>
+
+        <!-- AI Suggestions Prompt -->
+        <div class="bg-gradient-to-br from-secondary/5 to-primary-container/5 border border-primary/10 p-6 rounded-2xl">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-secondary to-primary-container flex items-center justify-center text-white shrink-0 shadow-lg shadow-secondary/20">
+              <span class="material-symbols-outlined">auto_awesome</span>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-on-surface mb-1">AI Assistant Suggestion</p>
+              <p class="text-xs text-on-surface-variant leading-relaxed">Consider adding a step for <span class="font-bold text-primary">"the user is logged in"</span> to ensure the session context is verified before proceeding.</p>
+              <button class="mt-3 text-xs font-extrabold text-secondary hover:underline">Apply Suggestion</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BOTTOM ACTION BAR ═══ -->
+  <div class="fixed bottom-0 left-0 lg:left-64 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-200/50 px-8 py-5 z-50 flex items-center justify-between">
+    <button
+      (click)="cancel()"
+      class="px-6 py-2.5 text-sm font-bold text-slate-500 hover:text-on-surface transition-colors">
+      Cancel
+    </button>
+    <button
+      (click)="onSubmit(false)"
+      [disabled]="isSubmitting || (!isEditMode && !canCreateScenario) || (isEditMode && isViewerRole)"
+      class="flex items-center gap-2 px-8 py-2.5 bg-primary text-on-primary rounded-full text-sm font-bold shadow-xl shadow-primary/20 hover:scale-[1.05] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+      <ng-container *ngIf="!isSubmitting">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">save</span>
+        Save Scenario
+      </ng-container>
+      <ng-container *ngIf="isSubmitting">
+        <span class="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>
+        Saving...
+      </ng-container>
+    </button>
+  </div>
+
+  <app-module-create
+    *ngIf="showCreateModuleModal"
+    [modalProjectId]="projectId"
+    (moduleCreated)="onInlineModuleCreated()"
+    (modalCancelled)="onInlineModuleCreateCancelled()"
+  ></app-module-create>
+
+  <app-feature-create-modal
+    *ngIf="showCreateFeatureModal"
+    [projectId]="projectId"
+    [moduleId]="moduleId"
+    [moduleName]="moduleName"
+    (featureCreated)="onInlineFeatureCreated($event)"
+    (modalClosed)="onInlineFeatureCreateCancelled()"
+  ></app-feature-create-modal>
+
+  <app-tag-create-modal
+    *ngIf="showCreateTagModal"
+    [projectId]="projectId"
+    (tagCreated)="onTagCreated($event)"
+    (modalClosed)="onTagCreateCancelled()"
+  ></app-tag-create-modal>
+
+</div>

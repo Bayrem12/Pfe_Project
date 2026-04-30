@@ -1,0 +1,130 @@
+<div class="px-6 py-8">
+  <!-- Header -->
+  <div class="flex justify-between items-end mb-8">
+    <div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">Gherkin Parser</h1>
+      <p class="text-slate-500">Parse Gherkin scenarios into structured steps</p>
+    </div>
+    <div class="flex gap-2">
+      <button
+        (click)="copyToClipboard()"
+        class="px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm">
+        <span class="material-symbols-outlined text-base">content_copy</span>
+        Copy
+      </button>
+      <button
+        *ngIf="parseResult"
+        (click)="downloadResults()"
+        class="px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm">
+        <span class="material-symbols-outlined text-base">download</span>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <!-- Sample Templates -->
+  <div class="flex items-center gap-2 flex-wrap mb-6">
+    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Quick Samples:</span>
+    <button (click)="loadSample('login')" class="px-2.5 py-1 text-[10px] font-bold text-slate-500 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">Login Flow</button>
+    <button (click)="loadSample('checkout')" class="px-2.5 py-1 text-[10px] font-bold text-slate-500 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">Checkout</button>
+    <button (click)="loadSample('registration')" class="px-2.5 py-1 text-[10px] font-bold text-slate-500 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">Registration</button>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Input Section -->
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <div class="px-5 py-3 border-b border-slate-100 flex justify-between items-center">
+        <h3 class="font-bold text-sm text-slate-700 flex items-center gap-2">
+          <span class="material-symbols-outlined text-base">edit_note</span>
+          Gherkin Input
+        </h3>
+        <button (click)="clearInput()" class="text-xs font-bold text-red-400 hover:text-red-600 uppercase tracking-wider flex items-center gap-1 transition-colors">
+          <span class="material-symbols-outlined text-sm">delete</span>
+          Clear
+        </button>
+      </div>
+      <div class="p-4">
+        <textarea
+          [(ngModel)]="gherkinInput"
+          rows="16"
+          placeholder="Enter your Gherkin scenario here...&#10;&#10;Example:&#10;Given I am on the login page&#10;When I enter username 'user@example.com'&#10;And I click login button&#10;Then I should see dashboard"
+          class="w-full p-4 bg-slate-50 rounded-xl border-0 font-mono text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:outline-none"></textarea>
+        <div class="mt-3 flex justify-between items-center">
+          <span class="text-xs text-slate-400">{{ gherkinInput.split('\n').length }} lines</span>
+          <button
+            (click)="parseGherkin()"
+            [disabled]="isLoading || !gherkinInput.trim()"
+            class="px-6 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            <span class="material-symbols-outlined text-base">{{ isLoading ? 'progress_activity' : 'auto_awesome' }}</span>
+            {{ isLoading ? 'Parsing...' : 'Parse Gherkin' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <div class="px-5 py-3 border-b border-slate-100 flex justify-between items-center">
+        <h3 class="font-bold text-sm text-slate-700 flex items-center gap-2">
+          <span class="material-symbols-outlined text-base">list_alt</span>
+          Parsed Steps
+        </h3>
+        <div *ngIf="parseResult" class="text-xs font-bold text-slate-400">
+          {{ parseResult.steps.length }} steps found
+        </div>
+      </div>
+      <div class="p-4 space-y-2 max-h-[480px] overflow-y-auto">
+        <!-- Error State -->
+        <div *ngIf="errorMessage" class="p-3 bg-red-50 rounded-xl text-red-600 text-sm flex items-start gap-2">
+          <span class="material-symbols-outlined text-base mt-0.5">error</span>
+          <div>
+            <p class="font-bold text-sm">Parse Error</p>
+            <p class="text-xs mt-1">{{ errorMessage }}</p>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="flex items-center justify-center py-16">
+          <div class="flex flex-col items-center gap-3">
+            <div class="h-10 w-10 rounded-full border-4 border-blue-100 border-t-[#2563eb] animate-spin"></div>
+            <span class="text-sm text-slate-400">Parsing...</span>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!isLoading && !parseResult && !errorMessage" class="flex flex-col items-center justify-center py-16 text-slate-400">
+          <span class="material-symbols-outlined text-4xl mb-2">code_blocks</span>
+          <p class="text-sm">Enter Gherkin text and click "Parse" to see results</p>
+        </div>
+
+        <!-- Parsed Steps -->
+        <div *ngIf="parseResult && parseResult.isValid" class="space-y-2">
+          <div *ngFor="let step of parseResult.steps; let i = index"
+               class="p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-primary/20 transition-colors">
+            <div class="flex items-start gap-2.5">
+              <span class="w-6 h-6 rounded-lg bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600 shrink-0">{{ i + 1 }}</span>
+              <div class="flex-1 min-w-0">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-1 inline-block"
+                      [style.color]="getKeywordStyle(step.keyword).color"
+                      [style.backgroundColor]="getKeywordStyle(step.keyword).bgColor">
+                  {{ step.keyword }}
+                </span>
+                <p class="text-sm text-slate-700 font-medium font-mono">{{ step.text }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Invalid Gherkin -->
+        <div *ngIf="parseResult && !parseResult.isValid" class="p-3 bg-red-50 rounded-xl flex items-start gap-2">
+          <span class="material-symbols-outlined text-red-500 text-base mt-0.5">warning</span>
+          <div>
+            <p class="font-bold text-sm text-red-700">Invalid Gherkin</p>
+            <p class="text-xs text-red-500 mt-1">{{ parseResult.errorMessage }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

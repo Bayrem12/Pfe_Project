@@ -1,0 +1,274 @@
+<div *ngIf="loadingUser" class="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-slate-500">
+  <span class="material-symbols-outlined animate-spin text-3xl text-slate-400">progress_activity</span>
+  <p class="text-sm font-medium">Loading profile...</p>
+</div>
+
+<div *ngIf="!loadingUser && userError" class="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-red-600">
+  <span class="material-symbols-outlined text-3xl">error</span>
+  <p class="text-sm font-semibold">{{ userError }}</p>
+</div>
+
+<main *ngIf="!loadingUser && !userError && user" class="mx-auto max-w-[1320px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+  <section class="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <div class="pointer-events-none absolute right-0 top-0 h-52 w-52 rounded-full bg-blue-100/40 blur-3xl"></div>
+    <div class="relative grid gap-6 xl:grid-cols-[1.7fr_1fr]">
+      <div class="space-y-5">
+        <div class="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-blue-700">
+          <span class="material-symbols-outlined !text-sm">shield_person</span>
+          Account Profile
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4">
+          <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-700 text-xl font-black text-white shadow-sm">{{ getInitials() }}</div>
+          <div class="min-w-0">
+            <h1 class="truncate text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">{{ user.fullName }}</h1>
+            <p class="mt-1 truncate text-sm text-slate-500 sm:text-base">{{ user.email }}</p>
+          </div>
+          <span class="inline-flex items-center rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]" [ngClass]="getRoleClass()">{{ getPrimaryRole() }}</span>
+        </div>
+
+        <div class="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Status</p>
+            <p class="mt-1 text-sm font-semibold text-slate-800">{{ user.isActive ? 'Active' : 'Inactive' }}</p>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Member Since</p>
+            <p class="mt-1 text-sm font-semibold text-slate-800">{{ user.createdDate ? (user.createdDate | date:'dd/MM/yyyy') : '—' }}</p>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Last Updated</p>
+            <p class="mt-1 text-sm font-semibold text-slate-800">{{ user.modifiedDate ? (user.modifiedDate | date:'dd/MM/yyyy') : '—' }}</p>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">User ID</p>
+            <p class="mt-1 truncate text-sm font-semibold text-slate-800">{{ user.id }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-1">
+        <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center shadow-sm">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Total Runs</p>
+          <p class="mt-1 text-3xl font-black text-slate-900">1,429</p>
+        </article>
+        <article class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-center shadow-sm">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-700">Quality Score</p>
+          <p class="mt-1 text-3xl font-black text-emerald-700">98.2%</p>
+        </article>
+        <article class="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-center shadow-sm">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-700">Account State</p>
+          <p class="mt-1 text-3xl font-black text-blue-700">{{ user.isActive ? 'ON' : 'OFF' }}</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid gap-6 xl:grid-cols-2">
+    <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <header class="mb-5 flex items-center justify-between">
+        <h2 class="text-lg font-bold text-slate-900">Personal Information</h2>
+        <span class="material-symbols-outlined text-slate-400">badge</span>
+      </header>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Full Name</p>
+          <p class="mt-1 text-sm font-semibold text-slate-900">{{ user.fullName }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Email</p>
+          <p class="mt-1 break-all text-sm font-semibold text-slate-900">{{ user.email }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">First Name</p>
+          <p class="mt-1 text-sm font-semibold text-slate-900">{{ user.firstName || '—' }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Last Name</p>
+          <p class="mt-1 text-sm font-semibold text-slate-900">{{ user.lastName || '—' }}</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <header class="mb-5 flex items-center justify-between">
+        <h2 class="text-lg font-bold text-slate-900">Preferences</h2>
+        <span class="material-symbols-outlined text-slate-400">tune</span>
+      </header>
+
+      <div class="space-y-4">
+        <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+          <div>
+            <h4 class="text-sm font-semibold text-slate-900">Auto-healing tests</h4>
+            <p class="mt-0.5 text-xs text-slate-500">Automatically retry unstable executions.</p>
+          </div>
+          <button
+            type="button"
+            class="relative h-7 w-12 rounded-full transition-colors"
+            [ngClass]="autoHealingEnabled ? 'bg-blue-600' : 'bg-slate-300'"
+            (click)="toggleAutoHealing()">
+            <span
+              class="absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all"
+              [ngClass]="autoHealingEnabled ? 'left-6' : 'left-1'"></span>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+          <div>
+            <h4 class="text-sm font-semibold text-slate-900">Email notifications</h4>
+            <p class="mt-0.5 text-xs text-slate-500">Get updates for failed runs and role changes.</p>
+          </div>
+          <button
+            type="button"
+            class="relative h-7 w-12 rounded-full transition-colors"
+            [ngClass]="emailNotificationsEnabled ? 'bg-blue-600' : 'bg-slate-300'"
+            (click)="toggleEmailNotifications()">
+            <span
+              class="absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all"
+              [ngClass]="emailNotificationsEnabled ? 'left-6' : 'left-1'"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-5 border-t border-slate-200 pt-5">
+        <p class="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Theme</p>
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            class="inline-flex h-10 items-center justify-center rounded-xl border text-sm font-semibold transition"
+            [ngClass]="preferredTheme === 'light' ? 'border-blue-700 bg-blue-700 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100'"
+            (click)="setTheme('light')">
+            Light
+          </button>
+          <button
+            type="button"
+            class="inline-flex h-10 items-center justify-center rounded-xl border text-sm font-semibold transition"
+            [ngClass]="preferredTheme === 'dark' ? 'border-blue-700 bg-blue-700 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100'"
+            (click)="setTheme('dark')">
+            Dark
+          </button>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <header class="mb-5 flex items-center justify-between">
+      <h2 class="text-lg font-bold text-slate-900">Security</h2>
+      <span class="material-symbols-outlined text-slate-400">shield</span>
+    </header>
+
+    <div *ngIf="successMessage" class="mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
+      <span class="material-symbols-outlined !text-base">check_circle</span>
+      {{ successMessage }}
+    </div>
+
+    <div *ngIf="errorMessage" class="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+      <span class="material-symbols-outlined !text-base">error</span>
+      {{ errorMessage }}
+    </div>
+
+    <div class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h4 class="text-sm font-semibold text-slate-900">2FA Authentication</h4>
+        <p class="mt-0.5 text-xs text-slate-500">{{ twoFactorEnabled ? 'Enabled via authenticator app.' : 'Disabled.' }}</p>
+      </div>
+      <button
+        type="button"
+        class="inline-flex h-9 items-center justify-center rounded-lg border px-4 text-sm font-semibold transition"
+        [ngClass]="twoFactorEnabled ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'"
+        (click)="toggleTwoFactor()">
+        {{ twoFactorEnabled ? 'Disable' : 'Enable' }}
+      </button>
+    </div>
+
+    <div class="mt-5 border-t border-slate-200 pt-5">
+      <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h4 class="text-sm font-semibold text-slate-900">Password Management</h4>
+          <p class="mt-0.5 text-xs text-slate-500">Update your password and keep your account secure.</p>
+        </div>
+        <button
+          type="button"
+          class="inline-flex h-10 items-center justify-center rounded-xl bg-blue-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
+          (click)="showPasswordForm = !showPasswordForm">
+          {{ showPasswordForm ? 'Cancel' : 'Change Password' }}
+        </button>
+      </div>
+
+      <form
+        *ngIf="showPasswordForm"
+        [formGroup]="changePasswordForm"
+        (ngSubmit)="onSubmit()"
+        novalidate
+        autocomplete="off"
+        class="grid gap-3">
+
+        <div class="rounded-xl border bg-slate-50 px-3" [ngClass]="f['currentPassword'].invalid && f['currentPassword'].touched ? 'border-red-300 bg-red-50' : 'border-slate-200'">
+          <div class="flex h-11 items-center">
+            <input
+              [type]="showCurrent ? 'text' : 'password'"
+              formControlName="currentPassword"
+              placeholder="Current password"
+              class="h-full w-full border-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400" />
+            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100" (click)="toggleVisibility('current')">
+              <span class="material-symbols-outlined !text-base">{{ showCurrent ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="rounded-xl border bg-slate-50 px-3" [ngClass]="f['newPassword'].invalid && f['newPassword'].touched ? 'border-red-300 bg-red-50' : 'border-slate-200'">
+          <div class="flex h-11 items-center">
+            <input
+              [type]="showNew ? 'text' : 'password'"
+              formControlName="newPassword"
+              placeholder="New password"
+              class="h-full w-full border-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400" />
+            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100" (click)="toggleVisibility('new')">
+              <span class="material-symbols-outlined !text-base">{{ showNew ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="f['newPassword'].value" class="flex items-center gap-3">
+          <div class="h-2 flex-1 overflow-hidden rounded-full bg-slate-200">
+            <div class="h-full transition-all duration-200" [ngClass]="[getStrengthColor(f['newPassword'].value), getStrengthWidth(f['newPassword'].value)]"></div>
+          </div>
+          <span class="text-xs font-semibold" [ngClass]="getStrengthTextColor(f['newPassword'].value)">{{ getPasswordStrengthLabel(f['newPassword'].value) }}</span>
+        </div>
+
+        <div class="rounded-xl border bg-slate-50 px-3" [ngClass]="f['confirmPassword'].invalid && f['confirmPassword'].touched ? 'border-red-300 bg-red-50' : 'border-slate-200'">
+          <div class="flex h-11 items-center">
+            <input
+              [type]="showConfirm ? 'text' : 'password'"
+              formControlName="confirmPassword"
+              placeholder="Confirm new password"
+              class="h-full w-full border-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400" />
+            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100" (click)="toggleVisibility('confirm')">
+              <span class="material-symbols-outlined !text-base">{{ showConfirm ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <p *ngIf="changePasswordForm.hasError('sameAsCurrent') && f['newPassword'].touched" class="text-xs font-semibold text-red-600">
+          New password must be different from current password.
+        </p>
+        <p *ngIf="changePasswordForm.hasError('mismatch') && f['confirmPassword'].touched" class="text-xs font-semibold text-red-600">
+          Password confirmation does not match.
+        </p>
+
+        <button
+          type="submit"
+          [disabled]="changePasswordForm.invalid || submitting"
+          class="mt-1 inline-flex h-11 items-center justify-center rounded-xl bg-blue-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60">
+          <span *ngIf="!submitting">Save Password</span>
+          <span *ngIf="submitting" class="inline-flex items-center gap-2">
+            <span class="material-symbols-outlined animate-spin !text-base">progress_activity</span>
+            Saving...
+          </span>
+        </button>
+      </form>
+    </div>
+  </article>
+</main>

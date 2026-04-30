@@ -1,0 +1,96 @@
+# Script genere automatiquement par l'Agent IA
+# Scenario : {{ scenario_name }}
+# Date de generation : {{ date_generation }}
+# Options : screenshots={{ with_screenshots }}, timeout={{ timeout_ms }}ms
+
+import re
+import asyncio
+from pathlib import Path
+from playwright.async_api import async_playwright, expect, Page, Frame
+
+
+# ── Screenshot helper ──────────────────────────────────────────────────────
+SCREENSHOTS_DIR = Path("screenshots/{{ test_function_name }}")
+
+async def _screenshot(page: Page, step_num: int, label: str) -> None:
+    """Capture une capture d'écran après chaque step (si activé)."""
+    SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
+    safe_label = re.sub(r"[^\w\-]", "_", label)[:60]
+    path = SCREENSHOTS_DIR / f"step_{step_num:02d}_{safe_label}.png"
+    await page.screenshot(path=str(path), full_page=False)
+
+
+# ── Context helpers ────────────────────────────────────────────────────────
+async def _get_frame(page: Page, frame_name: str) -> Frame:
+    """Retourne une iframe par nom/id (avec attente implicite)."""
+    await page.wait_for_selector(f"iframe[name='{frame_name}'], iframe#{frame_name}", timeout={{ timeout_ms }})
+    frame = page.frame(name=frame_name) or page.frame(url=re.compile(frame_name))
+    if frame is None:
+        raise RuntimeError(f"iframe '{frame_name}' introuvable")
+    return frame
+
+
+async def _accept_dialog(page: Page) -> None:
+    """Accepte le premier dialog (alert/confirm/prompt) qui apparaît."""
+    page.once("dialog", lambda d: asyncio.ensure_future(d.accept()))
+
+
+async def _dismiss_dialog(page: Page) -> None:
+    """Refuse le premier dialog qui apparaît."""
+    page.once("dialog", lambda d: asyncio.ensure_future(d.dismiss()))
+
+
+async def test_{{ test_function_name }}():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless={{ headless | default("True") }})
+        context = await browser.new_context(
+            viewport={"width": 1280, "height": 720},
+            record_video_dir="{{ 'videos/' + test_function_name if record_video else '' }}" or None,
+        )
+        page = await context.new_page()
+        page.set_default_timeout({{ timeout_ms }})
+
+{% if url_cible %}
+        # ── Navigation initiale ────────────────────────────────────────────
+        await page.goto("{{ url_cible }}")
+        await page.wait_for_load_state("networkidle")
+{% if with_screenshots %}
+        await _screenshot(page, 0, "initial_navigation")
+{% endif %}
+
+{% endif %}
+{% for block in step_blocks %}
+        # ── Step {{ block.number }}: {{ block.comment }} ──────────────────
+{% if block.context == 'iframe' %}
+        # Contexte : iframe
+        _frame = await _get_frame(page, "{{ block.iframe_name }}")
+{% for line in block.lines %}
+        {{ line }}
+{% endfor %}
+{% elif block.context == 'shadow' %}
+        # Contexte : shadow DOM
+{% for line in block.lines %}
+        {{ line }}
+{% endfor %}
+{% elif block.context == 'popup' %}
+        # Contexte : popup / dialog
+{% for line in block.lines %}
+        {{ line }}
+{% endfor %}
+{% else %}
+{% for line in block.lines %}
+        {{ line }}
+{% endfor %}
+{% endif %}
+{% if with_screenshots %}
+        await _screenshot(page, {{ block.number }}, "{{ block.comment | replace('"', '') | truncate(50, True, '') }}")
+{% endif %}
+
+{% endfor %}
+        await context.close()
+        await browser.close()
+
+
+if __name__ == "__main__":
+    asyncio.run(test_{{ test_function_name }}())
+

@@ -1,0 +1,73 @@
+<div class="space-y-6">
+  <!-- AI Intelligence Panel -->
+  <div class="bg-surface-container-high/40 p-1 rounded-3xl">
+    <div class="bg-surface-container-lowest p-6 rounded-[1.25rem] shadow-sm border border-slate-100">
+      <div class="flex items-center gap-2 mb-6">
+        <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+        <h4 class="text-sm font-bold text-on-surface uppercase tracking-wider">AI Intelligence</h4>
+      </div>
+      
+      <!-- Alerts List -->
+      <div class="space-y-4">
+        <div *ngFor="let alert of alerts" class="p-4 rounded-2xl" [ngClass]="getAlertClass(alert.severity)">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-[10px] font-black uppercase tracking-tighter"
+                  [ngClass]="alert.severity === 'critical' ? 'text-on-error-container' : 'text-on-surface-variant'">
+              {{ alert.title }}
+            </span>
+            <span *ngIf="alert.icon" class="material-symbols-outlined text-[18px]"
+                  [ngClass]="alert.severity === 'critical' ? 'text-on-error-container' : 'text-on-primary-fixed-variant'">
+              {{ alert.icon }}
+            </span>
+          </div>
+          <p class="text-xs leading-tight mb-3"
+             [ngClass]="alert.severity === 'critical' ? 'font-bold text-on-error-container' : alert.severity === 'info' ? 'italic text-on-surface-variant' : 'text-on-surface'">
+            {{ alert.message }}
+          </p>
+          <button (click)="onAlertAction(alert)"
+                  class="text-[10px] font-bold uppercase"
+                  [ngClass]="getAlertButtonClass(alert.severity)">
+            {{ alert.actionLabel }}
+          </button>
+        </div>
+        
+        <div *ngIf="alerts.length === 0" class="text-center py-8 text-slate-400 text-sm">
+          No AI alerts at this time
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Status -->
+  <div *ngIf="globalStatus" class="bg-surface-container-lowest p-6 rounded-3xl shadow-[0_8px_30px_rgba(0,40,142,0.04)] border border-slate-50">
+    <div class="flex justify-between items-center mb-4">
+      <h4 class="text-sm font-bold text-slate-500 uppercase tracking-widest">Global Status</h4>
+      <span class="text-[10px] font-bold text-tertiary-fixed-variant bg-tertiary-fixed px-1.5 py-0.5 rounded">LIVE</span>
+    </div>
+    
+    <!-- Map Placeholder -->
+    <div class="aspect-square rounded-2xl overflow-hidden relative bg-slate-50">
+      <div class="absolute inset-0 flex items-center justify-center text-slate-300">
+        <span class="material-symbols-outlined text-6xl">public</span>
+      </div>
+      <!-- Server Regions -->
+      <div *ngFor="let region of globalStatus.regions"
+           class="absolute w-3 h-3 rounded-full animate-pulse"
+           [style.top.%]="region.position.y"
+           [style.left.%]="region.position.x"
+           [ngClass]="region.status === 'active' ? 'bg-tertiary-fixed-dim shadow-[0_0_8px_rgba(111,251,190,0.8)]' : 'bg-error'">
+      </div>
+    </div>
+    
+    <div class="mt-4 grid grid-cols-2 gap-2">
+      <div class="p-2 rounded-lg bg-slate-50">
+        <span class="block text-[8px] font-bold text-slate-400 uppercase">Latency</span>
+        <span class="text-xs font-bold">{{ globalStatus.latency }}ms</span>
+      </div>
+      <div class="p-2 rounded-lg bg-slate-50">
+        <span class="block text-[8px] font-bold text-slate-400 uppercase">Uptime</span>
+        <span class="text-xs font-bold">{{ globalStatus.uptime }}%</span>
+      </div>
+    </div>
+  </div>
+</div>

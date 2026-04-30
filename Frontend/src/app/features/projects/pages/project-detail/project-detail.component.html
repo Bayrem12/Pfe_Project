@@ -1,0 +1,449 @@
+<div class="px-4 pb-6 pt-6 sm:px-6 lg:px-10 lg:pt-10" *ngIf="!isLoading && project">
+
+  <!-- Breadcrumb -->
+  <div class="mb-8 flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+    <div class="min-w-0">
+      <h2 class="text-4xl font-extrabold text-primary tracking-tight mb-2">{{ project.name }}</h2>
+      <p class="text-slate-500 max-w-2xl leading-relaxed">{{ project.description || 'Project workspace and execution dashboards.' }}</p>
+      <p *ngIf="project.url" class="flex items-center gap-1.5 text-primary text-sm font-semibold mt-2">
+        <span class="material-symbols-outlined text-base">link</span>
+        <a [href]="project.url" target="_blank" rel="noopener" class="hover:underline">{{ project.url }}</a>
+      </p>
+
+      <div class="mt-5 rounded-[1.75rem] border border-slate-200/70 bg-white/85 p-4 shadow-sm shadow-blue-900/5 backdrop-blur-sm">
+        <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p class="text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">Project Tags</p>
+            <p class="mt-1 text-sm text-slate-500">Quick labels to group, filter and communicate project context.</p>
+          </div>
+          <span class="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
+            <span class="material-symbols-outlined text-sm">sell</span>
+            {{ tags.length }} tag{{ tags.length > 1 ? 's' : '' }}
+          </span>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center gap-2" *ngIf="!isTagsLoading; else tagsLoadingInline">
+          <ng-container *ngIf="tags.length; else noTagsState">
+            <div
+              *ngFor="let tag of tags"
+              class="tag-chip group relative inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-2 text-sm font-bold shadow-sm"
+              [style.borderColor]="getTagBorderColor(tag.color)"
+              [style.backgroundColor]="getTagBackgroundColor(tag.color)"
+              [style.color]="getTagDotColor(tag.color)"
+            >
+              <span class="h-2.5 w-2.5 rounded-full shadow-sm" [style.backgroundColor]="getTagDotColor(tag.color)"></span>
+              <span class="truncate">{{ tag.name }}</span>
+              <button
+                *ngIf="!isViewerOrManager"
+                type="button"
+                class="tag-delete-button ml-1 inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-current/75 transition-all hover:border-red-200 hover:bg-white/80 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+                [disabled]="deletingTagId === tag.id"
+                (click)="requestTagDeletion(tag, $event)"
+                [attr.aria-label]="'Delete tag ' + tag.name"
+              >
+                <span *ngIf="deletingTagId !== tag.id" class="material-symbols-outlined text-[16px] leading-none">delete</span>
+                <span *ngIf="deletingTagId === tag.id" class="inline-block h-3.5 w-3.5 rounded-full border-2 border-current/25 border-t-current animate-spin"></span>
+              </button>
+
+              <div *ngIf="tag.description?.trim()"
+                class="tag-description-popover pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-max max-w-[220px] -translate-x-1/2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-xs font-medium normal-case leading-relaxed text-slate-600 shadow-lg shadow-slate-900/10">
+                {{ tag.description }}
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <ng-template #tagsLoadingInline>
+          <div class="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-2 text-sm text-slate-400">
+            <span class="h-4 w-4 rounded-full border-2 border-blue-100 border-t-primary animate-spin"></span>
+            Loading tags...
+          </div>
+        </ng-template>
+
+        <ng-template #noTagsState>
+          <div class="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-4 text-sm text-slate-400">
+            No tags yet. Create your first polished label for this project.
+          </div>
+        </ng-template>
+
+        <p *ngIf="tagsError" class="mt-3 text-sm text-red-500">{{ tagsError }}</p>
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      <button
+        class="px-5 py-2.5 bg-white text-red-600 border border-red-200 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-50 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none"
+        [disabled]="isArchiving || isViewerOrManager"
+        (click)="archiveProject()"
+      >
+        <span class="material-symbols-outlined text-lg">archive</span>
+        {{ isArchiving ? 'Archiving...' : 'Archive' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-6">
+    <div class="bg-white p-6 rounded-2xl shadow-sm shadow-blue-900/5 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">view_module</span>
+      </div>
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Modules</p>
+        <p class="text-2xl font-black text-slate-900">{{ stats.modules }}</p>
+      </div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm shadow-blue-900/5 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">featured_play_list</span>
+      </div>
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Features</p>
+        <p class="text-2xl font-black text-slate-900">{{ stats.features }}</p>
+      </div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm shadow-blue-900/5 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">schema</span>
+      </div>
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Scenarios</p>
+        <p class="text-2xl font-black text-slate-900">{{ stats.scenarios }}</p>
+      </div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm shadow-blue-900/5 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">history</span>
+      </div>
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Last Execution</p>
+        <p class="text-2xl font-black text-slate-900">{{ stats.lastExecution }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="flex items-center gap-8 border-b border-slate-200/60 mb-8">
+    <button
+      class="pb-4 text-sm font-bold uppercase tracking-widest transition-colors"
+      [class]="activeTab === 'overview' ? 'text-primary border-b-2 border-primary' : 'text-slate-400 hover:text-primary'"
+      (click)="setTab('overview')"
+    >Overview</button>
+    
+    <button
+      class="pb-4 text-sm font-bold uppercase tracking-widest transition-colors"
+      [class]="activeTab === 'scenarios' ? 'text-primary border-b-2 border-primary' : 'text-slate-400 hover:text-primary'"
+      (click)="setTab('scenarios')"
+    >Scenarios</button>
+  </div>
+
+  <!-- OVERVIEW TAB -->
+  <section *ngIf="activeTab === 'overview'">
+    <div *ngIf="!isHierarchyLoading; else hierarchyLoading" class="grid grid-cols-1 gap-8 pb-10 xl:grid-cols-12">
+
+      <!-- Left Column: Hierarchy -->
+      <div class="space-y-6 xl:col-span-4">
+        <div class="bg-[#f0f3ff] rounded-2xl p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500">Project Hierarchy</h3>
+            <button class="text-primary text-xs font-bold uppercase tracking-widest hover:underline" (click)="collapseAllNodes()">Collapse All</button>
+          </div>
+
+          <!-- Tree View -->
+          <div *ngIf="projectHierarchy.length; else emptyHierarchy" class="space-y-4">
+            <div *ngFor="let module of projectHierarchy" class="space-y-2">
+              <!-- Module Node -->
+              <div class="flex items-center gap-2">
+                <button class="flex flex-1 items-center gap-2 p-2 rounded-lg bg-white shadow-sm text-left transition-all hover:shadow-md" (click)="toggleNode(module)">
+                  <span class="material-symbols-outlined text-slate-400">{{ module.expanded ? 'expand_more' : 'chevron_right' }}</span>
+                  <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">folder</span>
+                  <span class="text-sm font-semibold text-slate-800 flex-1">{{ module.name }}</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-primary">{{ module.children.length }}</span>
+                </button>
+
+                <button
+                  *ngIf="!isViewerOrManager"
+                  type="button"
+                  class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 bg-white text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  [disabled]="deletingModuleId === module.id || !!deletingFeatureId"
+                  (click)="deleteModule(module, $event)"
+                  [attr.aria-label]="'Delete module ' + module.name"
+                >
+                  <span *ngIf="deletingModuleId !== module.id" class="material-symbols-outlined text-[18px]">delete</span>
+                  <span *ngIf="deletingModuleId === module.id" class="inline-block h-4 w-4 rounded-full border-2 border-current/30 border-t-current animate-spin"></span>
+                </button>
+              </div>
+
+              <!-- Features -->
+              <div *ngIf="module.expanded" class="ml-6 space-y-2 border-l-2 border-slate-200/50 pl-4 py-2">
+                <div *ngFor="let feature of module.children" class="space-y-2">
+                  <div class="flex items-center gap-2">
+                    <button class="flex flex-1 items-center gap-2 p-1.5 rounded-lg text-left transition-colors cursor-pointer"
+                      [class]="feature.expanded ? 'bg-blue-50/50' : 'hover:bg-slate-100'"
+                      (click)="toggleNode(feature)">
+                      <span class="material-symbols-outlined text-sm" [class]="feature.expanded ? 'text-primary' : 'text-slate-400'">{{ feature.expanded ? 'expand_more' : 'chevron_right' }}</span>
+                      <span class="material-symbols-outlined text-sm" [class]="feature.expanded ? 'text-primary' : 'text-slate-400'">sticky_note_2</span>
+                      <span class="text-xs font-bold" [class]="feature.expanded ? 'text-primary' : 'text-slate-600'">{{ feature.name }}</span>
+                    </button>
+
+                    <button
+                      *ngIf="!isViewerOrManager"
+                      type="button"
+                      class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-200 bg-white text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      [disabled]="deletingFeatureId === feature.id || !!deletingModuleId"
+                      (click)="deleteFeature(feature, $event)"
+                      [attr.aria-label]="'Delete feature ' + feature.name"
+                    >
+                      <span *ngIf="deletingFeatureId !== feature.id" class="material-symbols-outlined text-[16px]">delete</span>
+                      <span *ngIf="deletingFeatureId === feature.id" class="inline-block h-3.5 w-3.5 rounded-full border-2 border-current/30 border-t-current animate-spin"></span>
+                    </button>
+                  </div>
+
+                  <!-- Scenarios -->
+                  <div *ngIf="feature.expanded" class="ml-4 space-y-1 py-1">
+                    <button
+                      *ngFor="let scenario of feature.children"
+                      class="flex items-center gap-2 p-1.5 text-xs w-full text-left rounded-lg cursor-pointer group transition-all"
+                      [class]="selectedScenario?.id === scenario.id ? 'bg-primary/5 text-primary font-semibold' : 'text-slate-500 hover:text-primary'"
+                      (click)="selectScenarioById(scenario.id)"
+                    >
+                      <span class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                        [class]="scenario.lastTestStatus === 'Failed' ? 'bg-red-500' : scenario.lastTestStatus === 'Passed' ? 'bg-emerald-400' : scenario.status === 'active' ? 'bg-emerald-400' : scenario.status === 'archived' ? 'bg-red-300' : 'bg-slate-300'"></span>
+                      <span class="flex-1">{{ scenario.name }}</span>
+                      <span class="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #emptyHierarchy>
+            <div class="text-center py-8 text-sm text-slate-400">
+              <span class="material-symbols-outlined text-3xl text-slate-300 mb-2 block">account_tree</span>
+              No modules/features/scenarios found for this project.
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Right Column: Quick Actions + Detail -->
+      <div class="space-y-8 xl:col-span-8">
+        <!-- Quick Actions Bar -->
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div class="flex flex-col gap-3 md:flex-row md:flex-wrap">
+            <button class="px-6 py-3 bg-white border border-slate-200 text-slate-800 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm disabled:opacity-40 disabled:pointer-events-none" [disabled]="isViewerOrManager" (click)="navigateToCreateModule()">
+              <span class="material-symbols-outlined text-lg">add_box</span>
+              Add Module
+            </button>
+            <button class="px-6 py-3 rounded-xl border border-blue-200 bg-white text-blue-700 font-bold text-xs uppercase tracking-widest transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50/80 hover:shadow-lg hover:shadow-blue-900/10 flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none" [disabled]="isViewerOrManager" (click)="navigateToCreateFeature()">
+              <span class="material-symbols-outlined text-lg">add_circle</span>
+              Add Feature
+            </button>
+            <button class="px-6 py-3 rounded-xl border border-violet-200 bg-white text-violet-700 font-bold text-xs uppercase tracking-widest transition-all hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-50/80 hover:shadow-lg hover:shadow-violet-900/10 flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none" [disabled]="isViewerOrManager" (click)="openCreateTagModal()">
+              <span class="material-symbols-outlined text-lg">sell</span>
+              + Tags
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="tagNotice" class="rounded-2xl border px-4 py-3 text-sm font-semibold shadow-sm"
+          [class.border-emerald-200]="tagNotice.type === 'success'"
+          [class.bg-emerald-50]="tagNotice.type === 'success'"
+          [class.text-emerald-700]="tagNotice.type === 'success'"
+          [class.border-red-200]="tagNotice.type === 'error'"
+          [class.bg-red-50]="tagNotice.type === 'error'"
+          [class.text-red-700]="tagNotice.type === 'error'">
+          {{ tagNotice.text }}
+        </div>
+
+        <!-- Selected Scenario Detail View -->
+        <ng-container *ngIf="selectedScenario; else selectScenarioHint">
+          <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
+            <!-- Scenario Header -->
+            <div class="p-8 border-b border-slate-50 flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center"
+                  [class]="getScenarioStatusClass(selectedScenario.status) === 'active' ? 'bg-emerald-100 text-emerald-600' : getScenarioStatusClass(selectedScenario.status) === 'archived' ? 'bg-red-100 text-red-500' : 'bg-slate-100 text-slate-500'">
+                  <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">
+                    {{ getScenarioStatusClass(selectedScenario.status) === 'active' ? 'check_circle' : getScenarioStatusClass(selectedScenario.status) === 'archived' ? 'cancel' : 'pending' }}
+                  </span>
+                </div>
+                <div>
+                  <h4 class="text-xl font-bold tracking-tight text-slate-900">{{ selectedScenario.title }}</h4>
+                  <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Scenario ID: {{ getScenarioDisplayId(selectedScenario) }}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <span *ngIf="selectedScenario.lastTestStatus" class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"
+                  [class]="selectedScenario.lastTestStatus === 'Passed' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'">
+                  {{ selectedScenario.lastTestStatus === 'Passed' ? '✓ PASSED' : '✗ FAILED' }}
+                </span>
+                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"
+                  [class]="getScenarioStatusClass(selectedScenario.status) === 'active' ? 'bg-emerald-100 text-emerald-700' : getScenarioStatusClass(selectedScenario.status) === 'archived' ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-500'">
+                  {{ getScenarioStatusLabel(selectedScenario.status) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Gherkin Steps -->
+            <div class="p-10 space-y-8" *ngIf="!isScenarioLoading; else scenarioLoading">
+              <div class="space-y-4">
+                <h5 class="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6 flex items-center gap-2">
+                  <span class="w-8 h-px bg-primary/20"></span>
+                  Test Logic (Gherkin)
+                </h5>
+                <div *ngIf="gherkinLines.length; else noGherkin" class="font-mono text-sm leading-relaxed space-y-4">
+                  <div *ngFor="let line of gherkinLines" class="flex gap-4">
+                    <span class="text-secondary font-bold w-16 text-right flex-shrink-0">{{ line.keyword }}</span>
+                    <span class="text-slate-800" [innerHTML]="highlightGherkinText(line.text)"></span>
+                  </div>
+                </div>
+                <ng-template #noGherkin>
+                  <p class="text-sm text-slate-400">No gherkin steps available for this scenario.</p>
+                </ng-template>
+              </div>
+
+              
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-template #selectScenarioHint>
+          <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-16 text-center">
+            <span class="material-symbols-outlined text-5xl text-slate-300 mb-4 block">touch_app</span>
+            <h3 class="text-lg font-extrabold text-slate-800 mb-2">Select a scenario</h3>
+            <p class="text-sm text-slate-400">Choose a scenario from the hierarchy to display details.</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENARIOS TAB -->
+  <section *ngIf="activeTab === 'scenarios'">
+    <div class="space-y-3" *ngIf="scenarios.length; else noScenarios">
+      <div
+        *ngFor="let scenario of scenarios"
+        class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4 hover:shadow-md hover:border-primary/10 transition-all cursor-pointer"
+        (click)="openScenarioInScenariosPage(scenario)"
+      >
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+          [class]="getScenarioStatusClass(scenario.status) === 'active' ? 'bg-emerald-50 text-emerald-600' : getScenarioStatusClass(scenario.status) === 'archived' ? 'bg-red-50 text-red-500' : 'bg-slate-100 text-slate-500'">
+          <span class="material-symbols-outlined text-lg">description</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h4 class="text-sm font-bold text-slate-800">{{ scenario.title }}</h4>
+          <p class="text-xs text-slate-400 truncate">{{ scenario.description || 'No description available.' }}</p>
+        </div>
+        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex-shrink-0"
+          [class]="getScenarioStatusClass(scenario.status) === 'active' ? 'bg-emerald-50 text-emerald-600' : getScenarioStatusClass(scenario.status) === 'archived' ? 'bg-red-50 text-red-500' : 'bg-slate-100 text-slate-500'">
+          {{ getScenarioStatusLabel(scenario.status) }}
+        </span>
+      </div>
+    </div>
+    <ng-template #noScenarios>
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center">
+        <span class="material-symbols-outlined text-4xl text-slate-300 mb-2 block">description</span>
+        <p class="text-sm text-slate-400">No scenarios found for this project.</p>
+      </div>
+    </ng-template>
+  </section>
+
+</div>
+
+<ng-template #hierarchyLoading>
+  <div class="flex flex-col items-center gap-3 py-24 text-slate-400 text-sm">
+    <div class="w-9 h-9 border-[3px] border-blue-100 border-t-primary rounded-full animate-spin"></div>
+    <span>Loading modules, features and scenarios...</span>
+  </div>
+</ng-template>
+
+<ng-template #scenarioLoading>
+  <div class="flex items-center gap-2 p-10 text-slate-400 text-sm">
+    <div class="w-5 h-5 border-2 border-blue-100 border-t-primary rounded-full animate-spin"></div>
+    <span>Loading scenario detail...</span>
+  </div>
+</ng-template>
+
+<!-- Create Module Modal -->
+<app-module-create
+  *ngIf="showCreateModule"
+  [modalProjectId]="projectId"
+  (moduleCreated)="onModuleCreated()"
+  (modalCancelled)="onModuleCreateCancelled()"
+></app-module-create>
+
+<app-feature-create-modal
+  *ngIf="showCreateFeatureModal"
+  [projectId]="projectId"
+  [moduleId]="featureCreateModuleId"
+  [moduleName]="featureCreateModuleName"
+  (featureCreated)="onFeatureCreated($event)"
+  (modalClosed)="onFeatureCreateCancelled()"
+></app-feature-create-modal>
+
+<app-tag-create-modal
+  *ngIf="showCreateTagModal"
+  [projectId]="projectId"
+  (tagCreated)="onTagCreated($event)"
+  (modalClosed)="onTagCreateCancelled()"
+></app-tag-create-modal>
+
+<div
+  *ngIf="showDeleteTagModal && pendingDeleteTag"
+  class="delete-tag-backdrop fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/40 p-4"
+  (click)="cancelTagDeletion()"
+>
+  <div
+    class="delete-tag-panel w-full max-w-sm rounded-2xl border border-slate-200 bg-white shadow-xl"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="px-5 py-5 sm:px-6 sm:py-6">
+      <h3 class="text-lg font-bold tracking-tight text-slate-900">Delete tag “{{ pendingDeleteTag.name }}”?</h3>
+
+      <div class="mt-4 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold"
+        [style.borderColor]="getTagBorderColor(pendingDeleteTag.color)"
+        [style.backgroundColor]="getTagBackgroundColor(pendingDeleteTag.color)"
+        [style.color]="getTagDotColor(pendingDeleteTag.color)">
+        <span class="h-2.5 w-2.5 rounded-full shadow-sm" [style.backgroundColor]="getTagDotColor(pendingDeleteTag.color)"></span>
+        <span>{{ pendingDeleteTag.name }}</span>
+      </div>
+
+      <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          [disabled]="!!deletingTagId"
+          (click)="cancelTagDeletion()"
+        >
+          Keep tag
+        </button>
+
+        <button
+          type="button"
+          class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+          [disabled]="!!deletingTagId"
+          (click)="confirmTagDeletion()"
+        >
+          <span *ngIf="!deletingTagId" class="material-symbols-outlined text-lg">delete</span>
+          <span *ngIf="deletingTagId" class="inline-block h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
+          {{ deletingTagId ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div *ngIf="isLoading" class="flex flex-col items-center gap-3 py-24 text-slate-400 text-sm">
+  <div class="w-9 h-9 border-[3px] border-blue-100 border-t-primary rounded-full animate-spin"></div>
+  <span>Loading project...</span>
+</div>
+
+<!-- Not Found State -->
+<div *ngIf="!isLoading && !project" class="flex flex-col items-center gap-3 py-24 text-center">
+  <span class="material-symbols-outlined text-5xl text-slate-300">search_off</span>
+  <h2 class="text-xl font-extrabold text-slate-800">Project not found</h2>
+  <p class="text-sm text-slate-400 mb-4">The project you are looking for does not exist.</p>
+  <button class="px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-sm shadow-lg shadow-primary/20" (click)="goBack()">Back to Projects</button>
+</div>

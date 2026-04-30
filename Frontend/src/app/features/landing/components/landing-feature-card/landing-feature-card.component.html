@@ -1,0 +1,11 @@
+<article class="feature-card" [ngClass]="'accent-' + accent">
+  <div class="feature-icon-wrap">
+    <span class="material-symbols-outlined feature-icon">{{ icon }}</span>
+  </div>
+
+  <div class="space-y-3">
+    <p *ngIf="eyebrow" class="feature-eyebrow">{{ eyebrow }}</p>
+    <h3 class="feature-title">{{ title }}</h3>
+    <p class="feature-description">{{ description }}</p>
+  </div>
+</article>

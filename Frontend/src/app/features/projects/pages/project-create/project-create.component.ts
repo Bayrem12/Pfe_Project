@@ -1,0 +1,128 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { CreateProjectRequest, Project, UpdateProjectRequest } from '../../../../core/models/project.model';
+import { ResponseHttp } from '../../../../core/models/response-http.model';
+import { ProjectService } from '../../../../core/services/project.service';
+import { AuthService } from '../../../../core/services/auth.service';
+
+type CreateProjectResponse = ResponseHttp<Project & { Id?: string }> & {
+  Resultat?: Project & { Id?: string };
+};
+
+@Component({
+  selector: 'app-project-create',
+  standalone: true,
+  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  templateUrl: './project-create.component.html',
+  styleUrl: './project-create.component.scss'
+})
+export class ProjectCreateComponent {
+    get isViewerOrManager(): boolean {
+      return this.currentRole === 'viewer' || this.currentRole === 'manager';
+    }
+  projectForm: FormGroup;
+  isSubmitting = false;
+  createProjectError = '';
+
+  userId = '';
+  currentRole = 'viewer';
+
+  constructor(
+    private fb: FormBuilder,
+    private projectService: ProjectService,
+    private router: Router,
+    private authService: AuthService
+  ) {
+    this.projectForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(3)]],
+      description: ['', [Validators.required]],
+      url: ['', [Validators.pattern(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/)]],
+      isActive: [true]
+    });
+
+    this.authService.currentUser$.subscribe(user => {
+      this.userId = user?.id || this.userId;
+      this.currentRole = (user?.roles?.[0] || 'viewer').toLowerCase();
+    });
+  }
+
+  get f() {
+    return this.projectForm.controls;
+  }
+
+  onSubmit(): void {
+    if (!(this.currentRole === 'owner' || this.currentRole === 'tester')) {
+      return;
+    }
+
+    if (this.projectForm.invalid) {
+      // Marquer tous les champs comme touchés pour afficher les erreurs
+      Object.keys(this.projectForm.controls).forEach(key => {
+        this.projectForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.createProjectError = '';
+
+    const projectRequest: CreateProjectRequest = {
+      name: this.projectForm.value.name,
+      description: this.projectForm.value.description,
+      url: this.projectForm.value.url || '',
+      userId: this.userId
+    };
+
+    const projectData = {
+      Name: projectRequest.name,
+      Description: projectRequest.description,
+      Url: projectRequest.url,
+      UserId: projectRequest.userId,
+      IsActive: !!this.projectForm.value.isActive
+    };
+
+    console.log('Envoi des données:', projectData);
+
+    this.projectService.createProject(projectData as unknown as CreateProjectRequest).subscribe({
+      next: (response: CreateProjectResponse) => {
+        console.log('Projet créé avec succès:', response);
+        const shouldBeActive = !!this.projectForm.value.isActive;
+        const createdId = response?.resultat?.id || response?.resultat?.Id || response?.Resultat?.id || response?.Resultat?.Id;
+
+        // Safety net: if creation endpoint ignores IsActive, force status after creation
+        if (!shouldBeActive && createdId) {
+          const updatePayload: UpdateProjectRequest = {
+            projectId: createdId,
+            name: this.projectForm.value.name,
+            description: this.projectForm.value.description,
+            url: this.projectForm.value.url || '',
+            isActive: false
+          };
+
+          this.projectService.updateProject(createdId, updatePayload).subscribe({
+            next: () => this.router.navigate(['/projects']),
+            error: () => this.router.navigate(['/projects'])
+          });
+          return;
+        }
+
+        this.router.navigate(['/projects']);
+      },
+      error: (error) => {
+        console.error('Erreur lors de la création:', error);
+        this.createProjectError =
+          error?.error?.fail_Messages ||
+          error?.error?.Fail_Messages ||
+          'Failed to create project. Please try again.';
+        this.isSubmitting = false;
+      }
+    });
+  }
+
+  cancel(): void {
+    this.router.navigate(['/projects']);
+  }
+}

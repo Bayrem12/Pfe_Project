@@ -1,0 +1,130 @@
+<div class="p-10 space-y-10">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex items-center justify-center py-20">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  </div>
+
+  <!-- Dashboard Content -->
+  <ng-container *ngIf="!isLoading && dashboardData">
+    <!-- Welcome Header -->
+    <section class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <h2 class="text-3xl font-extrabold tracking-tight text-on-surface">
+          {{ dashboardData.user.greeting }}, {{ dashboardData.user.name }}
+        </h2>
+        <p class="text-on-surface-variant font-medium mt-1">{{ currentDate }}</p>
+      </div>
+      
+      <!-- Real-time Controls -->
+      <div class="flex items-center gap-3">
+        <!-- Live/Manual Toggle -->
+        <button
+          (click)="toggleLiveMode()"
+          class="flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors"
+          [ngClass]="isLiveMode 
+            ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'">
+          <span class="material-symbols-outlined text-sm" [class.animate-spin]="isLiveMode">
+            {{ isLiveMode ? 'sync' : 'sync_disabled' }}
+          </span>
+          <span>{{ isLiveMode ? 'Live' : 'Manual' }}</span>
+        </button>
+        
+        <!-- Manual Refresh -->
+        <button
+          (click)="onManualRefresh()"
+          [disabled]="isRefreshing"
+          class="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          <span class="material-symbols-outlined text-sm" [class.animate-spin]="isRefreshing">refresh</span>
+          <span>{{ isRefreshing ? 'Refreshing...' : 'Refresh' }}</span>
+        </button>
+        
+        <!-- Refresh Interval -->
+        <div class="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg">
+          <span class="text-xs text-gray-500">Auto:</span>
+          <select
+            (change)="onRefreshIntervalChange($event)"
+            [disabled]="!isLiveMode"
+            class="px-2 py-1 text-xs border border-gray-300 rounded bg-white disabled:opacity-50">
+            <option value="15000">15s</option>
+            <option value="30000" selected>30s</option>
+            <option value="60000">1min</option>
+            <option value="300000">5min</option>
+          </select>
+        </div>
+        
+        <!-- Last Updated -->
+        <div class="flex items-center space-x-2 text-xs text-gray-500">
+          <div class="w-2 h-2 rounded-full" [ngClass]="isLiveMode ? 'bg-green-500 animate-pulse' : 'bg-gray-400'"></div>
+          <span>{{ lastUpdated | date:'shortTime' }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Enhanced Stat Cards -->
+    <app-enhanced-stat-cards [summary]="dashboardData.summary"></app-enhanced-stat-cards>
+
+    <!-- Main Workspace Grid -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Charts Area (2/3 width) -->
+      <div class="lg:col-span-2 space-y-8">
+        <!-- Execution Trends Chart with Project Selector -->
+        <div class="bg-white rounded-2xl shadow-sm p-6">
+          <div class="flex justify-between items-center mb-6">
+            <div>
+              <h3 class="text-lg font-bold text-gray-800">Test Executions</h3>
+              <p class="text-sm text-gray-500">Performance over last 14 days</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <label class="text-xs font-semibold text-gray-500 uppercase">Project:</label>
+              <select 
+                *ngIf="dashboardData?.availableProjects && (dashboardData.availableProjects?.length ?? 0) > 0"
+                #projectSelect
+                (change)="onProjectChange($event)"
+                class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-[200px]">
+                <option *ngFor="let project of dashboardData.availableProjects" 
+                  [value]="project.id"
+                  [selected]="project.id === selectedProjectId">
+                  {{ project.name }}
+                </option>
+              </select>
+              
+              <div *ngIf="isLoadingTrends" class="flex items-center gap-2 text-gray-400">
+                <span class="text-xs">Loading...</span>
+              </div>
+            </div>
+          </div>
+          <app-execution-trends-chart [trends]="dashboardData.executionTrends"></app-execution-trends-chart>
+        </div>
+
+        <!-- Pass Rate Trend (2/3 width) -->
+        <div class="lg:col-span-2">
+          <app-pass-rate-trend-chart [trends]="dashboardData.executionTrends"></app-pass-rate-trend-chart>
+        </div>
+      </div>
+      <!-- Distribution Donut Chart -->
+      <div class="lg:col-span-1 flex flex-col gap-6">
+        <app-test-distribution-chart [distribution]="dashboardData.distribution"></app-test-distribution-chart>
+       
+        <!-- Project Comparison Section -->
+        <section *ngIf="projectComparisonData.length > 1">
+          <app-project-comparison-chart [projects]="projectComparisonData"></app-project-comparison-chart>
+        </section>
+        <!-- Weekly Activity (1/3 width) -->
+        <div class="lg:col-span-1">
+          <app-weekly-activity-chart [trends]="dashboardData.executionTrends"></app-weekly-activity-chart>
+        </div>
+      </div>
+    </section>
+   
+  </ng-container>
+
+  <!-- Error State -->
+  <div *ngIf="!isLoading && !dashboardData" class="text-center py-20">
+    <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">error_outline</span>
+    <p class="text-slate-500 text-lg">Failed to load dashboard data</p>
+    <button (click)="loadDashboardData()" class="mt-4 px-6 py-2 bg-primary text-white rounded-full hover:bg-primary-container transition-colors">
+      Retry
+    </button>
+  </div>
+</div>

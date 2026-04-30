@@ -1,0 +1,52 @@
+<aside class="sidebar" [class.collapsed]="!(sidebarService.isOpen$ | async)">
+  <!-- Logo Section -->
+  <a class="logo-section" routerLink="/landing" style="text-decoration:none;color:inherit;cursor:pointer;">
+    <div class="logo-icon">
+      <img 
+        alt="AutoTestify Logo" 
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvoUkG8U1B4TF6IIr7lX6agS67HDgYdHw7QJWa7XEtebFxXEw-gbuu79QvRW80SHMYhYbWFq9_nGzt8Fn0hk57ZNNOrEM4WVIFDf1JXM4s7mHWwP3830bnEc8kVbqsxUVCEztmM5Acvav2KPCct0c_NAIlGKx4os2mBmwGCkdFadJd2HU-x-ElE0cVMt7PDNOLMJYkkZJl_dkfr7n4rt2pZNpLt0U-SOqlR3JJ8nB3eitsGmwzNQosCTvh8Yr2HQCatnQL1CgWzT4G"/>
+    </div>
+    <div class="logo-text">
+      <h2>AutoTestify</h2>
+      <p>BDD Enterprise</p>
+    </div>
+  </a>
+
+  <!-- Navigation Links -->
+  <nav>
+    <a 
+      *ngFor="let item of navItems"
+      [routerLink]="item.route"
+      class="nav-link"
+      [class.active]="isActive(item.route)"
+      [title]="item.label">
+      <span 
+        class="material-symbols-outlined nav-icon"
+        [style.font-variation-settings]="isActive(item.route) ? '\'FILL\' 1' : '\'FILL\' 0'">{{ item.icon }}</span>
+      <span class="nav-label">{{ item.label }}</span>
+    </a>
+  </nav>
+
+  <!-- Bottom Actions -->
+  <div class="bottom-actions">
+    <a 
+      *ngFor="let item of bottomNavItems"
+      [routerLink]="item.route"
+      class="nav-link"
+      [class.active]="isActive(item.route)"
+      [title]="item.label">
+      <span 
+        class="material-symbols-outlined nav-icon"
+        [style.font-variation-settings]="isActive(item.route) ? '\'FILL\' 1' : '\'FILL\' 0'">{{ item.icon }}</span>
+      <span class="nav-label">{{ item.label }}</span>
+    </a>
+    <a routerLink="/help" class="nav-link" title="Help">
+      <span class="material-symbols-outlined nav-icon">help</span>
+      <span class="nav-label">Help</span>
+    </a>
+    <button (click)="logout()" class="nav-link logout-btn" title="Logout">
+      <span class="material-symbols-outlined nav-icon">logout</span>
+      <span class="nav-label">Logout</span>
+    </button>
+  </div>
+</aside>

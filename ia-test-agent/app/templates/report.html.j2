@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Rapport — {{ scenario_name }}</title>
+<style>
+:root{
+  --ok:#10b981;--ok-bg:#ecfdf5;--ok-border:#a7f3d0;
+  --fail:#ef4444;--fail-bg:#fef2f2;--fail-border:#fca5a5;
+  --warn:#f59e0b;--warn-bg:#fffbeb;
+  --blue:#3b82f6;--blue-bg:#eff6ff;
+  --purple:#8b5cf6;--purple-bg:#f5f3ff;
+  --gray:#6b7280;--gray-bg:#f9fafb;--gray-border:#e5e7eb;
+  --text:#111827;--muted:#6b7280;
+  --bg:#f3f4f6;--card:#fff;
+  --r:8px;--sh:0 1px 3px rgba(0,0,0,.1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+code{font-family:'Cascadia Code','Fira Code',monospace;font-size:.82em;background:#f1f5f9;padding:1px 5px;border-radius:3px;word-break:break-all}
+a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+
+/* ── Header ─ */
+.hdr{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 100%);color:#fff;padding:28px 36px}
+.hdr-inner{max-width:1080px;margin:0 auto;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.hdr h1{font-size:1.5rem;font-weight:700;margin-bottom:4px}
+.hdr-sub{font-size:.8rem;opacity:.65;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.hdr-meta{display:flex;flex-wrap:wrap;gap:16px;font-size:.85rem;opacity:.82;margin-top:10px}
+.hdr-meta span{display:flex;align-items:center;gap:5px}
+.status-pill{padding:6px 20px;border-radius:999px;font-weight:700;font-size:1rem;white-space:nowrap}
+.status-pill.pass{background:#10b981;color:#fff}
+.status-pill.fail{background:#ef4444;color:#fff}
+
+/* ── Container ─ */
+.wrap{max-width:1080px;margin:0 auto;padding:28px 20px}
+
+/* ── Summary grid ─ */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:24px}
+.scard{background:var(--card);border-radius:var(--r);padding:18px 14px;box-shadow:var(--sh);text-align:center}
+.scard .val{font-size:1.9rem;font-weight:700}
+.scard .lbl{font-size:.76rem;color:var(--muted);margin-top:3px}
+.scard.ok .val{color:var(--ok)}
+.scard.fail .val{color:var(--fail)}
+.scard.purple .val{color:var(--purple)}
+.scard.gray .val{color:var(--text)}
+
+/* ── Recovery bar ─ */
+.rbar-wrap{background:var(--card);border-radius:var(--r);padding:18px 20px;margin-bottom:24px;box-shadow:var(--sh)}
+.rbar-wrap h3{font-size:.9rem;color:var(--muted);font-weight:600;margin-bottom:10px}
+.bar-track{background:#e5e7eb;border-radius:999px;height:10px;overflow:hidden;display:flex}
+.b-ok{background:var(--ok)}.b-rec{background:var(--purple)}.b-fail{background:var(--fail)}
+.bar-leg{display:flex;gap:16px;margin-top:8px;font-size:.8rem;flex-wrap:wrap}
+.bar-leg span{display:flex;align-items:center;gap:5px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+/* ── Step cards ─ */
+.steps-hdr{font-size:1rem;font-weight:700;margin-bottom:14px}
+.sc{background:var(--card);border-radius:var(--r);margin-bottom:12px;box-shadow:var(--sh);border:1px solid transparent;border-left-width:4px}
+.sc.ok{border-left-color:var(--ok)}
+.sc.fail{border-left-color:var(--fail)}
+.sc-head{display:flex;align-items:flex-start;gap:10px;padding:14px 18px;cursor:pointer;user-select:none}
+.sc-head:hover{background:#fafafa}
+.num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0;margin-top:1px}
+.num.ok{background:var(--ok-bg);color:var(--ok)}
+.num.fail{background:var(--fail-bg);color:var(--fail)}
+.sc-info{flex:1;min-width:0}
+.step-desc{font-size:.86rem;color:var(--muted);word-break:break-word}
+.step-code-line{font-family:'Cascadia Code','Fira Code',monospace;font-size:.78rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:3px 8px;margin-top:4px;word-break:break-all;display:block}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:.74rem;font-weight:600;white-space:nowrap}
+.b-ok2{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-border)}
+.b-fail2{background:var(--fail-bg);color:var(--fail);border:1px solid var(--fail-border)}
+.b-warn{background:var(--warn-bg);color:#92400e;border:1px solid #fde68a}
+.b-blue{background:var(--blue-bg);color:#1d4ed8;border:1px solid #bfdbfe}
+.b-purple{background:var(--purple-bg);color:#7c3aed;border:1px solid #ddd6fe}
+.b-gray{background:var(--gray-bg);color:var(--gray);border:1px solid var(--gray-border)}
+.sc-timing{font-size:.8rem;color:var(--muted);white-space:nowrap;flex-shrink:0;margin-top:3px}
+.chevron{font-size:.7rem;opacity:.5;transition:transform .2s;margin-top:5px;flex-shrink:0}
+.sc.open .chevron{transform:rotate(90deg)}
+
+/* ── Step body ─ */
+.sc-body{padding:0 18px 16px;border-top:1px solid #f3f4f6;display:none}
+.sc.open .sc-body{display:block}
+
+/* error box */
+.ebox{background:var(--fail-bg);border:1px solid var(--fail-border);border-radius:6px;padding:12px 14px;margin-top:12px}
+.etype{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fail);margin-bottom:3px}
+.eexp{font-size:.84rem;color:#7f1d1d;margin-bottom:7px}
+.edetail{font-family:monospace;font-size:.76rem;color:#991b1b;background:#fee2e2;padding:8px;border-radius:4px;white-space:pre-wrap;word-break:break-word;max-height:180px;overflow-y:auto}
+
+/* screenshot */
+.ss-wrap{margin-top:12px}
+.ss-wrap img{max-width:100%;border-radius:6px;border:1px solid var(--gray-border);cursor:zoom-in;transition:opacity .15s}
+.ss-wrap img:hover{opacity:.9}
+.ss-lbl{font-size:.73rem;color:var(--muted);margin-top:3px}
+
+/* ── Lightbox ─ */
+.lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out}
+.lb.open{display:flex}
+.lb img{max-width:92vw;max-height:92vh;object-fit:contain;border-radius:4px}
+.lb-x{position:fixed;top:16px;right:22px;font-size:2rem;color:#fff;cursor:pointer;z-index:10000;line-height:1}
+
+/* ── Footer ─ */
+.footer{text-align:center;font-size:.78rem;color:var(--muted);margin-top:36px;padding-top:16px;border-top:1px solid var(--gray-border)}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-inner">
+    <div>
+      <div class="hdr-sub">IA Test Agent · Rapport d'exécution</div>
+      <h1>{{ scenario_name }}</h1>
+      <div class="hdr-meta">
+        <span>📅 {{ date_execution }}</span>
+        <span>⏱ {{ "%.0f"|format(duree_ms) }} ms</span>
+        {% if url_cible %}<span>🌐 <a href="{{ url_cible }}" style="color:rgba(255,255,255,.75)">{{ url_cible }}</a></span>{% endif %}
+        <span>🖥 {{ navigateur }}</span>
+        <span style="opacity:.5">id: {{ test_id }}</span>
+      </div>
+    </div>
+    <div style="flex-shrink:0;padding-top:4px">
+      {% if statut == 'PASSED' %}
+      <span class="status-pill pass">✓ PASSED</span>
+      {% else %}
+      <span class="status-pill fail">✗ FAILED</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- SUMMARY CARDS -->
+  <div class="grid">
+    <div class="scard gray"><div class="val">{{ recovery_stats.steps_total }}</div><div class="lbl">Steps exécutés</div></div>
+    <div class="scard ok">  <div class="val">{{ recovery_stats.steps_ok }}</div><div class="lbl">OK (1er essai)</div></div>
+    <div class="scard purple"><div class="val">{{ recovery_stats.steps_recovered }}</div><div class="lbl">Récupérés</div></div>
+    <div class="scard fail"> <div class="val">{{ recovery_stats.steps_failed }}</div><div class="lbl">Échecs</div></div>
+    <div class="scard purple"><div class="val">{{ recovery_stats.visual_fallback_total }}</div><div class="lbl">Fallbacks YOLO+DOM</div></div>
+  </div>
+
+  <!-- RECOVERY BAR -->
+  {% set total = recovery_stats.steps_total if recovery_stats.steps_total > 0 else 1 %}
+  {% set pok  = (recovery_stats.steps_ok        / total * 100)|round|int %}
+  {% set prec = (recovery_stats.steps_recovered / total * 100)|round|int %}
+  {% set pfail= (recovery_stats.steps_failed    / total * 100)|round|int %}
+  <div class="rbar-wrap">
+    <h3>Taux de récupération : <strong>{{ (recovery_stats.taux_recuperation * 100)|round|int }}%</strong></h3>
+    <div class="bar-track">
+      <div class="b-ok"  style="width:{{ pok  }}%"></div>
+      <div class="b-rec" style="width:{{ prec }}%"></div>
+      <div class="b-fail"style="width:{{ pfail}}%"></div>
+    </div>
+    <div class="bar-leg">
+      <span><span class="dot" style="background:#10b981"></span> OK direct ({{ pok }}%)</span>
+      <span><span class="dot" style="background:#8b5cf6"></span> Récupérés fallback/retry ({{ prec }}%)</span>
+      <span><span class="dot" style="background:#ef4444"></span> Échecs définitifs ({{ pfail }}%)</span>
+    </div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps-hdr">Détail des steps ({{ steps_results|length }})</div>
+
+  {% for step in steps_results %}
+  {% set i = loop.index %}
+  {% set is_ok = step.statut == 'OK' %}
+  {% set err = step.erreur|lower %}
+
+  {# ── Error classification ── #}
+  {% if not step.erreur %}
+    {% set etype = "" %}{% set eexp = "" %}
+  {% elif "err_name_not_resolved" in err or "err_connection" in err or "err_internet" in err %}
+    {% set etype = "ERREUR RÉSEAU" %}
+    {% set eexp = "Impossible de joindre le site. Vérifiez l'URL et votre connexion internet." %}
+  {% elif "timeout" in err and ("get_by_role" in err or "get_by_label" in err or "locator" in err or "get_by_placeholder" in err or "check" in err or "fill" in err) %}
+    {% set etype = "ÉLÉMENT INTROUVABLE" %}
+    {% set eexp = "Le sélecteur généré par l'IA ne correspond à aucun élément sur la page. Le label Gherkin ne correspond pas à la structure HTML réelle du site. Le fallback visuel (YOLO+DOM) a été tenté." %}
+  {% elif "timeout" in err and ("networkidle" in err or "load_state" in err) %}
+    {% set etype = "TIMEOUT PAGE" %}
+    {% set eexp = "La page prend trop de temps à charger. Le site est peut-être lent ou inaccessible." %}
+  {% elif "timeout" in err %}
+    {% set etype = "TIMEOUT" %}
+    {% set eexp = "L'opération a dépassé le délai configuré (" + step.duree_ms|string + " ms)." %}
+  {% elif "expected to contain text" in err or "to_contain_text" in err or "unexpected value" in err %}
+    {% set etype = "ASSERTION ÉCHOUÉE" %}
+    {% set eexp = "Le texte attendu n'est pas présent sur la page. Cause probable : une action précédente a échoué (champ non rempli, mauvais identifiants, navigation vers la mauvaise page)." %}
+  {% elif "to_be_visible" in err %}
+    {% set etype = "ASSERTION ÉCHOUÉE" %}
+    {% set eexp = "L'élément attendu n'est pas visible sur la page." %}
+  {% else %}
+    {% set etype = "ERREUR" %}
+    {% set eexp = "Erreur lors de l'exécution." %}
+  {% endif %}
+
+  {# ── Method badge ── #}
+  {% if not is_ok and step.visual_fallback_used %}
+    {% set meth = "⚠ Fallback YOLO+DOM tenté (non récupéré)" %}{% set mc = "b-warn" %}
+  {% elif not is_ok %}
+    {% set meth = "✗ Playwright direct (échec)" %}{% set mc = "b-fail2" %}
+  {% elif step.visual_fallback_used %}
+    {% set meth = "🔍 Fallback YOLO+DOM" %}{% set mc = "b-purple" %}
+  {% elif step.retry_count > 0 %}
+    {% set meth = "🔄 Retry + Adaptation" %}{% set mc = "b-warn" %}
+  {% else %}
+    {% set meth = "⚡ Playwright direct" %}{% set mc = "b-gray" %}
+  {% endif %}
+
+  <div class="sc {{ 'ok' if is_ok else 'fail' }}" id="sc{{ i }}">
+    <div class="sc-head" onclick="toggle({{ i }})">
+      <div class="num {{ 'ok' if is_ok else 'fail' }}">{{ i }}</div>
+      <div class="sc-info">
+        <div class="step-desc">{{ step.step }}</div>
+        <div class="badges">
+          {% if is_ok %}
+          <span class="badge b-ok2">✓ OK</span>
+          {% else %}
+          <span class="badge b-fail2">✗ FAILED</span>
+          {% endif %}
+          <span class="badge {{ mc }}">{{ meth }}</span>
+          {% if step.retry_count > 0 %}<span class="badge b-gray">{{ step.retry_count }}× retry</span>{% endif %}
+          {% if step.adaptation_appliquee %}<span class="badge b-blue" title="{{ step.adaptation_appliquee }}">🧠 Adaptation</span>{% endif %}
+        </div>
+      </div>
+      <div class="sc-timing">{{ "%.0f"|format(step.duree_ms) }} ms</div>
+      <div class="chevron">▶</div>
+    </div>
+
+    <div class="sc-body" id="sb{{ i }}">
+      {% if step.erreur %}
+      <div class="ebox">
+        {% if etype %}<div class="etype">⚠ {{ etype }}</div>{% endif %}
+        {% if eexp %}<div class="eexp">{{ eexp }}</div>{% endif %}
+        <div class="edetail">{{ step.erreur[:1000] }}</div>
+      </div>
+      {% endif %}
+
+      {% set ss_path = "../screenshots/" + test_id + "_step_" + i|string + ".png" %}
+      <div class="ss-wrap">
+        <img src="{{ ss_path }}" alt="Screenshot step {{ i }}"
+             onclick="lb(this.src)"
+             onerror="this.parentElement.style.display='none'">
+        <div class="ss-lbl">📷 Screenshot après step {{ i }}</div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="footer">Généré par <strong>IA Test Agent</strong> · {{ date_execution }}</div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lb" id="lightbox" onclick="cls()">
+  <span class="lb-x" onclick="cls()">×</span>
+  <img id="lb-img" src="" alt="">
+</div>
+
+<script>
+function toggle(i){
+  const c=document.getElementById('sc'+i),b=document.getElementById('sb'+i);
+  c.classList.toggle('open');
+}
+function lb(src){document.getElementById('lb-img').src=src;document.getElementById('lightbox').classList.add('open')}
+function cls(){document.getElementById('lightbox').classList.remove('open')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')cls()});
+// Open all failed steps by default
+document.querySelectorAll('.sc.fail').forEach(c=>{
+  c.classList.add('open');
+});
+</script>
+</body>
+</html>

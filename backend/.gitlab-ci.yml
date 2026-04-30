@@ -1,0 +1,32 @@
+stages:
+  - security
+  - build
+  - deploy
+
+include:
+  - project: 'addinn/digital-software-factory/stage-lab/pfe/2026/dev/digital2026-01/devops-library'
+    ref: main
+    file: '/templates/trivy.yml'
+    inputs:
+      severity: "HIGH,CRITICAL"
+      exit_code: "0"
+
+  - project: 'addinn/digital-software-factory/stage-lab/pfe/2026/dev/digital2026-01/devops-library'
+    ref: main
+    file: '/templates/build.yml'
+    inputs:
+      service_name: "backend"
+      dockerfile_path: "API/Dockerfile"
+      image_suffix: "api"
+
+  - project: 'addinn/digital-software-factory/stage-lab/pfe/2026/dev/digital2026-01/devops-library'
+    ref: main
+    file: '/templates/deploy.yml'
+    inputs:
+      service_name: "backend"
+      app_path: "$CI_PROJECT_DIR"
+      manifests_path: "k8s"
+      namespace: "pfe-2026-devops-lina"
+      deployment_name: "backend"
+      container_name: "backend"
+      image_suffix: "api"

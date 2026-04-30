@@ -1,0 +1,142 @@
+<div class="space-y-6">
+  <!-- Header with Stats -->
+  <div *ngIf="showHeader" class="flex justify-between items-end">
+    <div>
+      <h3 class="text-xl font-bold text-slate-900 mb-1">NLP Analysis Results</h3>
+      <p class="text-sm text-slate-500">AI-powered step interpretation and action extraction</p>
+    </div>
+    <button
+      *ngIf="analyses.length > 0"
+      (click)="exportAnalysis()"
+      class="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm">
+      <span class="material-symbols-outlined text-base">download</span>
+      Export
+    </button>
+  </div>
+
+  <!-- Stats Cards -->
+  <div *ngIf="analyses.length > 0" class="grid grid-cols-3 gap-4">
+    <div class="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3">
+      <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+        <span class="material-symbols-outlined text-primary text-lg">checklist</span>
+      </div>
+      <div>
+        <p class="text-[10px] font-bold text-slate-400 uppercase">Total Steps</p>
+        <h4 class="text-xl font-bold text-slate-800">{{ totalSteps }}</h4>
+      </div>
+    </div>
+    <div class="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3">
+      <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+        <span class="material-symbols-outlined text-emerald-600 text-lg">psychology</span>
+      </div>
+      <div>
+        <p class="text-[10px] font-bold text-slate-400 uppercase">Avg Confidence</p>
+        <h4 class="text-xl font-bold text-slate-800">{{ (averageConfidence * 100).toFixed(0) }}%</h4>
+      </div>
+    </div>
+    <div class="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3">
+      <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+        <span class="material-symbols-outlined text-purple-600 text-lg">category</span>
+      </div>
+      <div>
+        <p class="text-[10px] font-bold text-slate-400 uppercase">Intent Types</p>
+        <h4 class="text-xl font-bold text-slate-800">{{ Object.keys(intentDistribution).length }}</h4>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="analyses.length === 0" class="bg-white rounded-2xl shadow-sm py-16 text-center">
+    <div class="mb-4 w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto">
+      <span class="material-symbols-outlined text-2xl text-slate-300">auto_awesome_motion</span>
+    </div>
+    <h3 class="text-lg font-bold text-slate-800 mb-1">No Analysis Data</h3>
+    <p class="text-sm text-slate-400">Run NLP analysis on a scenario to see results here</p>
+  </div>
+
+  <!-- Analysis Steps -->
+  <div *ngIf="analyses.length > 0" class="space-y-3">
+    <div *ngFor="let analysis of analyses; let i = index"
+         class="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+
+      <!-- Step Header -->
+      <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">{{ i + 1 }}</span>
+          <div class="flex items-center gap-2 px-2.5 py-1 rounded-lg border {{ getIntentColor(analysis.intent) }}">
+            <span class="material-symbols-outlined text-sm">{{ getIntentIcon(analysis.intent) }}</span>
+            <span class="text-[10px] font-bold uppercase">{{ analysis.intent }}</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-bold {{ getConfidenceColor(analysis.confidence) }}">
+              {{ (analysis.confidence * 100).toFixed(0) }}%
+            </span>
+          </div>
+        </div>
+        <div class="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+          <div
+            class="h-full {{ getConfidenceBarColor(analysis.confidence) }} transition-all duration-300"
+            [style.width]="getConfidenceBarWidth(analysis.confidence)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Step Content -->
+      <div class="px-5 py-4">
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Action</p>
+            <p class="text-sm font-mono bg-slate-50 px-3 py-2 rounded-lg text-slate-700">{{ analysis.action || 'N/A' }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Target</p>
+            <p class="text-sm font-mono bg-slate-50 px-3 py-2 rounded-lg text-slate-700 truncate" [title]="analysis.target || 'N/A'">{{ analysis.target || 'N/A' }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Value</p>
+            <p class="text-sm font-mono bg-slate-50 px-3 py-2 rounded-lg text-slate-700 truncate" [title]="analysis.value || 'N/A'">{{ analysis.value || 'N/A' }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="analysis.parameters && analysis.parameters.length > 0" class="mt-3">
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Extracted Parameters</p>
+          <div class="flex flex-wrap gap-2">
+            <div *ngFor="let param of analysis.parameters"
+                 class="px-2.5 py-1 bg-purple-50 text-purple-700 rounded-lg border border-purple-100 text-xs">
+              <span class="font-bold">{{ param.name }}</span>
+              <span class="text-purple-400 mx-1">:</span>
+              <span class="font-mono">{{ param.value }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Intent Distribution -->
+  <div *ngIf="analyses.length > 1 && Object.keys(intentDistribution).length > 1"
+       class="bg-white rounded-2xl shadow-sm p-5">
+    <h4 class="font-bold text-sm text-slate-700 mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-base">pie_chart</span>
+      Intent Distribution
+    </h4>
+    <div class="space-y-3">
+      <div *ngFor="let intent of Object.keys(intentDistribution)" class="flex items-center gap-3">
+        <div class="flex-1">
+          <div class="flex justify-between mb-1">
+            <span class="text-xs font-medium text-slate-700">{{ intent }}</span>
+            <span class="text-xs text-slate-400 font-bold">
+              {{ intentDistribution[intent] }} steps ({{ getIntentDistributionPercentage(intentDistribution[intent]).toFixed(0) }}%)
+            </span>
+          </div>
+          <div class="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+            <div
+              class="h-full bg-primary rounded-full transition-all duration-300"
+              [style.width]="getIntentDistributionPercentage(intentDistribution[intent]) + '%'">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

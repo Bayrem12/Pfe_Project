@@ -1,0 +1,44 @@
+# Environnement virtuel
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Environnement
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Modeles entraines (trop lourds pour Git)
+trained_models/nlp/*.pt
+trained_models/nlp/*.joblib
+trained_models/vision/*.pt
+
+# Donnees
+data/ui_screenshots/*.png
+data/ui_screenshots/*.jpg
+data/annotations/*.txt
+
+# Rapports generes
+reports/screenshots/*.png
+reports/html/*.html
+reports/generated_tests/
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/*.ipynb
+
+# OS
+.DS_Store
+Thumbs.db

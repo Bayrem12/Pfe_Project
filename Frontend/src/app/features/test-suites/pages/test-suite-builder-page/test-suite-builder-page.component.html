@@ -1,0 +1,243 @@
+<div *ngIf="loading" class="builder-state flex-1 flex items-center justify-center">
+  <div class="flex flex-col items-center gap-4">
+    <div class="h-11 w-11 rounded-full border-4 border-blue-100 border-t-[#2563eb] animate-spin"></div>
+    <span class="text-sm font-medium text-slate-400">Loading suite builder...</span>
+  </div>
+</div>
+
+<div *ngIf="errorMessage && !loading" class="mx-6 mt-6 flex items-center gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700 shadow-sm">
+  <span class="material-symbols-outlined text-red-500">error</span>
+  {{ errorMessage }}
+  <button (click)="errorMessage = ''" class="ml-auto rounded-full p-1 text-red-300 transition-colors hover:bg-red-100 hover:text-red-500" type="button">
+    <span class="material-symbols-outlined text-sm">close</span>
+  </button>
+</div>
+
+<div *ngIf="successMessage"
+     class="fixed right-6 top-20 z-50 inline-flex items-center gap-3 rounded-2xl border border-emerald-100 bg-white px-5 py-3 text-sm font-semibold text-emerald-700 shadow-[0_18px_50px_rgba(16,185,129,0.16)]">
+  <span class="material-symbols-outlined text-[18px]">check_circle</span>
+  {{ successMessage }}
+</div>
+
+<div *ngIf="!loading && suite" class="builder-shell">
+  <!-- Builder Workspace: 40/60 split -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- LEFT PANEL: Available Scenarios (40%) -->
+    <section class="w-[40%] flex flex-col border-r border-slate-200/30 bg-slate-50">
+      <!-- Search & Filters -->
+      <div class="p-6 space-y-4">
+        <h2 class="text-[11px] font-black tracking-widest text-slate-500 uppercase">Available Scenarios</h2>
+        <div class="relative group">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+          <input [ngModel]="searchTerm"
+                 (ngModelChange)="onSearchChange($event)"
+                 class="w-full bg-white border-none rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-primary shadow-sm placeholder:text-slate-400"
+                 placeholder="Search scenarios..."
+                 type="text"/>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button (click)="setStatusFilter('all')"
+                  [class]="statusFilter === 'all' ? 'px-3 py-1.5 rounded-lg bg-primary text-white border border-primary text-xs font-semibold' : 'px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-500 hover:border-primary transition-colors'"
+                  type="button">All</button>
+          <button (click)="setStatusFilter('active')"
+                  [class]="statusFilter === 'active' ? 'px-3 py-1.5 rounded-lg bg-primary text-white border border-primary text-xs font-semibold' : 'px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-500 hover:border-primary transition-colors'"
+                  type="button">Active</button>
+          <button (click)="setStatusFilter('draft')"
+                  [class]="statusFilter === 'draft' ? 'px-3 py-1.5 rounded-lg bg-primary text-white border border-primary text-xs font-semibold' : 'px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-500 hover:border-primary transition-colors'"
+                  type="button">Draft</button>
+          <button (click)="setStatusFilter('archived')"
+                  [class]="statusFilter === 'archived' ? 'px-3 py-1.5 rounded-lg bg-primary text-white border border-primary text-xs font-semibold' : 'px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-500 hover:border-primary transition-colors'"
+                  type="button">Archived</button>
+        </div>
+      </div>
+
+      <!-- Scrollable Scenario List -->
+      <div class="flex-1 overflow-y-auto px-6 pb-6 space-y-3"
+           cdkDropList
+           #availableList="cdkDropList"
+           [cdkDropListData]="filteredAvailable"
+           [cdkDropListConnectedTo]="[suiteList]"
+         [cdkDropListDisabled]="isViewerRole"
+           [cdkDropListSortingDisabled]="true">
+        <!-- Empty -->
+        <div *ngIf="filteredAvailable.length === 0" class="border-2 border-dashed border-slate-200 rounded-xl py-12 flex flex-col items-center justify-center text-center">
+          <span class="material-symbols-outlined text-2xl text-slate-300 mb-2">search_off</span>
+          <p class="text-xs text-slate-400 max-w-xs">
+            {{ searchTerm || statusFilter !== 'all' ? 'No scenarios match your filters.' : 'All project scenarios are already in this suite.' }}
+          </p>
+        </div>
+
+        <!-- Scenario Cards -->
+        <div *ngFor="let scenario of filteredAvailable"
+             cdkDrag
+             [cdkDragData]="scenario"
+             class="group bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all border-l-4 border-transparent hover:border-primary/60 relative cursor-grab active:cursor-grabbing">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-[10px] font-black uppercase tracking-wider text-primary bg-blue-50 px-2 py-0.5 rounded">{{ scenario.featureName || 'Feature' }}</span>
+            <span class="text-[10px] text-slate-400 font-medium">{{ scenario.stepCount }} steps</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-800 mb-1">{{ scenario.title }}</h3>
+          <p class="text-xs text-slate-400 line-clamp-1 mb-3">{{ scenario.description || 'No description provided.' }}</p>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] py-0.5 px-2 rounded-full font-bold"
+                  [ngClass]="getScenarioStatusClass(scenario.status)">
+              {{ getScenarioStatusLabel(scenario.status) }}
+            </span>
+          </div>
+          <button (click)="addScenario(scenario)"
+              [disabled]="addingScenarioId === scenario.id || isViewerRole"
+                  class="absolute top-1/2 right-3 -translate-y-1/2 h-8 w-8 bg-primary text-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all scale-90 hover:scale-100 disabled:opacity-50"
+                  type="button">
+            <span *ngIf="addingScenarioId !== scenario.id" class="material-symbols-outlined text-lg">add</span>
+            <div *ngIf="addingScenarioId === scenario.id" class="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
+          </button>
+        </div>
+
+        <!-- Placeholder -->
+        <div *ngIf="filteredAvailable.length > 0" class="border-2 border-dashed border-slate-200/50 rounded-xl h-24 flex items-center justify-center">
+          <span class="text-xs text-slate-400 font-medium">Search for more scenarios</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: Suite Scenarios (60%) -->
+    <section class="w-[60%] flex flex-col bg-white relative">
+      <!-- Sticky Top Bar: Suite Details -->
+      <div class="sticky top-0 z-10 bg-white px-8 py-6 border-b border-slate-100 shadow-sm">
+        <div class="flex items-center justify-between gap-6">
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2">
+              <button (click)="cancel()"
+                      class="text-xs font-bold text-slate-500 hover:text-primary transition-colors flex items-center gap-1"
+                      type="button">
+                <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                Back
+              </button>
+            </div>
+            <input [(ngModel)]="suiteName"
+                   [readonly]="isViewerRole"
+                   class="w-full text-2xl font-black tracking-tight text-primary bg-transparent border-none p-0 focus:ring-0 placeholder:text-slate-300"
+                   placeholder="Suite Name"
+                   type="text"/>
+            <input [(ngModel)]="suiteDescription"
+                   [readonly]="isViewerRole"
+                   class="w-full text-sm text-slate-500 bg-transparent border-none p-0 focus:ring-0 mt-1 placeholder:text-slate-300"
+                   placeholder="Add a description for this test suite..."
+                   type="text"/>
+          </div>
+          <div class="flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-xl shrink-0">
+            <span class="material-symbols-outlined text-primary">layers</span>
+            <div class="flex flex-col">
+              <span class="text-[10px] font-black text-slate-500 uppercase">Scenario Count</span>
+              <span class="text-sm font-bold text-primary">{{ formatOrder(suiteScenarios.length - 1) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suite Ordered List -->
+      <div class="flex-1 overflow-y-auto px-8 py-6 space-y-4 suite-drop-list"
+           cdkDropList
+           #suiteList="cdkDropList"
+           [cdkDropListData]="suiteScenarios"
+           [cdkDropListConnectedTo]="[availableList]"
+         [cdkDropListDisabled]="isViewerRole"
+           (cdkDropListDropped)="onDrop($event)">
+        <!-- Drag Items -->
+        <div *ngFor="let item of suiteScenarios; let i = index"
+             cdkDrag
+             class="suite-row flex items-center gap-4 group">
+          <div class="text-xs font-black text-slate-400 group-hover:text-primary transition-colors shrink-0 w-6 text-right">{{ formatOrder(i) }}</div>
+          <div class="flex-1 bg-white border border-slate-200/50 rounded-2xl p-5 flex items-center gap-6 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
+            <span cdkDragHandle class="material-symbols-outlined text-slate-400 cursor-grab active:cursor-grabbing">drag_indicator</span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <h4 class="text-sm font-bold text-slate-800">{{ item.scenarioTitle }}</h4>
+                <span class="text-[10px] px-2 py-0.5 bg-slate-100 text-primary font-bold rounded uppercase">{{ getScenarioFeatureName(item.scenarioId) }}</span>
+              </div>
+              <p class="text-xs text-slate-400">{{ item.scenarioDescription || 'No description' }}</p>
+            </div>
+            <div class="flex items-center gap-6 shrink-0">
+              <div class="text-right">
+                <span class="block text-[10px] text-slate-400 font-bold uppercase">Steps</span>
+                <span class="text-xs font-bold">{{ getScenarioStepCount(item.scenarioId) }}</span>
+              </div>
+              <button (click)="removeScenario(item)"
+                      [disabled]="removingScenarioId === item.scenarioId || isViewerRole"
+                      class="p-2 text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50"
+                      type="button">
+                <span *ngIf="removingScenarioId !== item.scenarioId" class="material-symbols-outlined">close</span>
+                <div *ngIf="removingScenarioId === item.scenarioId" class="h-4 w-4 rounded-full border-2 border-red-200 border-t-red-500 animate-spin"></div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="suiteScenarios.length === 0" class="flex items-center gap-4 opacity-40">
+          <div class="text-xs font-black text-slate-400 w-6 text-right">01</div>
+          <div class="flex-1 border-2 border-dashed border-slate-300 rounded-2xl p-8 flex flex-col items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-3xl">add_circle</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Add Scenarios from Left Panel</span>
+          </div>
+        </div>
+
+        <!-- Drop Target Placeholder -->
+        <div *ngIf="suiteScenarios.length > 0" class="flex items-center gap-4 opacity-40">
+          <div class="text-xs font-black text-slate-400 w-6 text-right">{{ formatOrder(suiteScenarios.length) }}</div>
+          <div class="flex-1 border-2 border-dashed border-slate-300 rounded-2xl p-8 flex flex-col items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-3xl">add_circle</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Drop Scenario Here</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sticky Bottom Action Bar -->
+      <div class="sticky bottom-0 z-10 bg-white/90 backdrop-blur-md px-8 py-6 border-t border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-8">
+          <div class="flex flex-col">
+            <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Total Steps</span>
+            <span class="text-xl font-bold text-slate-900">{{ suiteStepCount }}</span>
+          </div>
+          <div class="h-10 w-[1px] bg-slate-200"></div>
+          <div class="flex flex-col">
+            <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Scenarios</span>
+            <span class="text-xl font-bold text-primary">{{ suiteScenarios.length }}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button (click)="cancel()"
+                  class="px-6 py-3 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 transition-all"
+                  type="button">
+            Cancel
+          </button>
+          <button (click)="saveSuite()"
+              [disabled]="saving || !suiteName.trim() || isViewerRole"
+                  class="px-6 py-3 rounded-xl bg-slate-100 text-primary font-black text-sm hover:bg-slate-200 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  type="button">
+            <div *ngIf="saving" class="h-4 w-4 rounded-full border-2 border-primary/30 border-t-primary animate-spin"></div>
+            {{ saving ? 'Saving...' : 'Save Suite' }}
+          </button>
+          <button (click)="runSuite(false)"
+              [disabled]="running || suiteScenarios.length === 0 || !canRunTests"
+                  title="Run with browser visible — watch the suite execute live"
+                  class="px-5 py-3 rounded-xl border-2 border-tertiary text-tertiary font-black text-sm hover:bg-tertiary/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  type="button">
+            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">visibility</span>
+            Watch Run
+          </button>
+          <button (click)="runSuite(true)"
+              [disabled]="running || suiteScenarios.length === 0 || !canRunTests"
+                  class="px-6 py-3 rounded-xl bg-primary text-white font-black text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  type="button">
+            <div *ngIf="running" class="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
+            <span *ngIf="!running" class="material-symbols-outlined text-sm">play_arrow</span>
+            {{ running ? 'Running...' : 'Run Suite' }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>

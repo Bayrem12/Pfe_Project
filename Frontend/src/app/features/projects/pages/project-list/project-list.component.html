@@ -1,0 +1,605 @@
+<div class="px-8 py-10 lg:px-12">
+
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+    <div>
+      <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 mb-2">Projects</h1>
+      <p class="text-slate-500 max-w-xl leading-relaxed">
+        Curate and manage your automated test suites with architectural precision.
+        Review integrity metrics and deployment status across all environments.
+      </p>
+    </div>
+    <button
+      class="flex items-center justify-center gap-2 px-8 py-3.5 bg-primary text-white rounded-xl font-bold text-sm shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
+      routerLink="/projects/create"
+      [disabled]="isViewerOrManager"
+    >
+      <span class="material-symbols-outlined text-lg">add</span>
+      Create Project
+    </button>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="relative z-10 flex items-center justify-between flex-wrap gap-4 bg-slate-50/80 border border-slate-200/40 rounded-2xl px-5 py-3 mb-8 shadow-sm">
+    <div class="flex items-center gap-3 flex-wrap">
+      <div class="flex items-center gap-0.5 p-1 bg-white border border-slate-200/60 rounded-lg shadow-sm">
+        <button
+          class="flex items-center justify-center w-8 h-8 rounded-md transition-all"
+          [class]="viewMode === 'grid' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-primary hover:bg-blue-50'"
+          (click)="setViewMode('grid')"
+          aria-label="Switch to grid view"
+          [attr.aria-pressed]="viewMode === 'grid'"
+        >
+          <span class="material-symbols-outlined text-base">grid_view</span>
+        </button>
+        <button
+          class="flex items-center justify-center w-8 h-8 rounded-md transition-all"
+          [class]="viewMode === 'list' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-primary hover:bg-blue-50'"
+          (click)="setViewMode('list')"
+          aria-label="Switch to list view"
+          [attr.aria-pressed]="viewMode === 'list'"
+        >
+          <span class="material-symbols-outlined text-base">view_list</span>
+        </button>
+      </div>
+
+      <div class="h-6 w-px bg-slate-200/60"></div>
+
+      <nav class="flex items-center gap-1">
+        <button
+          class="px-4 py-2 rounded-lg text-sm font-semibold transition-all border"
+          [class]="activeFilter === 'all' ? 'bg-white text-primary border-primary/10 shadow-sm' : 'text-slate-400 border-transparent hover:bg-white hover:text-slate-600'"
+          (click)="setFilter('all')"
+          [attr.aria-pressed]="activeFilter === 'all'"
+        >All Projects</button>
+        <button
+          class="px-4 py-2 rounded-lg text-sm font-semibold transition-all border"
+          [class]="activeFilter === 'active' ? 'bg-white text-primary border-primary/10 shadow-sm' : 'text-slate-400 border-transparent hover:bg-white hover:text-slate-600'"
+          (click)="setFilter('active')"
+          [attr.aria-pressed]="activeFilter === 'active'"
+        >Active</button>
+        <button
+          class="px-4 py-2 rounded-lg text-sm font-semibold transition-all border"
+          [class]="activeFilter === 'archived' ? 'bg-white text-primary border-primary/10 shadow-sm' : 'text-slate-400 border-transparent hover:bg-white hover:text-slate-600'"
+          (click)="setFilter('archived')"
+          [attr.aria-pressed]="activeFilter === 'archived'"
+        >Archived</button>
+      </nav>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <span class="text-xs font-bold tracking-widest uppercase text-slate-400">Sorted by</span>
+      <div class="relative">
+        <button
+          class="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200/60 rounded-lg text-sm font-semibold text-slate-800 cursor-pointer outline-none hover:border-primary/30 focus:border-primary/40 focus:ring-2 focus:ring-primary/10 shadow-sm transition-all"
+          (click)="toggleSortDropdown($event)"
+          aria-label="Sort projects"
+          aria-haspopup="menu"
+          [attr.aria-expanded]="sortDropdownOpen"
+          aria-controls="projects-sort-menu"
+        >
+          {{ sortLabel }}
+          <span class="material-symbols-outlined text-base text-slate-400 transition-transform" [class.rotate-180]="sortDropdownOpen">expand_more</span>
+        </button>
+        <div *ngIf="sortDropdownOpen"
+          id="projects-sort-menu"
+          role="menu"
+          class="absolute top-full right-0 mt-1.5 min-w-[12rem] bg-white border border-slate-200/80 rounded-xl shadow-2xl z-30 p-1.5 flex flex-col gap-0.5">
+          <button
+            class="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+            [class]="sortBy === 'recently-modified' ? 'bg-primary/5 text-primary font-semibold' : 'text-slate-600 hover:bg-slate-50'"
+            (click)="setSortBy('recently-modified')"
+            role="menuitemradio"
+            [attr.aria-checked]="sortBy === 'recently-modified'">
+            <span class="material-symbols-outlined text-base">schedule</span>
+            Recently Modified
+            <span *ngIf="sortBy === 'recently-modified'" class="material-symbols-outlined text-sm ml-auto">check</span>
+          </button>
+          <button
+            class="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+            [class]="sortBy === 'name' ? 'bg-primary/5 text-primary font-semibold' : 'text-slate-600 hover:bg-slate-50'"
+            (click)="setSortBy('name')"
+            role="menuitemradio"
+            [attr.aria-checked]="sortBy === 'name'">
+            <span class="material-symbols-outlined text-base">sort_by_alpha</span>
+            Name
+            <span *ngIf="sortBy === 'name'" class="material-symbols-outlined text-sm ml-auto">check</span>
+          </button>
+          <button
+            class="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+            [class]="sortBy === 'created' ? 'bg-primary/5 text-primary font-semibold' : 'text-slate-600 hover:bg-slate-50'"
+            (click)="setSortBy('created')"
+            role="menuitemradio"
+            [attr.aria-checked]="sortBy === 'created'">
+            <span class="material-symbols-outlined text-base">calendar_month</span>
+            Created Date
+            <span *ngIf="sortBy === 'created'" class="material-symbols-outlined text-sm ml-auto">check</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="flex flex-col items-center gap-4 py-32 text-slate-400 text-sm">
+    <div class="w-10 h-10 border-[3px] border-blue-100 border-t-primary rounded-full animate-spin"></div>
+    <span class="font-medium">Loading projects...</span>
+  </div>
+
+  <!-- Grid Cards -->
+  <div
+    *ngIf="!isLoading && viewMode === 'grid'"
+    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7"
+  >
+    <article
+      *ngFor="let project of filteredProjects; let i = index"
+      class="project-card group relative bg-white rounded-2xl p-6 cursor-pointer flex flex-col transition-all duration-300"
+      [class.project-card--archived]="!project.isActive"
+      [routerLink]="['/projects', getProjectSlug(project)]"
+      [style.animation-delay]="i * 60 + 'ms'"
+      tabindex="0"
+      role="link"
+      [attr.aria-label]="'Open project ' + project.name"
+      (keydown.enter)="openProjectFromKeyboard(project, $event)"
+      (keydown.space)="openProjectFromKeyboard(project, $event)"
+    >
+      <!-- Gradient accent top border (active only) -->
+      <div *ngIf="project.isActive" class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-blue-500 to-indigo-400 rounded-t-2xl"></div>
+
+      <!-- Top: Icon + Badge + Menu -->
+      <div class="flex items-start justify-between mb-6">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+          [class]="project.isActive ? 'bg-emerald-50/80 text-emerald-600' : 'bg-slate-100 text-slate-400'">
+          <span class="material-symbols-outlined text-[28px]">hub</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase"
+            [class]="project.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'">
+            <span *ngIf="project.isActive" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            {{ project.isActive ? 'ACTIVE' : 'ARCHIVED' }}
+          </span>
+          <label
+            class="relative inline-flex items-center cursor-pointer opacity-0 group-hover:opacity-100 transition-all"
+            [class.pointer-events-none]="isViewerOrManager"
+            [class.!opacity-0]="isViewerOrManager"
+            [title]="project.isActive ? 'Archive project' : 'Activate project'"
+            (click)="$event.stopPropagation()"
+          >
+            <input type="checkbox"
+              class="sr-only peer"
+              [checked]="project.isActive"
+              [disabled]="isViewerOrManager"
+              role="switch"
+              [attr.aria-label]="project.isActive ? 'Archive project ' + project.name : 'Activate project ' + project.name"
+              [attr.aria-checked]="project.isActive"
+              (change)="toggleProjectStatus(project, $event)" />
+            <div class="w-9 h-5 bg-slate-200 peer-checked:bg-emerald-500 rounded-full transition-all after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:shadow-sm after:transition-all peer-checked:after:translate-x-4"></div>
+          </label>
+          <div class="relative">
+            <button
+              class="flex items-center justify-center w-7 h-7 rounded-lg text-slate-300 hover:bg-slate-100 hover:text-slate-600 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 disabled:pointer-events-none"
+              (click)="toggleProjectActionsMenu(project.id, $event)"
+              [disabled]="isViewerOrManager"
+              [attr.aria-label]="'Open actions menu for project ' + project.name"
+              aria-haspopup="menu"
+              [attr.aria-expanded]="openActionsMenuProjectId === project.id"
+              [attr.aria-controls]="'project-actions-menu-' + project.id"
+            >
+              <span class="material-symbols-outlined text-lg">more_vert</span>
+            </button>
+            <div
+              *ngIf="openActionsMenuProjectId === project.id"
+              [attr.id]="'project-actions-menu-' + project.id"
+              role="menu"
+              class="absolute top-full right-0 mt-1.5 min-w-[11rem] bg-white border border-slate-200/80 rounded-xl shadow-2xl z-20 p-1.5 flex flex-col gap-0.5"
+              (click)="$event.stopPropagation()"
+            >
+              <button
+                class="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all disabled:opacity-30 disabled:pointer-events-none"
+                (click)="editProject(project, $event)"
+                [disabled]="isViewerOrManager"
+                role="menuitem"
+                [attr.aria-label]="'Edit project ' + project.name"
+              >
+                <span class="material-symbols-outlined text-base">edit</span>
+                Edit
+              </button>
+              <button
+                class="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-[13px] font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-all disabled:opacity-30 disabled:pointer-events-none"
+                (click)="deleteProject(project.id, $event)"
+                [disabled]="isViewerOrManager"
+                role="menuitem"
+                [attr.aria-label]="'Delete project ' + project.name"
+              >
+                <span class="material-symbols-outlined text-base">delete</span>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Name + Description -->
+      <div class="mb-6">
+        <h3 class="text-lg font-bold text-slate-900 tracking-tight mb-1.5 leading-snug">{{ project.name }}</h3>
+        <p class="text-sm text-slate-400 line-clamp-2 leading-relaxed min-h-[2.8em]">{{ project.description }}</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        <div class="rounded-xl px-4 py-3"
+          [class]="project.isActive ? 'bg-blue-50/60' : 'bg-slate-50'">
+          <span class="block text-[10px] font-bold tracking-widest uppercase mb-1"
+            [class]="project.isActive ? 'text-slate-400' : 'text-slate-400'">MODULES</span>
+          <span class="block text-xl font-black leading-none"
+            [class]="project.isActive ? 'text-primary' : 'text-slate-500'">{{ project.modulesCount || 0 }}</span>
+        </div>
+        <div class="rounded-xl px-4 py-3"
+          [class]="project.isActive ? 'bg-blue-50/60' : 'bg-slate-50'">
+          <span class="block text-[10px] font-bold tracking-widest uppercase mb-1"
+            [class]="project.isActive ? 'text-slate-400' : 'text-slate-400'">SCENARIOS</span>
+          <span class="block text-xl font-black leading-none"
+            [class]="project.isActive ? 'text-primary' : 'text-slate-500'">{{ project.scenariosCount || 0 }}</span>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-between pt-4 border-t border-slate-100 mt-auto">
+        <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+          <span class="material-symbols-outlined text-sm">calendar_today</span>
+          <span>{{ project.lastRun ? 'Last run: ' + (project.lastRun | date:'MMM d, yyyy') : (project.modifiedDate ? 'Updated: ' + (project.modifiedDate | date:'MMM d, yyyy') : (project.isActive ? 'No runs yet' : 'Archived')) }}</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button
+            class="flex items-center justify-center w-7 h-7 border border-slate-200 rounded-full bg-white text-slate-400 hover:border-primary hover:text-primary hover:bg-blue-50 transition-all disabled:opacity-30 disabled:pointer-events-none"
+            (click)="openAddMemberModal(project, $event)"
+            title="Add member"
+            [disabled]="isViewerOrManager"
+            [attr.aria-label]="'Add member to project ' + project.name"
+          >
+            <span class="material-symbols-outlined text-sm">person_add</span>
+          </button>
+          <div class="flex items-center cursor-pointer members-trigger" (click)="openMembersListModal(project, $event)"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="'Open members list for project ' + project.name"
+            (keydown.enter)="openMembersListModalFromKeyboard(project, $event)"
+            (keydown.space)="openMembersListModalFromKeyboard(project, $event)">
+            <div
+              *ngFor="let m of project.members?.slice(0, 3); let mi = index"
+              class="w-7 h-7 rounded-full border-2 border-white bg-gradient-to-br from-primary to-blue-500 text-white text-[10px] font-bold flex items-center justify-center"
+              [style.margin-left]="mi > 0 ? '-6px' : '0'"
+              [title]="(m.firstName || '') + ' ' + (m.lastName || m.userName || '')"
+            >
+              {{ ((m.firstName && m.firstName.charAt(0)) || (m.userName && m.userName.charAt(0)) || 'U') | uppercase }}
+            </div>
+            <div
+              *ngIf="project.members && project.members.length > 3"
+              class="w-7 h-7 rounded-full border-2 border-white bg-slate-100 text-slate-500 text-[10px] font-bold flex items-center justify-center -ml-1.5"
+            >
+              +{{ project.members.length - 3 }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- New Project Card -->
+    <div
+      *ngIf="canCreateProjects()"
+      class="new-project-card group border-2 border-dashed border-slate-200/80 rounded-2xl bg-white/50 min-h-[320px] cursor-pointer flex items-center justify-center hover:border-primary/40 hover:bg-primary/[0.02] transition-all duration-300"
+      routerLink="/projects/create"
+      tabindex="0"
+      role="link"
+      aria-label="Create a new project"
+      (keydown.enter)="openCreateProjectFromKeyboard($event)"
+      (keydown.space)="openCreateProjectFromKeyboard($event)"
+    >
+      <div class="flex flex-col items-center text-center px-6 py-8 gap-3">
+        <div class="w-16 h-16 rounded-full bg-blue-50/80 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300">
+          <span class="material-symbols-outlined text-3xl">add_circle</span>
+        </div>
+        <strong class="text-base font-bold text-slate-800">New Test Suite</strong>
+        <p class="text-xs text-slate-400 max-w-[200px] leading-relaxed">Initialize a new project with AI-driven Gherkin scaffolding</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- List View -->
+  <div *ngIf="!isLoading && viewMode === 'list'" class="flex flex-col gap-3">
+    <article
+      *ngFor="let project of filteredProjects; let i = index"
+      class="project-card-list group bg-white rounded-2xl p-5 cursor-pointer flex items-center gap-6 transition-all duration-300"
+      [class.project-card--archived]="!project.isActive"
+      [routerLink]="['/projects', getProjectSlug(project)]"
+      [style.animation-delay]="i * 40 + 'ms'"
+      tabindex="0"
+      role="link"
+      [attr.aria-label]="'Open project ' + project.name"
+      (keydown.enter)="openProjectFromKeyboard(project, $event)"
+      (keydown.space)="openProjectFromKeyboard(project, $event)"
+    >
+      <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+        [class]="project.isActive ? 'bg-emerald-50/80 text-emerald-600' : 'bg-slate-100 text-slate-400'">
+        <span class="material-symbols-outlined text-xl">hub</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h3 class="text-[15px] font-bold text-slate-900 tracking-tight leading-tight">{{ project.name }}</h3>
+        <p class="text-xs text-slate-400 truncate mt-0.5">{{ project.description }}</p>
+      </div>
+      <div class="flex items-center gap-5 flex-shrink-0">
+        <div class="text-center px-3 py-1.5 rounded-lg" [class]="project.isActive ? 'bg-blue-50/60' : 'bg-slate-50'">
+          <span class="block text-[10px] font-bold tracking-widest uppercase text-slate-400">MODULES</span>
+          <span class="block text-lg font-black" [class]="project.isActive ? 'text-primary' : 'text-slate-500'">{{ project.modulesCount || 0 }}</span>
+        </div>
+        <div class="text-center px-3 py-1.5 rounded-lg" [class]="project.isActive ? 'bg-blue-50/60' : 'bg-slate-50'">
+          <span class="block text-[10px] font-bold tracking-widest uppercase text-slate-400">SCENARIOS</span>
+          <span class="block text-lg font-black" [class]="project.isActive ? 'text-primary' : 'text-slate-500'">{{ project.scenariosCount || 0 }}</span>
+        </div>
+      </div>
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase flex-shrink-0"
+        [class]="project.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'">
+        <span *ngIf="project.isActive" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        {{ project.isActive ? 'ACTIVE' : 'ARCHIVED' }}
+      </span>
+      <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium flex-shrink-0 w-36">
+        <span class="material-symbols-outlined text-sm">calendar_today</span>
+        <span>{{ project.lastRun ? (project.lastRun | date:'MMM d, yyyy') : (project.modifiedDate ? 'Updated: ' + (project.modifiedDate | date:'MMM d, yyyy') : 'No runs yet') }}</span>
+      </div>
+      <div class="flex items-center gap-1.5 flex-shrink-0">
+        <div class="flex items-center cursor-pointer members-trigger" (click)="openMembersListModal(project, $event)"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="'Open members list for project ' + project.name"
+          (keydown.enter)="openMembersListModalFromKeyboard(project, $event)"
+          (keydown.space)="openMembersListModalFromKeyboard(project, $event)">
+          <div *ngFor="let m of project.members?.slice(0, 3); let mi = index"
+            class="w-7 h-7 rounded-full border-2 border-white bg-gradient-to-br from-primary to-blue-500 text-white text-[10px] font-bold flex items-center justify-center"
+            [style.margin-left]="mi > 0 ? '-6px' : '0'">
+            {{ ((m.firstName && m.firstName.charAt(0)) || (m.userName && m.userName.charAt(0)) || 'U') | uppercase }}
+          </div>
+          <div *ngIf="project.members && project.members.length > 3" class="w-7 h-7 rounded-full border-2 border-white bg-slate-100 text-slate-500 text-[10px] font-bold flex items-center justify-center -ml-1.5">
+            +{{ project.members.length - 3 }}
+          </div>
+        </div>
+        <button class="flex items-center justify-center w-7 h-7 border border-slate-200 rounded-full bg-white text-slate-400 hover:border-primary hover:text-primary hover:bg-blue-50 transition-all disabled:opacity-30 disabled:pointer-events-none"
+          (click)="openAddMemberModal(project, $event)" title="Add member" [disabled]="isViewerOrManager"
+          [attr.aria-label]="'Add member to project ' + project.name">
+          <span class="material-symbols-outlined text-sm">person_add</span>
+        </button>
+      </div>
+      <div class="relative flex-shrink-0">
+        <button class="flex items-center justify-center w-8 h-8 rounded-lg text-slate-300 hover:bg-slate-100 hover:text-slate-600 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 disabled:pointer-events-none"
+          (click)="toggleProjectActionsMenu(project.id, $event)" [disabled]="isViewerOrManager"
+          [attr.aria-label]="'Open actions menu for project ' + project.name"
+          aria-haspopup="menu"
+          [attr.aria-expanded]="openActionsMenuProjectId === project.id"
+          [attr.aria-controls]="'project-actions-menu-list-' + project.id">
+          <span class="material-symbols-outlined text-lg">more_vert</span>
+        </button>
+        <div *ngIf="openActionsMenuProjectId === project.id"
+          [attr.id]="'project-actions-menu-list-' + project.id"
+          role="menu"
+          class="absolute top-full right-0 mt-1.5 min-w-[11rem] bg-white border border-slate-200/80 rounded-xl shadow-2xl z-20 p-1.5 flex flex-col gap-0.5"
+          (click)="$event.stopPropagation()">
+          <button class="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-[13px] font-semibold text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-30 disabled:pointer-events-none"
+            (click)="editProject(project, $event)" [disabled]="isViewerOrManager"
+            role="menuitem"
+            [attr.aria-label]="'Edit project ' + project.name">
+            <span class="material-symbols-outlined text-base">edit</span> Edit
+          </button>
+          <button class="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-[13px] font-semibold text-red-600 hover:bg-red-50 transition-all disabled:opacity-30 disabled:pointer-events-none"
+            (click)="deleteProject(project.id, $event)" [disabled]="isViewerOrManager"
+            role="menuitem"
+            [attr.aria-label]="'Delete project ' + project.name">
+            <span class="material-symbols-outlined text-base">delete</span> Delete
+          </button>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!isLoading && filteredProjects.length === 0" class="flex flex-col items-center gap-3 py-24 text-center">
+    <div class="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mb-2">
+      <span class="material-symbols-outlined text-4xl text-slate-300">folder_off</span>
+    </div>
+    <h3 class="text-lg font-extrabold text-slate-800">No projects found</h3>
+    <p class="text-sm text-slate-400 mb-5 max-w-xs">Create your first project to start building automated test suites.</p>
+    <button *ngIf="canCreateProjects()" class="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95" routerLink="/projects/create">
+      <span class="material-symbols-outlined text-lg">add</span> Create Project
+    </button>
+  </div>
+
+  <!-- Edit Project Modal -->
+  <div *ngIf="showEditProjectModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-6 z-50" (click)="closeEditProjectModal()">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-in" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Edit project dialog">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <h2 class="text-[15px] font-extrabold text-slate-900">Edit Project</h2>
+        <button class="flex items-center justify-center w-7 h-7 border border-slate-200 rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all" (click)="closeEditProjectModal()" aria-label="Close edit project dialog">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+      <div class="px-5 py-5 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">Project Name <span class="text-red-500">*</span></label>
+          <input type="text" class="w-full border border-slate-200 rounded-xl bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all" [(ngModel)]="editProjectForm.name" placeholder="Project name" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">Description</label>
+          <textarea class="w-full border border-slate-200 rounded-xl bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all min-h-[6rem] resize-y" [(ngModel)]="editProjectForm.description" placeholder="Project description"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">Project Status</label>
+          <div class="flex items-center gap-3 bg-blue-50/40 border border-primary/10 rounded-xl px-3.5 py-2.5">
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" [(ngModel)]="editProjectForm.isActive" class="sr-only peer" role="switch" aria-label="Toggle project status" [attr.aria-checked]="editProjectForm.isActive" />
+              <div class="w-10 h-5 bg-slate-300 peer-checked:bg-primary rounded-full transition-all after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:shadow after:transition-all peer-checked:after:translate-x-5"></div>
+            </label>
+            <span class="px-2.5 py-0.5 rounded-full bg-primary text-white text-[10px] font-black tracking-wider">{{ editProjectForm.isActive ? 'ACTIVE' : 'ARCHIVED' }}</span>
+          </div>
+        </div>
+        <div *ngIf="editProjectError" class="flex items-center gap-2 p-3 border border-red-200 rounded-xl bg-red-50 text-red-700 text-sm">
+          <span class="material-symbols-outlined text-base flex-shrink-0">error_outline</span>
+          {{ editProjectError }}
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 px-5 py-3.5 border-t border-slate-100 bg-slate-50/50">
+        <button class="px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all" (click)="closeEditProjectModal()">Cancel</button>
+        <button class="px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-md shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-40 disabled:pointer-events-none" (click)="saveProjectChanges()" [disabled]="isUpdatingProject">
+          {{ isUpdatingProject ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Members Modal (Multi-select) -->
+  <div *ngIf="showAddMemberModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-6 z-50" (click)="closeAddMemberModal()">
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden animate-in" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Add members dialog">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <h2 class="text-[15px] font-extrabold text-slate-900">Add Members</h2>
+        <button class="flex items-center justify-center w-7 h-7 border border-slate-200 rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all" (click)="closeAddMemberModal()" aria-label="Close add members dialog">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+      <div class="px-5 py-5 space-y-4">
+        <p class="text-sm text-slate-400">Project: <strong class="text-slate-700">{{ selectedProject?.name }}</strong></p>
+
+        <!-- Search input for users -->
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">Search Users <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+            <input
+              type="text"
+              class="w-full border border-slate-200 rounded-xl bg-white pl-10 pr-3.5 py-2.5 text-sm text-slate-800 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all"
+              placeholder="Search by name or email..."
+              [(ngModel)]="memberSearchQuery"
+            />
+          </div>
+        </div>
+
+        <!-- User list to select from -->
+        <div class="max-h-[200px] overflow-y-auto border border-slate-100 rounded-xl custom-scrollbar">
+          <div *ngIf="getFilteredAvailableUsers().length === 0" class="text-center py-6 text-sm text-slate-400">
+            {{ memberSearchQuery ? 'No users match your search' : 'No available users' }}
+          </div>
+          <div
+            *ngFor="let user of getFilteredAvailableUsers()"
+            class="user-picker-option flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50/50 cursor-pointer transition-all border-b border-slate-50 last:border-0"
+            (click)="selectUserToAdd(user)"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="'Add user ' + (user.firstName || user.userName || user.email) + (user.lastName ? ' ' + user.lastName : '') + ' to selected members'"
+            (keydown.enter)="selectUserToAddFromKeyboard(user, $event)"
+            (keydown.space)="selectUserToAddFromKeyboard(user, $event)"
+          >
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-blue-500 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+              {{ ((user.firstName && user.firstName.charAt(0)) || (user.userName && user.userName.charAt(0)) || 'U') | uppercase }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold text-slate-700 truncate">{{ (user.firstName || user.userName || user.email) }}{{ user.lastName ? ' ' + user.lastName : '' }}</p>
+              <p class="text-[11px] text-slate-400">{{ user.roles?.[0] || 'No role' }}</p>
+            </div>
+            <span class="material-symbols-outlined text-primary text-lg flex-shrink-0">add_circle</span>
+          </div>
+        </div>
+
+        <!-- Selected members chips -->
+        <div *ngIf="selectedMembers.length > 0" class="space-y-2">
+          <label class="block text-xs font-bold text-slate-600">Selected ({{ selectedMembers.length }})</label>
+          <div class="flex flex-wrap gap-2">
+            <div *ngFor="let member of selectedMembers; let i = index" class="flex items-center gap-2 pl-1 pr-2 py-1 bg-blue-50 border border-primary/10 rounded-xl">
+              <div class="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-blue-500 text-white text-[9px] font-bold flex items-center justify-center">
+                {{ member.firstName.charAt(0) | uppercase }}
+              </div>
+              <span class="text-xs font-semibold text-slate-700">{{ member.firstName }} {{ member.lastName }}</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">{{ member.role }}</span>
+              <button class="flex items-center justify-center w-5 h-5 rounded-full text-slate-400 hover:bg-red-100 hover:text-red-500 transition-all" (click)="removeFromSelection(i)" [attr.aria-label]="'Remove ' + member.firstName + ' ' + member.lastName + ' from selection'">
+                <span class="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="addMemberError" class="flex items-center gap-2 p-3 border border-red-200 rounded-xl bg-red-50 text-red-700 text-sm">
+          <span class="material-symbols-outlined text-base flex-shrink-0">error_outline</span>
+          {{ addMemberError }}
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 px-5 py-3.5 border-t border-slate-100 bg-slate-50/50">
+        <button class="px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all" (click)="closeAddMemberModal()">Cancel</button>
+        <button class="px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-md shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-40 disabled:pointer-events-none" (click)="addMembers()" [disabled]="isAddingMember || selectedMembers.length === 0">
+          {{ isAddingMember ? 'Adding...' : 'Add ' + selectedMembers.length + ' Member' + (selectedMembers.length > 1 ? 's' : '') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Members List Modal (with delete) -->
+  <div *ngIf="showMembersListModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-6 z-50" (click)="closeMembersListModal()">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-in" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Project members dialog">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <h2 class="text-[15px] font-extrabold text-slate-900">Project Members</h2>
+        <button class="flex items-center justify-center w-7 h-7 border border-slate-200 rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all" (click)="closeMembersListModal()" aria-label="Close project members dialog">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+      <div class="px-5 py-4">
+        <p class="text-sm text-slate-400 mb-4">Project: <strong class="text-slate-700">{{ selectedProjectForMembers?.name }}</strong></p>
+        <div *ngIf="!selectedProjectForMembers?.members?.length" class="text-center py-10 text-sm text-slate-400">No members in this project yet.</div>
+        <div class="max-h-[44vh] overflow-y-auto space-y-1.5 custom-scrollbar">
+          <div *ngFor="let member of selectedProjectForMembers?.members" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-all">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-blue-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+              {{ ((member.firstName && member.firstName.charAt(0)) || (member.userName && member.userName.charAt(0)) || 'U') | uppercase }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-slate-800 truncate">{{ member.firstName || '' }} {{ member.lastName || member.userName || 'Unknown' }}</p>
+              <p class="text-[11px] text-slate-400">{{ getRoleName(member.role) }}</p>
+            </div>
+            <!-- Normal: show trash icon -->
+            <button
+              *ngIf="canManageProjects() && deletingMemberId !== (member.userId || member.id)"
+              class="flex items-center justify-center w-8 h-8 rounded-lg text-slate-300 hover:bg-red-50 hover:text-red-500 transition-all"
+              (click)="confirmDeleteMember(member.userId || member.id, $event)"
+              title="Remove member"
+              [attr.aria-label]="'Remove member ' + (member.firstName || '') + ' ' + (member.lastName || member.userName || '')"
+            >
+              <span class="material-symbols-outlined text-lg">person_remove</span>
+            </button>
+            <!-- Confirming: show confirm/cancel -->
+            <div *ngIf="canManageProjects() && deletingMemberId === (member.userId || member.id)" class="flex items-center gap-1.5 flex-shrink-0">
+              <span class="text-[11px] text-red-500 font-semibold whitespace-nowrap">Remove?</span>
+              <button
+                class="flex items-center justify-center w-7 h-7 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-all"
+                (click)="removeMember(member.userId || member.id, $event)"
+                title="Confirm remove"
+                [attr.aria-label]="'Confirm removing member ' + (member.firstName || '') + ' ' + (member.lastName || member.userName || '')"
+              >
+                <span class="material-symbols-outlined text-sm">check</span>
+              </button>
+              <button
+                class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all"
+                (click)="confirmDeleteMember(member.userId || member.id, $event)"
+                title="Cancel"
+                [attr.aria-label]="'Cancel removing member ' + (member.firstName || '') + ' ' + (member.lastName || member.userName || '')"
+              >
+                <span class="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="membersListError" class="mt-3 flex items-center gap-2 p-3 border border-red-200 rounded-xl bg-red-50 text-red-700 text-xs">
+          <span class="material-symbols-outlined text-sm flex-shrink-0">error_outline</span>
+          {{ membersListError }}
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 px-5 py-3.5 border-t border-slate-100 bg-slate-50/50">
+        <button class="px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all" (click)="closeMembersListModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+

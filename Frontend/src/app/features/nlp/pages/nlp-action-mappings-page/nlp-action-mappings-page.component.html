@@ -1,0 +1,570 @@
+<div class="px-6 py-8 space-y-6">
+  <!-- Page Header -->
+  <div class="flex justify-between items-start">
+    <div>
+      <div class="flex items-center gap-3 mb-1">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
+          <span class="material-symbols-outlined text-white text-xl">psychology</span>
+        </div>
+        <div>
+          <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">NLP Configuration</h1>
+          <p class="text-sm text-slate-400">Define action mappings, parse Gherkin syntax, and analyze test steps</p>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div *ngIf="isLoadingProjects" class="flex items-center gap-2 text-slate-400">
+        <span class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+        <span class="text-sm">Loading...</span>
+      </div>
+      <!-- Custom Project Dropdown -->
+      <div *ngIf="!isLoadingProjects && projects.length > 0" class="relative">
+        <button (click)="projectDropdownOpen = !projectDropdownOpen; $event.stopPropagation()"
+                class="flex items-center gap-3 pl-4 pr-3 py-2.5 bg-white rounded-xl border border-slate-200 shadow-sm hover:border-primary/30 hover:shadow-md transition-all duration-200 group"
+                type="button">
+          <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/5 text-primary">
+            <span class="material-symbols-outlined text-lg">folder_open</span>
+          </div>
+          <div class="flex flex-col items-start">
+            <span class="text-[10px] font-bold tracking-widest text-slate-400 uppercase leading-none mb-0.5">Project</span>
+            <span class="text-sm font-semibold" [class]="selectedProjectId ? 'text-slate-800' : 'text-slate-400'">
+              {{ selectedProjectId ? getSelectedProjectName() : 'Select project...' }}
+            </span>
+          </div>
+          <span class="material-symbols-outlined text-base text-slate-400 group-hover:text-primary transition-all duration-200 ml-2"
+                [class.rotate-180]="projectDropdownOpen">
+            expand_more
+          </span>
+        </button>
+        <!-- Dropdown Panel -->
+        <div *ngIf="projectDropdownOpen"
+             class="absolute top-full right-0 mt-2 w-72 bg-white rounded-xl border border-slate-200 shadow-xl z-50 overflow-hidden">
+          <div class="p-2">
+            <div class="px-3 py-2 text-[10px] font-bold tracking-widest text-slate-400 uppercase">Select a project</div>
+            <button *ngIf="selectedProjectId"
+                    (click)="selectProject('')"
+                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm text-slate-500 hover:bg-slate-50 transition-colors">
+              <span class="material-symbols-outlined text-base text-slate-400">close</span>
+              <span class="font-medium">Clear selection</span>
+            </button>
+            <button *ngFor="let project of projects"
+                    (click)="selectProject(project.id)"
+                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left hover:bg-primary/5 transition-colors group/item"
+                    [class]="project.id === selectedProjectId ? 'bg-primary/5' : ''">
+              <div class="flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
+                   [class]="project.id === selectedProjectId ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-400 group-hover/item:bg-primary/10 group-hover/item:text-primary'">
+                <span class="material-symbols-outlined text-base">folder</span>
+              </div>
+              <span class="text-sm font-medium truncate"
+                    [class]="project.id === selectedProjectId ? 'text-primary font-semibold' : 'text-slate-700'">
+                {{ project.name }}
+              </span>
+              <span *ngIf="project.id === selectedProjectId"
+                    class="material-symbols-outlined text-base text-primary ml-auto shrink-0">check</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <button
+        *ngIf="activeTab === 'mappings'"
+        (click)="openCreateModal()"
+        [disabled]="!selectedProjectId || !canManageMappings"
+        class="h-10 flex items-center gap-2 px-5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed">
+        <span class="material-symbols-outlined text-lg">add</span>
+        Add Mapping
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="isViewerRole" class="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+    <span class="material-symbols-outlined text-base">visibility</span>
+    Viewer mode: NLP mappings are read-only. You can still parse Gherkin text from the parser tab.
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMessage" class="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 animate-in">
+    <span class="material-symbols-outlined text-red-400 text-lg">error</span>
+    <span class="flex-1">{{ errorMessage }}</span>
+    <button (click)="errorMessage = ''" class="p-1 rounded-lg text-red-300 hover:text-red-500 hover:bg-red-100 transition-colors" type="button">
+      <span class="material-symbols-outlined text-lg">close</span>
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="bg-white rounded-xl border border-slate-200/60 p-1.5 shadow-sm">
+    <nav class="flex gap-1">
+      <button
+        (click)="setActiveTab('mappings')"
+        [class]="activeTab === 'mappings'
+          ? 'flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white font-semibold text-sm shadow-md shadow-primary/20 transition-all'
+          : 'flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-medium text-sm transition-all'">
+        <span class="material-symbols-outlined text-lg">psychology</span>
+        Mappings
+        <span *ngIf="mappings.length > 0"
+              class="ml-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold min-w-[20px] text-center"
+              [class]="activeTab === 'mappings' ? 'bg-white/20' : 'bg-primary/10 text-primary'">
+          {{ mappings.length }}
+        </span>
+      </button>
+      <button
+        (click)="setActiveTab('parser')"
+        [class]="activeTab === 'parser'
+          ? 'flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white font-semibold text-sm shadow-md shadow-primary/20 transition-all'
+          : 'flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-medium text-sm transition-all'">
+        <span class="material-symbols-outlined text-lg">code</span>
+        Gherkin Parser
+        <span *ngIf="parsedSteps.length > 0"
+              class="ml-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold min-w-[20px] text-center"
+              [class]="activeTab === 'parser' ? 'bg-white/20' : 'bg-primary/10 text-primary'">
+          {{ parsedSteps.length }}
+        </span>
+      </button>
+      <button
+        (click)="setActiveTab('analysis')"
+        [class]="activeTab === 'analysis'
+          ? 'flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white font-semibold text-sm shadow-md shadow-primary/20 transition-all'
+          : 'flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-medium text-sm transition-all'">
+        <span class="material-symbols-outlined text-lg">analytics</span>
+        NLP Analysis
+        <span *ngIf="analysisResults.length > 0"
+              class="ml-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold min-w-[20px] text-center"
+              [class]="activeTab === 'analysis' ? 'bg-white/20' : 'bg-primary/10 text-primary'">
+          {{ analysisResults.length }}
+        </span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ==================== TAB 1: ACTION MAPPINGS ==================== -->
+  <div *ngIf="activeTab === 'mappings'">
+    <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+      <!-- Table Sub-Header -->
+      <div class="px-6 py-3.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div class="flex items-center gap-3">
+          <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary text-sm">folder</span>
+          </div>
+          <span class="text-sm font-bold text-slate-700">{{ getSelectedProjectName() }}</span>
+          <div class="h-4 w-px bg-slate-200"></div>
+          <span class="text-xs text-slate-400 font-medium">{{ getActiveMappingsCount() }} active &middot; {{ mappings.length }} total</span>
+        </div>
+        <span *ngIf="isViewerRole" class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700 text-[10px] font-bold uppercase tracking-wider">Read only</span>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="flex items-center justify-center py-20">
+        <div class="flex flex-col items-center gap-3">
+          <div class="h-10 w-10 rounded-full border-[3px] border-slate-200 border-t-primary animate-spin"></div>
+          <span class="text-sm text-slate-400 font-medium">Loading mappings...</span>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && mappings.length === 0" class="flex flex-col items-center justify-center py-20 text-center">
+        <div class="mb-5 w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
+          <span class="material-symbols-outlined text-3xl text-slate-300">psychology</span>
+        </div>
+        <h3 class="text-lg font-bold text-slate-800 mb-1">No Action Mappings</h3>
+        <p class="text-sm text-slate-400 max-w-sm mb-6">Create your first mapping to define how Gherkin steps translate to UI actions.</p>
+        <button
+          (click)="openCreateModal()"
+          [disabled]="!selectedProjectId || !canManageMappings"
+          class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 transition-all shadow-md shadow-primary/20 disabled:opacity-50">
+          <span class="material-symbols-outlined text-lg">add</span>
+          Create First Mapping
+        </button>
+      </div>
+
+      <!-- Table -->
+      <div *ngIf="!isLoading && mappings.length > 0" class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b border-slate-100">
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Intent Pattern</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Action</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Strategy</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Selector</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400 text-center">Priority</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400 text-center">Status</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr *ngFor="let mapping of mappings" class="hover:bg-blue-50/30 transition-colors">
+              <td class="px-6 py-4">
+                <code class="font-mono text-[13px] font-semibold text-slate-800">{{ mapping.intentPattern }}</code>
+              </td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide border"
+                      [ngClass]="getActionTypeColor(mapping.actionType)">{{ mapping.actionType }}</span>
+              </td>
+              <td class="px-6 py-4">
+                <span class="px-2.5 py-1 bg-slate-100 rounded-lg text-[11px] font-bold text-slate-600 uppercase tracking-wide">{{ mapping.selectorStrategy }}</span>
+              </td>
+              <td class="px-6 py-4">
+                <code class="font-mono text-xs text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">{{ mapping.selectorValue }}</code>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[11px] font-bold"
+                      [class.bg-primary]="(mapping.priority ?? 0) > 0"
+                      [class.text-white]="(mapping.priority ?? 0) > 0"
+                      [class.bg-slate-100]="(mapping.priority ?? 0) === 0"
+                      [class.text-slate-400]="(mapping.priority ?? 0) === 0"
+                      [title]="(mapping.priority ?? 0) > 0 ? 'High priority — checked first' : 'Default priority'">{{ mapping.priority ?? 0 }}</span>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <button
+                  (click)="toggleStatus(mapping)"
+                  [disabled]="!canManageMappings"
+                  class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2"
+                  [class.bg-emerald-500]="mapping.isActive"
+                  [class.bg-slate-300]="!mapping.isActive"
+                  [class.opacity-50]="!canManageMappings"
+                  [class.cursor-not-allowed]="!canManageMappings">
+                  <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform"
+                        [class.translate-x-6]="mapping.isActive"
+                        [class.translate-x-1]="!mapping.isActive"></span>
+                </button>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex justify-end gap-1">
+                  <button (click)="openEditModal(mapping)"
+                      [disabled]="!canManageMappings"
+                          class="p-2 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
+                          title="Edit mapping">
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                  </button>
+                  <button (click)="deleteMapping(mapping)"
+                      [disabled]="!canManageMappings"
+                          class="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                          title="Delete mapping">
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table Footer -->
+      <div *ngIf="!isLoading && mappings.length > 0" class="px-6 py-3 border-t border-slate-100 bg-slate-50/30 text-xs text-slate-400 font-medium">
+        Showing {{ mappings.length }} mapping{{ mappings.length !== 1 ? 's' : '' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 2: GHERKIN PARSER ==================== -->
+  <div *ngIf="activeTab === 'parser'">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Input Panel -->
+      <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col">
+        <div class="px-5 py-3.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <h3 class="font-bold text-sm text-slate-700 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-lg">edit_note</span>
+            Gherkin Input
+          </h3>
+          <div class="flex gap-1.5">
+            <button (click)="loadSample('login')" class="px-2.5 py-1 text-[10px] font-bold text-primary bg-primary/10 rounded-lg hover:bg-primary/15 transition-colors">Login</button>
+            <button (click)="loadSample('checkout')" class="px-2.5 py-1 text-[10px] font-bold text-primary bg-primary/10 rounded-lg hover:bg-primary/15 transition-colors">Checkout</button>
+            <button (click)="loadSample('registration')" class="px-2.5 py-1 text-[10px] font-bold text-primary bg-primary/10 rounded-lg hover:bg-primary/15 transition-colors">Registration</button>
+          </div>
+        </div>
+        <div class="p-5 flex-1 flex flex-col">
+          <textarea
+            [(ngModel)]="gherkinInput"
+            rows="14"
+            placeholder="Enter your Gherkin feature/scenario here...&#10;&#10;Example:&#10;Given I am on the login page&#10;When I enter username 'user@test.com'&#10;And I click login button&#10;Then I should see dashboard"
+            class="flex-1 w-full p-4 bg-slate-50/80 rounded-xl border border-slate-200/60 font-mono text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 focus:outline-none focus:bg-white transition-all"></textarea>
+          <div class="flex gap-3 mt-4">
+            <button
+              (click)="parseGherkin()"
+              [disabled]="isParsing || !gherkinInput.trim() || !canParseGherkinText"
+              class="flex-1 h-11 bg-primary text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-md shadow-primary/20 disabled:opacity-50 disabled:shadow-none">
+              <span *ngIf="isParsing" class="material-symbols-outlined animate-spin text-lg">progress_activity</span>
+              <span *ngIf="!isParsing" class="material-symbols-outlined text-lg">play_arrow</span>
+              {{ isParsing ? 'Parsing...' : 'Parse Gherkin' }}
+            </button>
+            <button (click)="clearParser()"
+                    class="h-11 px-4 bg-slate-100 text-slate-500 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors flex items-center justify-center"
+                    title="Clear input">
+              <span class="material-symbols-outlined text-lg">clear</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Output Panel -->
+      <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col">
+        <div class="px-5 py-3.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <h3 class="font-bold text-sm text-slate-700 flex items-center gap-2">
+            <span class="material-symbols-outlined text-emerald-500 text-lg">checklist</span>
+            Parsed Steps
+            <span *ngIf="parsedSteps.length > 0" class="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold">{{ parsedSteps.length }}</span>
+          </h3>
+          <button
+            *ngIf="parsedSteps.length > 0"
+            (click)="analyzeSteps()"
+            class="h-8 px-3.5 bg-primary text-white rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-primary/90 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-sm">analytics</span>
+            Analyze with NLP
+          </button>
+        </div>
+        <div class="p-4 flex-1 max-h-[480px] overflow-y-auto">
+          <!-- Parse Error -->
+          <div *ngIf="parseError" class="p-3 bg-red-50 rounded-xl text-red-600 text-sm flex items-center gap-2 border border-red-100">
+            <span class="material-symbols-outlined text-lg">error</span>
+            {{ parseError }}
+          </div>
+
+          <!-- Empty -->
+          <div *ngIf="!parseError && parsedSteps.length === 0" class="flex flex-col items-center justify-center py-16 text-slate-300">
+            <span class="material-symbols-outlined text-5xl mb-3">code_blocks</span>
+            <p class="text-sm text-slate-400 font-medium">Parsed steps will appear here</p>
+          </div>
+
+          <!-- Steps -->
+          <div *ngIf="parsedSteps.length > 0" class="space-y-2">
+            <div *ngFor="let step of parsedSteps; let i = index"
+                 class="p-3.5 bg-slate-50/80 rounded-xl border border-slate-100 hover:border-primary/20 hover:bg-blue-50/20 transition-all">
+              <div class="flex items-start gap-3">
+                <span class="w-6 h-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold shrink-0">{{ i + 1 }}</span>
+                <div class="flex-1 min-w-0">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase border mb-1.5 inline-block"
+                        [ngClass]="getKeywordClass(step.keyword)">{{ step.keyword }}</span>
+                  <p class="text-sm text-slate-700 font-medium leading-relaxed">{{ step.text }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 3: NLP ANALYSIS ==================== -->
+  <div *ngIf="activeTab === 'analysis'" class="space-y-6">
+    <!-- Stats Row -->
+    <div *ngIf="analysisResults.length > 0" class="grid grid-cols-3 gap-4">
+      <div class="bg-white p-4 rounded-xl border border-slate-200/60 shadow-sm flex items-center gap-4">
+        <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center">
+          <span class="material-symbols-outlined text-primary text-xl">format_list_numbered</span>
+        </div>
+        <div>
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Steps</p>
+          <h4 class="text-2xl font-extrabold text-slate-800">{{ analysisResults.length }}</h4>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-slate-200/60 shadow-sm flex items-center gap-4">
+        <div class="w-11 h-11 bg-emerald-50 rounded-xl flex items-center justify-center">
+          <span class="material-symbols-outlined text-emerald-600 text-xl">speed</span>
+        </div>
+        <div>
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Avg Confidence</p>
+          <h4 class="text-2xl font-extrabold text-slate-800">{{ getAverageConfidence() }}</h4>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-slate-200/60 shadow-sm flex items-center gap-4">
+        <div class="w-11 h-11 bg-purple-50 rounded-xl flex items-center justify-center">
+          <span class="material-symbols-outlined text-purple-600 text-xl">category</span>
+        </div>
+        <div>
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Intent Types</p>
+          <h4 class="text-2xl font-extrabold text-slate-800">{{ (getIntentCounts() | keyvalue).length }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+      <div class="px-6 py-3.5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+        <h3 class="font-bold text-sm text-slate-700 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-lg">analytics</span>
+          Analysis Results
+        </h3>
+        <button *ngIf="analysisResults.length > 0" (click)="exportAnalysis()"
+                class="h-8 px-3 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-sm">download</span>
+          Export JSON
+        </button>
+      </div>
+
+      <!-- Empty -->
+      <div *ngIf="analysisResults.length === 0 && !isAnalyzing" class="flex flex-col items-center justify-center py-20 text-center">
+        <div class="mb-5 w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
+          <span class="material-symbols-outlined text-3xl text-slate-300">analytics</span>
+        </div>
+        <h3 class="text-lg font-bold text-slate-800 mb-1">No Analysis Results</h3>
+        <p class="text-sm text-slate-400 max-w-sm mb-6">Parse Gherkin steps first, then click "Analyze with NLP".</p>
+        <button (click)="setActiveTab('parser')"
+                class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 transition-all shadow-md shadow-primary/20">
+          <span class="material-symbols-outlined text-lg">code</span>
+          Go to Parser
+        </button>
+      </div>
+
+      <!-- Analyzing -->
+      <div *ngIf="isAnalyzing" class="flex items-center justify-center py-20">
+        <div class="flex flex-col items-center gap-3">
+          <div class="h-10 w-10 rounded-full border-[3px] border-slate-200 border-t-primary animate-spin"></div>
+          <span class="text-sm text-slate-400 font-medium">Analyzing steps with NLP...</span>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div *ngIf="analysisResults.length > 0 && !isAnalyzing" class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b border-slate-100">
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">#</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Step Text</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Intent</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Confidence</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Parameters</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Suggested Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr *ngFor="let result of analysisResults; let i = index" class="hover:bg-blue-50/30 transition-colors">
+              <td class="px-6 py-3.5">
+                <span class="w-6 h-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold">{{ i + 1 }}</span>
+              </td>
+              <td class="px-6 py-3.5">
+                <p class="text-sm text-slate-700 font-medium max-w-xs truncate" [title]="result.stepText">{{ result.stepText }}</p>
+              </td>
+              <td class="px-6 py-3.5">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide border"
+                      [ngClass]="getActionTypeColor(result.detectedIntent)">{{ result.detectedIntent }}</span>
+              </td>
+              <td class="px-6 py-3.5">
+                <div class="flex items-center gap-2">
+                  <div class="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all"
+                         [style.width.%]="result.confidenceScore * 100"
+                         [class.bg-emerald-500]="result.confidenceScore >= 0.9"
+                         [class.bg-amber-500]="result.confidenceScore >= 0.7 && result.confidenceScore < 0.9"
+                         [class.bg-red-500]="result.confidenceScore < 0.7"></div>
+                  </div>
+                  <span class="text-xs font-bold" [ngClass]="getConfidenceClass(result.confidenceScore)">{{ (result.confidenceScore * 100).toFixed(0) }}%</span>
+                </div>
+              </td>
+              <td class="px-6 py-3.5">
+                <div *ngIf="result.parameters && result.parameters.length > 0" class="flex flex-wrap gap-1">
+                  <span *ngFor="let param of result.parameters" class="px-2 py-0.5 bg-purple-50 text-purple-700 rounded-md text-[10px] font-mono border border-purple-100">{{ param.value }}</span>
+                </div>
+                <span *ngIf="!result.parameters || result.parameters.length === 0" class="text-slate-300 text-xs italic">None</span>
+              </td>
+              <td class="px-6 py-3.5">
+                <code class="px-2.5 py-1 bg-slate-50 text-slate-600 rounded-lg text-xs font-mono border border-slate-100">{{ result.suggestedAction }}</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Intent Distribution -->
+    <div *ngIf="analysisResults.length > 0" class="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-5">
+      <h3 class="font-bold text-sm text-slate-700 mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-lg text-primary">pie_chart</span>
+        Intent Distribution
+      </h3>
+      <div class="flex flex-wrap gap-2">
+        <div *ngFor="let intent of getIntentCounts() | keyvalue"
+             class="px-3.5 py-2 rounded-xl border flex items-center gap-2"
+             [ngClass]="getActionTypeColor(intent.key)">
+          <span class="text-lg font-extrabold">{{ intent.value }}</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider">{{ intent.key }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div *ngIf="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div (click)="closeModal()" class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm"></div>
+  <div class="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl border border-slate-200/50">
+    <!-- Modal Header -->
+    <div class="border-b border-slate-100 px-7 py-5 bg-slate-50/50">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary text-lg">{{ editingMapping ? 'edit' : 'add_circle' }}</span>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">{{ editingMapping ? 'Edit Mapping' : 'New Mapping' }}</h2>
+            <p class="text-xs text-slate-400 mt-0.5">{{ editingMapping ? 'Update the mapping configuration' : 'Define a new NLP action mapping' }}</p>
+          </div>
+        </div>
+        <button (click)="closeModal()" class="p-1.5 text-slate-400 hover:bg-slate-200 rounded-lg transition-colors" type="button">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Form -->
+    <form [formGroup]="mappingForm" (ngSubmit)="saveMapping()" class="px-7 py-5">
+      <div class="space-y-4">
+        <div>
+          <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">Intent Pattern *</label>
+          <input formControlName="intentPattern" type="text" placeholder="e.g., click on {button}"
+                 class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-mono text-slate-800 placeholder:text-slate-300 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"/>
+          <p class="mt-1 text-[11px] text-slate-400">Use <code class="bg-slate-100 px-1 rounded font-mono text-[10px]">{{ '{' }}variable{{ '}' }}</code> for dynamic values</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">Action Type *</label>
+            <select formControlName="actionType"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer">
+              <option *ngFor="let type of actionTypes" [value]="type.value">{{ type.label }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">Strategy *</label>
+            <select formControlName="selectorStrategy"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer">
+              <option *ngFor="let strategy of selectorStrategies" [value]="strategy.value">{{ strategy.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">Selector Value *</label>
+          <input formControlName="selectorValue" type="text" placeholder="e.g., #loginBtn, .submit-button"
+                 class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-mono text-slate-800 placeholder:text-slate-300 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"/>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">Description *</label>
+          <textarea formControlName="description" rows="2" placeholder="Describe what this mapping does..."
+                    class="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-300 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"></textarea>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">Priority</label>
+          <div class="flex items-center gap-3">
+            <input formControlName="priority" type="number" min="0" max="100" placeholder="0"
+                   class="w-24 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-300 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"/>
+            <p class="text-[11px] text-slate-400 leading-snug">
+              Higher number = checked first when multiple active mappings match.<br/>
+              <span class="text-slate-300">0 = default &nbsp;·&nbsp; use 10, 20… for specific patterns</span>
+            </p>
+          </div>
+          <p *ngIf="mappingForm.get('priority')?.errors?.['max']" class="mt-1 text-[11px] text-red-400">Maximum priority is 100.</p>
+        </div>
+      </div>
+
+      <div class="mt-5 flex items-center justify-end gap-2.5 border-t border-slate-100 pt-4">
+        <button (click)="closeModal()" type="button"
+                class="h-10 px-5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+        <button type="submit" [disabled]="mappingForm.invalid || !canManageMappings"
+                class="h-10 flex items-center gap-2 px-5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 transition-all shadow-md shadow-primary/20 disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed">
+          <span class="material-symbols-outlined text-lg">{{ editingMapping ? 'save' : 'add' }}</span>
+          {{ editingMapping ? 'Update' : 'Create' }} Mapping
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

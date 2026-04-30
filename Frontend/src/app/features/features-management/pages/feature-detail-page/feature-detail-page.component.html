@@ -1,0 +1,166 @@
+<!-- src/app/features/features-management/pages/feature-detail-page/feature-detail-page.component.html -->
+<div class="min-h-screen bg-background">
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="flex flex-col items-center gap-4 py-32">
+    <div class="w-10 h-10 border-[3px] border-surface-container border-t-primary rounded-full animate-spin"></div>
+    <span class="text-on-surface-variant text-sm font-medium">Loading feature...</span>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading && feature" class="px-8 py-10 lg:px-12 max-w-5xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-12">
+      <div class="flex-1">
+        <!-- Back Button -->
+        <button
+          (click)="navigateBack()"
+          class="flex items-center gap-2 text-on-surface-variant hover:text-primary mb-6 transition-colors group">
+          <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+          <span class="text-sm font-semibold">Back to Features</span>
+        </button>
+
+        <div class="flex items-center gap-5 mb-3">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-3xl text-primary">inventory_2</span>
+          </div>
+          <div>
+            <h1 class="text-4xl font-extrabold tracking-tight text-on-background">{{ feature.name }}</h1>
+            <p class="text-sm text-on-surface-variant mt-1">
+              Module: <strong class="text-on-background">{{ feature.moduleName }}</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex flex-wrap items-center gap-3">
+
+        <button
+          *ngIf="canEdit()"
+          (click)="navigateToEdit()"
+          class="flex items-center gap-2 px-5 py-2.5 bg-surface-container-lowest border border-outline-variant text-on-surface rounded-xl font-semibold text-sm hover:bg-surface-container hover:border-outline transition-all">
+          <span class="material-symbols-outlined text-lg">edit</span>
+          Edit
+        </button>
+
+        <!-- Delete flow -->
+        <div *ngIf="canEdit() && !showDeleteConfirm">
+          <button
+            (click)="confirmDelete()"
+            class="flex items-center gap-2 px-5 py-2.5 bg-surface-container-lowest border border-error/30 text-error rounded-xl font-semibold text-sm hover:bg-error-container transition-all">
+            <span class="material-symbols-outlined text-lg">delete</span>
+            Delete
+          </button>
+        </div>
+
+        <div *ngIf="showDeleteConfirm" class="flex items-center gap-2 p-1 bg-error-container rounded-xl">
+          <span class="text-sm text-on-error-container font-semibold pl-3">Confirm?</span>
+          <button
+            (click)="deleteFeature()"
+            [disabled]="isDeleting"
+            class="px-4 py-2 bg-error text-on-error rounded-lg font-bold text-sm hover:bg-error/90 transition-all disabled:opacity-50 flex items-center gap-1.5">
+            <span *ngIf="isDeleting" class="w-3.5 h-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin"></span>
+            {{ isDeleting ? 'Deleting...' : 'Yes, delete' }}
+          </button>
+          <button
+            (click)="cancelDelete()"
+            class="px-4 py-2 bg-surface-container text-on-surface-variant rounded-lg font-semibold text-sm hover:bg-surface-container-high transition-all">
+            Cancel
+          </button>
+        </div>
+
+        <!-- CTA: New Scenario -->
+        <button
+          (click)="navigateToCreateScenario()"
+          class="flex items-center gap-2 px-8 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all hover:-translate-y-0.5 active:translate-y-0">
+          <span class="material-symbols-outlined text-lg">add</span>
+          New Scenario
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Bento Row -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+      <!-- Scenarios Count -->
+      <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl text-primary">description</span>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Scenarios</p>
+            <h3 class="text-3xl font-extrabold text-on-background">{{ feature.scenarioCount || 0 }}</h3>
+          </div>
+        </div>
+        <button
+          (click)="navigateToScenarios()"
+          class="flex items-center gap-1 text-sm text-primary hover:text-primary/80 font-semibold transition-colors group">
+          View all scenarios
+          <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+        </button>
+      </div>
+
+      <!-- Display Order -->
+      <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant shadow-sm">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl text-secondary">sort</span>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Display Order</p>
+            <h3 class="text-3xl font-extrabold text-on-background">{{ feature.displayOrder }}</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Created Date -->
+      <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant shadow-sm">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-tertiary/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl text-tertiary">calendar_today</span>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Created</p>
+            <h3 class="text-lg font-bold text-on-background">{{ feature.createdDate | date: 'MMM d, yyyy' }}</h3>
+            <p *ngIf="feature.modifiedDate" class="text-xs text-on-surface-variant">
+              Updated {{ feature.modifiedDate | date: 'MMM d, yyyy' }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description Panel -->
+    <div class="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant shadow-sm mb-6">
+      <h2 class="text-lg font-bold text-on-background mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-xl text-on-surface-variant">info</span>
+        Description
+      </h2>
+      <p class="text-on-surface-variant leading-relaxed">{{ feature.description }}</p>
+    </div>
+
+    <!-- Quick Actions Panel -->
+    <div class="p-1 rounded-2xl bg-gradient-to-r from-secondary to-primary-container">
+      <div class="bg-surface-container-lowest rounded-[14px] p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+          </div>
+          <div>
+            <p class="font-bold text-on-background">Ready to write scenarios?</p>
+            <p class="text-sm text-on-surface-variant">Create Gherkin test scenarios for this feature.</p>
+          </div>
+        </div>
+        <button
+          (click)="navigateToCreateScenario()"
+          class="px-6 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all hover:-translate-y-0.5 whitespace-nowrap">
+          + New Scenario
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
