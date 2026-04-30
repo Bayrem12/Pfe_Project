@@ -1,0 +1,334 @@
+$blue: #1a3caa;
+$blue-dark: #112d8a;
+$blue-mid: #2550d4;
+$blue-soft: #eef1fb;
+$ink: #1b2035;
+$ink-2: #3e4a6b;
+$ink-3: #8492b0;
+$white: #ffffff;
+$bg: #f6f7fb;
+$border: #e3e7f0;
+
+.project-create-container {
+  min-height: 100vh;
+  width: 100%;
+  background: $bg;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.4rem 3% 3rem;
+  font-family: 'Inter', 'DM Sans', system-ui, sans-serif;
+  color: $ink;
+
+  @media (max-width: 48rem) {
+    padding: 1.25rem 4% 2rem;
+  }
+}
+
+.page-header {
+  width: 100%;
+  max-width: 40rem;
+  text-align: center;
+  margin-bottom: 1.35rem;
+
+  h1 {
+    margin: 0 0 .55rem;
+    font-size: clamp(1.8rem, 2.8vw, 2.35rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: $ink;
+  }
+
+  .subtitle {
+    margin: 0 auto 1rem;
+    max-width: 92%;
+    color: $ink-3;
+    font-size: .92rem;
+    line-height: 1.6;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: .28rem;
+    border-radius: 999px;
+    background: #d9dfeb;
+    overflow: hidden;
+
+    .progress-fill {
+      width: 35%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, $blue 0%, $blue-mid 100%);
+    }
+  }
+}
+
+.project-form {
+  width: min(100%, 35rem);
+  background: $white;
+  border: 1px solid $border;
+  border-radius: 1rem;
+  box-shadow: 0 .25rem 1rem rgba(17, 45, 138, 0.08);
+  padding: 1.6rem;
+
+  @media (max-width: 40rem) {
+    padding: 1.1rem;
+  }
+}
+
+.form-group {
+  margin-bottom: 1.15rem;
+
+  label {
+    display: block;
+    margin-bottom: .45rem;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    color: $ink-2;
+    text-transform: uppercase;
+
+    .required {
+      color: #ef4444;
+      margin-left: .12rem;
+    }
+  }
+
+  input[type='text'],
+  textarea {
+    width: 100%;
+    border: 1px solid $border;
+    border-radius: .7rem;
+    background: #f8faff;
+    color: $ink;
+    padding: .84rem .92rem;
+    font-size: .95rem;
+    line-height: 1.45;
+    outline: none;
+    transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+    box-sizing: border-box;
+
+    &::placeholder {
+      color: #98a6c4;
+    }
+
+    &:focus {
+      border-color: $blue-mid;
+      background: $white;
+      box-shadow: 0 0 0 .2rem rgba(37, 80, 212, 0.14);
+    }
+
+    &.error {
+      border-color: #ef4444;
+      background: #fff5f5;
+
+      &:focus {
+        box-shadow: 0 0 0 .2rem rgba(239, 68, 68, 0.15);
+      }
+    }
+  }
+
+  textarea {
+    min-height: 6.2rem;
+    resize: vertical;
+  }
+
+  .error-message {
+    margin-top: .35rem;
+    font-size: .75rem;
+    color: #dc2626;
+    font-weight: 600;
+  }
+}
+
+.status-group {
+  border-radius: .85rem;
+  border: 1px solid #eaf0fb;
+  background: #f7faff;
+  padding: .85rem .95rem;
+
+  .status-content {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+
+    @media (max-width: 32rem) {
+      flex-wrap: wrap;
+    }
+  }
+
+  .status-info {
+    flex: 1;
+    min-width: 60%;
+
+    .status-title {
+      display: block;
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: $ink;
+      margin-bottom: .2rem;
+    }
+
+    .status-description {
+      display: block;
+      font-size: .82rem;
+      color: $ink-3;
+      line-height: 1.4;
+    }
+  }
+
+  .status-label {
+    font-size: .86rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    color: #7f8dab;
+
+    &.active {
+      color: $blue;
+    }
+  }
+}
+
+.toggle-switch {
+  position: relative;
+  width: 3rem;
+  height: 1.7rem;
+  cursor: pointer;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .slider {
+      background: $blue;
+
+      &::before {
+        transform: translateX(1.32rem);
+      }
+    }
+  }
+
+  .slider {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: #c7d0e4;
+    transition: .24s ease;
+
+    &::before {
+      content: '';
+      position: absolute;
+      width: 1.3rem;
+      height: 1.3rem;
+      left: .2rem;
+      bottom: .2rem;
+      border-radius: 999px;
+      background: $white;
+      box-shadow: 0 .08rem .28rem rgba(0, 0, 0, .22);
+      transition: .24s ease;
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: .8rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e8edf7;
+}
+
+.btn-cancel,
+.btn-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  border-radius: .65rem;
+  font-size: .9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .18s ease;
+}
+
+.btn-cancel {
+  border: none;
+  background: transparent;
+  color: $ink-3;
+  padding: .62rem 1rem;
+
+  &:hover {
+    color: $ink-2;
+    background: #f3f6fc;
+  }
+}
+
+.btn-submit {
+  border: none;
+  background: $blue;
+  color: $white;
+  padding: .68rem 1.2rem;
+  box-shadow: 0 .24rem .75rem rgba(26, 60, 170, .25);
+
+  &:hover:not(:disabled) {
+    background: $blue-dark;
+  }
+
+  &:disabled {
+    opacity: .7;
+    cursor: not-allowed;
+  }
+
+  .spinner-small {
+    width: .92rem;
+    height: .92rem;
+    border: 2px solid rgba(255, 255, 255, .35);
+    border-top-color: $white;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.footer-note {
+  margin-top: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: #9caac7;
+
+  .dot {
+    width: .36rem;
+    height: .36rem;
+    border-radius: 999px;
+    background: #a2b0ca;
+  }
+}
+
+// Désactivation universelle pour tous les boutons custom
+.cta-btn[disabled],
+.add-btn[disabled],
+.more-btn[disabled],
+.actions-menu-item[disabled],
+.btn-secondary[disabled],
+.btn-danger[disabled],
+.btn-mini[disabled],
+.btn-submit[disabled],
+.btn-cancel[disabled] {
+  background: #e3e7f0 !important;
+  color: #b9c4da !important;
+  border-color: #e3e7f0 !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+}

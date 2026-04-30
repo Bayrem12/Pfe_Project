@@ -1,0 +1,85 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* ── Fonts ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+/* ── Keyframes ── */
+@keyframes gridPulse {
+  0%, 100% { opacity: .055; }
+  50%       { opacity: .10;  }
+}
+
+@keyframes scanLine {
+  0%   { top: -2px;  opacity: 1;  }
+  80%  {              opacity: .8; }
+  100% { top: 100%;  opacity: 0;  }
+}
+
+@keyframes orbMove1 {
+  0%   { transform: translate(0, 0);        }
+  25%  { transform: translate(70px,-50px);  }
+  50%  { transform: translate(30px, 70px);  }
+  75%  { transform: translate(-60px, 20px); }
+  100% { transform: translate(0, 0);        }
+}
+
+@keyframes orbMove2 {
+  0%   { transform: translate(0, 0);         }
+  25%  { transform: translate(-60px,  40px); }
+  50%  { transform: translate( 50px, -60px); }
+  75%  { transform: translate( 25px,  50px); }
+  100% { transform: translate(0, 0);         }
+}
+
+@keyframes orbMove3 {
+  0%   { transform: translate(0, 0);         }
+  33%  { transform: translate( 50px,  50px); }
+  66%  { transform: translate(-35px, -35px); }
+  100% { transform: translate(0, 0);         }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes spinIcon {
+  from { transform: rotate(0deg);   }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Animation utility classes ── */
+.scan  { animation: scanLine  3.2s linear     infinite;      }
+.gpulse { animation: gridPulse 4s  ease-in-out infinite;     }
+.orb-1 { animation: orbMove1 22s  ease-in-out infinite;      }
+.orb-2 { animation: orbMove2 28s  ease-in-out infinite  6s;  }
+.orb-3 { animation: orbMove3 19s  ease-in-out infinite 11s;  }
+.su-1  { animation: slideUp  .7s  cubic-bezier(.22,1,.36,1) .10s both; }
+.su-2  { animation: slideUp  .7s  cubic-bezier(.22,1,.36,1) .20s both; }
+.su-3  { animation: slideUp  .7s  cubic-bezier(.22,1,.36,1) .30s both; }
+
+/* ── Typography globale ── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', sans-serif;
+}

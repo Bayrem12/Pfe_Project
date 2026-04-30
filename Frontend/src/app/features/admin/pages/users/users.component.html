@@ -1,0 +1,327 @@
+<section class="users-shell">
+  <header class="users-header">
+    <div>
+      <h1>User Management</h1>
+      <p>Manage team access, permissions, and account activity from a single workspace.</p>
+    </div>
+    <button class="header-cta" type="button" (click)="openInviteModal()">
+      <span class="material-symbols-outlined">person_add</span>
+      Invite User
+    </button>
+  </header>
+
+  @if (errorMessage) {
+    <div class="alert-error">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <p>Total Users</p>
+      <h3>{{ totalUsers }}</h3>
+    </article>
+    <article class="stat-card accent-owner">
+      <p>Owners</p>
+      <h3>{{ getRoleCount('Owner') }}</h3>
+    </article>
+    <article class="stat-card accent-active">
+      <p>Active Accounts</p>
+      <h3>{{ activeSessions }}</h3>
+    </article>
+    <article class="stat-card accent-viewer">
+      <p>Viewers</p>
+      <h3>{{ getRoleCount('Viewer') }}</h3>
+    </article>
+  </section>
+
+  <section class="table-card">
+    <div class="toolbar">
+      <div class="filters">
+        <label class="search-input">
+          <span class="material-symbols-outlined">search</span>
+          <input
+            type="text"
+            [(ngModel)]="searchKeyword"
+            (input)="onSearch()"
+            placeholder="Search name or email"/>
+        </label>
+
+        <select [(ngModel)]="selectedRole" (change)="onFilterChange()">
+          <option value="">All roles</option>
+          <option value="Owner">Owner</option>
+          <option value="Manager">Manager</option>
+          <option value="Tester">Tester</option>
+          <option value="Viewer">Viewer</option>
+        </select>
+
+        <select [(ngModel)]="selectedStatus" (change)="onFilterChange()">
+          <option value="">All status</option>
+          <option value="true">Active</option>
+          <option value="false">Inactive</option>
+        </select>
+
+        <button type="button" class="ghost-btn" (click)="clearFilters()">Reset</button>
+      </div>
+
+      @if (selectedUsers.length > 0) {
+        <div class="bulk-actions">
+          <span>{{ selectedUsers.length }} selected</span>
+          <button type="button" class="danger-btn" (click)="bulkDeactivateSelected()">
+            <span class="material-symbols-outlined">person_off</span>
+            Deactivate Selected
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="w-check">
+              <input type="checkbox" (change)="toggleSelectAll($event)"/>
+            </th>
+            <th>User</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Joined</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoading) {
+            <tr>
+              <td colspan="6" class="empty-row">
+                <span class="material-symbols-outlined spin">progress_activity</span>
+                Loading users...
+              </td>
+            </tr>
+          }
+
+          @if (!isLoading && filteredUsers.length === 0) {
+            <tr>
+              <td colspan="6" class="empty-row">
+                <span class="material-symbols-outlined">group_off</span>
+                No users found.
+              </td>
+            </tr>
+          }
+
+          @for (user of getPaginatedUsers(); track user.id) {
+            <tr>
+              <td>
+                <input type="checkbox" [checked]="isSelected(user.id)" (change)="toggleSelect(user.id)"/>
+              </td>
+
+              <td>
+                <div class="user-cell">
+                  <div class="avatar" [ngClass]="getAvatarClass(user.roles)">
+                    {{ getInitials(user.firstName, user.lastName) }}
+                  </div>
+                  <div>
+                    <p class="name">{{ user.firstName }} {{ user.lastName }}</p>
+                    <p class="email">{{ user.email }}</p>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <span class="pill" [ngClass]="getRoleBadgeClass(user.roles)">{{ user.roles[0] || 'N/A' }}</span>
+              </td>
+
+              <td>
+                <div class="status" [class.inactive]="!user.isActive">
+                  <span class="dot"></span>
+                  {{ user.isActive ? 'Active' : 'Inactive' }}
+                </div>
+              </td>
+
+              <td>
+                {{ user.createdDate ? (user.createdDate | date:'mediumDate') : 'N/A' }}
+              </td>
+
+              <td>
+                <div class="row-actions">
+                  <button (click)="toggleStatus(user)" [title]="user.isActive ? 'Deactivate' : 'Activate'" type="button">
+                    <span class="material-symbols-outlined">{{ user.isActive ? 'toggle_on' : 'toggle_off' }}</span>
+                  </button>
+                  <button (click)="openEditRoles(user)" title="Edit Roles" type="button">
+                    <span class="material-symbols-outlined">manage_accounts</span>
+                  </button>
+                  <button (click)="openEditUser(user)" title="Edit User" type="button">
+                    <span class="material-symbols-outlined">edit</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="table-footer">
+      <p>
+        Showing
+        <strong>{{ Math.min((currentPage - 1) * pageSize + 1, filteredUsers.length || 0) }}-{{ Math.min(currentPage * pageSize, filteredUsers.length) }}</strong>
+        of
+        <strong>{{ filteredUsers.length }}</strong>
+        users
+      </p>
+      <div class="pagination">
+        <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1" type="button">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        @for (page of pages; track page) {
+          <button (click)="changePage(page)" [class.active]="page === currentPage" type="button">{{ page }}</button>
+        }
+        <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages" type="button">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+    </footer>
+  </section>
+</section>
+
+@if (showEditModal) {
+  <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-[#111c2d]">Edit User</h2>
+        <button (click)="closeEditModal()" class="text-slate-400 hover:text-slate-600" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">First Name</label>
+          <input [(ngModel)]="editForm.firstName" type="text"
+                 class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00288e]/20 focus:border-[#00288e]"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Last Name</label>
+          <input [(ngModel)]="editForm.lastName" type="text"
+                 class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00288e]/20 focus:border-[#00288e]"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Email</label>
+          <input [(ngModel)]="editForm.email" type="email"
+                 class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00288e]/20 focus:border-[#00288e]"/>
+        </div>
+        <div class="flex items-center gap-3">
+          <input [(ngModel)]="editForm.isActive" type="checkbox" id="isActive"
+                 class="rounded border-slate-300 text-[#00288e]"/>
+          <label for="isActive" class="text-sm font-medium text-slate-600">Active</label>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-8">
+        <button (click)="closeEditModal()"
+                class="flex-1 py-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors" type="button">
+          Cancel
+        </button>
+        <button (click)="saveEditUser()"
+                class="flex-1 py-3 bg-[#00288e] text-white rounded-xl text-sm font-semibold hover:bg-[#1e40af] transition-colors" type="button">
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showRolesModal) {
+  <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-[#111c2d]">Edit Roles</h2>
+        <button (click)="closeRolesModal()" class="text-slate-400 hover:text-slate-600" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <p class="text-sm text-slate-500 mb-4">
+        Assign roles for <span class="font-semibold text-[#111c2d]">{{ editingRolesUser?.firstName }} {{ editingRolesUser?.lastName }}</span>
+      </p>
+
+      <div class="space-y-3">
+        @for (role of availableRoles; track role) {
+          <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-[#00288e]/30 transition-colors cursor-pointer"
+               (click)="toggleRole(role)"
+               [ngClass]="selectedRoles.includes(role) ? 'border-[#00288e]/30 bg-blue-50/50' : ''">
+            <div class="flex items-center gap-3">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase"
+                    [ngClass]="getAvatarClass([role])">{{ role }}</span>
+            </div>
+            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
+                 [ngClass]="selectedRoles.includes(role) ? 'border-[#00288e] bg-[#00288e]' : 'border-slate-300'">
+              @if (selectedRoles.includes(role)) {
+                <span class="material-symbols-outlined text-white text-xs">check</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="flex gap-3 mt-8">
+        <button (click)="closeRolesModal()"
+                class="flex-1 py-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors" type="button">
+          Cancel
+        </button>
+        <button (click)="saveRoles()"
+                class="flex-1 py-3 bg-[#712ae2] text-white rounded-xl text-sm font-semibold hover:bg-purple-700 transition-colors" type="button">
+          Save Roles
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showInviteModal) {
+  <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-[#111c2d]">Invite User</h2>
+        <button (click)="closeInviteModal()" class="text-slate-400 hover:text-slate-600" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">First Name</label>
+          <input [(ngModel)]="inviteForm.firstName" type="text"
+                 class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00288e]/20 focus:border-[#00288e]"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Last Name</label>
+          <input [(ngModel)]="inviteForm.lastName" type="text"
+                 class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00288e]/20 focus:border-[#00288e]"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Email</label>
+          <input [(ngModel)]="inviteForm.email" type="email"
+                 class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00288e]/20 focus:border-[#00288e]"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Temporary Password</label>
+          <input [(ngModel)]="inviteForm.password" type="password"
+                 class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00288e]/20 focus:border-[#00288e]"/>
+          <p class="text-[11px] text-slate-500 mt-2">Password must satisfy backend policy (8+ chars, upper/lower/number/special).</p>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-8">
+        <button (click)="closeInviteModal()"
+                class="flex-1 py-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors" type="button">
+          Cancel
+        </button>
+        <button (click)="submitInviteUser()"
+                class="flex-1 py-3 bg-[#00288e] text-white rounded-xl text-sm font-semibold hover:bg-[#1e40af] transition-colors" type="button">
+          Invite
+        </button>
+      </div>
+    </div>
+  </div>
+}

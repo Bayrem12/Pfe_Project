@@ -1,0 +1,391 @@
+<!-- src/app/features/scenarios/pages/scenarios-list-page/scenarios-list-page.component.html -->
+<div class="p-8 w-full space-y-8">
+
+  <!-- ===== PROJECT PICKER (shown when no project selected) ===== -->
+  <ng-container *ngIf="showProjectPicker">
+    <div>
+      <h1 class="text-4xl font-extrabold tracking-tighter text-on-surface mb-2">Scenarios</h1>
+      <p class="text-on-surface-variant max-w-2xl">Select a project to view and manage its scenarios.</p>
+    </div>
+
+    <!-- Loading Projects -->
+    <div *ngIf="loadingProjects" class="flex flex-col items-center gap-4 py-32">
+      <div class="w-10 h-10 border-[3px] border-surface-container border-t-primary rounded-full animate-spin"></div>
+      <span class="text-on-surface-variant text-sm font-medium">Loading projects...</span>
+    </div>
+
+    <!-- No Projects -->
+    <div *ngIf="!loadingProjects && projects.length === 0" class="text-center py-24">
+      <div class="w-20 h-20 rounded-2xl bg-surface-container flex items-center justify-center mx-auto mb-6">
+        <span class="material-symbols-outlined text-4xl text-on-surface-variant">folder_off</span>
+      </div>
+      <h3 class="text-xl font-bold text-on-background mb-2">No projects found</h3>
+      <p class="text-on-surface-variant text-sm mb-6">Create a project first to start building scenarios.</p>
+      <button
+        routerLink="/projects"
+        class="px-8 py-3 bg-primary text-white rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
+        Go to Projects
+      </button>
+    </div>
+
+    <!-- Project Cards Grid -->
+    <div *ngIf="!loadingProjects && projects.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <button
+        *ngFor="let project of projects"
+        (click)="selectProject(project)"
+        class="text-left bg-surface-container-lowest rounded-2xl border border-slate-100 p-6 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 transition-all group cursor-pointer">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-colors">
+            <span class="material-symbols-outlined">folder_open</span>
+          </div>
+          <span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">arrow_forward</span>
+        </div>
+        <h3 class="font-bold text-lg text-on-surface group-hover:text-primary transition-colors mb-1">{{ project.name }}</h3>
+        <p class="text-sm text-on-surface-variant line-clamp-2">{{ project.description || 'No description' }}</p>
+        <div class="flex items-center gap-4 mt-4 text-xs text-on-surface-variant">
+          <span *ngIf="project.scenariosCount !== undefined" class="flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">description</span>
+            {{ project.scenariosCount }} scenarios
+          </span>
+          <span *ngIf="project.modulesCount !== undefined" class="flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">account_tree</span>
+            {{ project.modulesCount }} modules
+          </span>
+        </div>
+      </button>
+    </div>
+  </ng-container>
+
+  <!-- ===== SCENARIOS LIST (shown when project is selected) ===== -->
+  <ng-container *ngIf="!showProjectPicker">
+
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div>
+      <h1 class="text-4xl font-extrabold tracking-tighter text-on-surface mb-2">Scenarios</h1>
+      <p class="text-on-surface-variant max-w-2xl">Manage your behavioral test definitions. Link user stories directly to automated execution scripts with Gherkin-powered logic.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      
+      <button
+        (click)="navigateToCreate()"
+        [disabled]="!canCreateScenario"
+        class="flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-xl font-bold hover:shadow-xl hover:shadow-primary/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:active:scale-100">
+        <span class="material-symbols-outlined">add</span>
+        Create Scenario
+      </button>
+    </div>
+  </div>
+
+  <!-- Advanced Filter Bar -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+    <div class="lg:col-span-4 relative group">
+      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange()"
+        placeholder="Search by name, feature, or tags..."
+        class="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border-none rounded-xl shadow-sm focus:ring-2 focus:ring-primary/20 transition-all text-sm" />
+    </div>
+    <div class="lg:col-span-2">
+      <select
+        [(ngModel)]="selectedModule"
+        (ngModelChange)="onModuleChange()"
+        class="w-full py-3 px-4 bg-surface-container-lowest border-none rounded-xl shadow-sm focus:ring-2 focus:ring-primary/20 text-sm text-on-surface-variant appearance-none cursor-pointer">
+        <option value="">Module: All</option>
+        <option *ngFor="let mod of uniqueModules" [value]="mod">{{ mod }}</option>
+      </select>
+    </div>
+    <div class="lg:col-span-2">
+      <select
+        [(ngModel)]="selectedStatus"
+        (ngModelChange)="onStatusChange()"
+        class="w-full py-3 px-4 bg-surface-container-lowest border-none rounded-xl shadow-sm focus:ring-2 focus:ring-primary/20 text-sm text-on-surface-variant appearance-none cursor-pointer">
+        <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+      </select>
+    </div>
+    
+    
+  </div>
+
+  <!-- Bulk Actions Bar -->
+  <div
+    *ngIf="selectedIds.size > 0"
+    class="flex items-center justify-between bg-primary-container/10 px-6 py-3 rounded-2xl border border-primary-container/20">
+    <div class="flex items-center gap-4">
+      <span class="text-sm font-semibold text-primary">{{ selectedIds.size }} scenarios selected</span>
+      <div class="h-4 w-[1px] bg-primary/20"></div>
+      <div class="flex items-center gap-2">
+        <button
+          (click)="bulkRun()"
+          [disabled]="!canRunScenarioTests"
+          class="flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary">
+          <span class="material-symbols-outlined text-sm">play_arrow</span>
+          Run Selected
+        </button>
+        <button
+          (click)="bulkAddTags()"
+          [disabled]="isViewerRole"
+          class="flex items-center gap-1.5 px-4 py-2 bg-surface-container-lowest text-on-surface rounded-lg text-xs font-semibold border border-slate-200 hover:bg-surface-container-high transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-surface-container-lowest">
+          <span class="material-symbols-outlined text-sm">label</span>
+          Add Tags
+        </button>
+        <button
+          (click)="bulkExport()"
+          class="flex items-center gap-1.5 px-4 py-2 bg-surface-container-lowest text-on-surface rounded-lg text-xs font-semibold border border-slate-200 hover:bg-surface-container-high transition-colors">
+          <span class="material-symbols-outlined text-sm">ios_share</span>
+          Export
+        </button>
+      </div>
+    </div>
+    <button
+      (click)="bulkDelete()"
+      [disabled]="isViewerRole"
+      class="flex items-center gap-1.5 px-3 py-1.5 text-error font-bold text-xs hover:bg-error/5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent">
+      <span class="material-symbols-outlined text-sm">delete</span>
+      Delete
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex flex-col items-center gap-4 py-32">
+    <div class="w-10 h-10 border-[3px] border-surface-container border-t-primary rounded-full animate-spin"></div>
+    <span class="text-on-surface-variant text-sm font-medium">Loading scenarios...</span>
+  </div>
+
+  <!-- Error -->
+  <div
+    *ngIf="error && !loading"
+    class="mb-6 p-4 bg-error-container border border-error/20 rounded-xl text-on-error-container text-sm flex items-center gap-3">
+    <span class="material-symbols-outlined text-error">error</span>
+    {{ error }}
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && filteredScenarios.length === 0 && !error" class="text-center py-24">
+    <div class="w-20 h-20 rounded-2xl bg-surface-container flex items-center justify-center mx-auto mb-6">
+      <span class="material-symbols-outlined text-4xl text-on-surface-variant">description</span>
+    </div>
+    <h3 class="text-xl font-bold text-on-background mb-2">
+      {{ (searchTerm || selectedStatus || selectedModule || selectedTagFilters.length > 0) ? 'No matching scenarios' : 'No scenarios yet' }}
+    </h3>
+    <p class="text-on-surface-variant text-sm mb-6">
+      {{ searchTerm || selectedStatus || selectedModule || selectedTagFilters.length > 0
+        ? 'Try adjusting your search or filters.'
+        : 'Create your first Gherkin scenario to start automating.' }}
+    </p>
+    <button
+      *ngIf="!searchTerm && !selectedStatus && !selectedModule && selectedTagFilters.length === 0"
+      (click)="navigateToCreate()"
+      [disabled]="!canCreateScenario"
+      class="px-8 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary">
+      + Create First Scenario
+    </button>
+  </div>
+
+  <!-- Scenarios Advanced Table -->
+  <div
+    *ngIf="!loading && filteredScenarios.length > 0"
+    class="bg-surface-container-lowest rounded-[2rem] shadow-xl shadow-slate-200/40 overflow-hidden border border-slate-100">
+
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-surface-container-low text-on-surface-variant uppercase text-[10px] font-bold tracking-[0.1em]">
+          <th class="px-6 py-5 w-12">
+            <input
+              type="checkbox"
+              [checked]="allSelected"
+              (change)="toggleSelectAll()"
+              class="rounded border-outline-variant text-primary focus:ring-primary/20" />
+          </th>
+          <th class="px-6 py-5">Scenario Details</th>
+          <th class="px-6 py-5">Module / Feature</th>
+          <th class="px-6 py-5">Tags</th>
+          <th class="px-6 py-5 text-center">Steps</th>
+          <th class="px-6 py-5">Health</th>
+          <th class="px-6 py-5">Status</th>
+          <th class="px-6 py-5 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-50">
+        <tr
+          *ngFor="let scenario of pagedScenarios"
+          (click)="navigateToDetail(scenario.id)"
+          class="group hover:bg-surface-container-low/30 transition-colors cursor-pointer">
+
+          <!-- Checkbox -->
+          <td class="px-6 py-6" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              [checked]="isSelected(scenario.id)"
+              (change)="toggleSelect(scenario.id)"
+              class="rounded border-outline-variant text-primary focus:ring-primary/20" />
+          </td>
+
+          <!-- Scenario Details -->
+          <td class="px-6 py-6">
+            <div class="flex flex-col">
+              <span class="font-bold text-slate-900 group-hover:text-primary transition-colors">{{ scenario.title }}</span>
+              <span class="text-xs text-slate-400 mt-1 line-clamp-1">{{ scenario.description || 'No description' }}</span>
+            </div>
+          </td>
+
+          <!-- Feature / Module -->
+          <td class="px-6 py-6">
+            <div class="flex flex-col">
+              <span class="text-sm font-semibold text-slate-700">{{ scenario.moduleName || '—' }}</span>
+              <span *ngIf="scenario.featureName" class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ scenario.featureName }}</span>
+            </div>
+          </td>
+
+          <!-- Tags -->
+          <td class="px-6 py-6">
+            <div class="flex flex-wrap gap-1.5">
+              <ng-container *ngIf="scenario.tags && scenario.tags.length > 0">
+                <span *ngFor="let tag of scenario.tags | slice:0:2" class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold">{{ tag }}</span>
+                <span *ngIf="scenario.tags.length > 2" class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full text-[10px] font-bold">+{{ scenario.tags.length - 2 }}</span>
+              </ng-container>
+            </div>
+          </td>
+
+          <!-- Steps -->
+          <td class="px-6 py-6 text-center">
+            <span class="text-sm font-bold text-slate-600">{{ scenario.stepCount }}</span>
+          </td>
+
+          <!-- Health -->
+          <td class="px-6 py-6">
+            <div class="flex flex-col">
+              <span *ngIf="scenario.lastTestStatus" [class]="'inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold w-fit ' + getTestStatusColor(scenario.lastTestStatus)">
+                <span class="material-symbols-outlined text-xs" [style.fontVariationSettings]="'\'FILL\' 1'">{{ scenario.lastTestStatus === 'Passed' ? 'check_circle' : 'cancel' }}</span>
+                {{ scenario.lastTestStatus === 'Passed' ? 'PASSED' : 'FAILED' }}
+              </span>
+              <span *ngIf="!scenario.lastTestStatus" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold w-fit bg-slate-100 text-slate-500">
+                <span class="material-symbols-outlined text-xs">hourglass_empty</span>
+                NOT TESTED
+              </span>
+              <span class="text-[10px] text-slate-400 mt-1">v{{ scenario.currentVersion }}</span>
+            </div>
+          </td>
+
+          <!-- Status -->
+          <td class="px-6 py-6">
+            <span [class]="'inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold w-fit ' + getStatusColor(scenario.status)">
+              <span class="material-symbols-outlined text-xs" [style.fontVariationSettings]="'\'FILL\' 1'">{{ getStatusIcon(scenario.status) }}</span>
+              {{ getStatusLabel(scenario.status) }}
+            </span>
+          </td>
+
+          <!-- Actions -->
+          <td class="px-6 py-6 text-right">
+            <div class="flex items-center justify-end gap-1.5" (click)="$event.stopPropagation()">
+              <button
+                (click)="navigateToEdit(scenario.id, $event)"
+                [disabled]="isViewerRole"
+                class="w-9 h-9 flex items-center justify-center bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary/10 disabled:hover:text-primary"
+                title="Edit">
+                <span class="material-symbols-outlined text-[18px]">edit</span>
+              </button>
+              <button
+                (click)="runScenario(scenario, $event)"
+                [disabled]="!canRunScenarioTests"
+                class="w-9 h-9 flex items-center justify-center bg-tertiary-fixed/30 text-on-tertiary-fixed-variant hover:bg-tertiary-fixed hover:text-on-tertiary-fixed-variant rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-tertiary-fixed/30"
+                title="Run">
+                <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+              </button>
+              <button
+                (click)="deleteScenario(scenario, $event)"
+                [disabled]="isViewerRole"
+                class="w-9 h-9 flex items-center justify-center bg-error-container/50 text-error hover:bg-error hover:text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-error-container/50 disabled:hover:text-error"
+                title="Delete">
+                <span class="material-symbols-outlined text-[18px]">delete</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination Footer -->
+    <div class="px-8 py-6 bg-surface-container-lowest flex flex-col sm:flex-row items-center justify-between border-t border-slate-50 gap-4">
+      <div class="flex items-center gap-6">
+        <span class="text-sm text-on-surface-variant">
+          Showing <span class="font-bold text-slate-900">{{ paginationStart }}-{{ paginationEnd }}</span>
+          of <span class="font-bold text-slate-900">{{ filteredScenarios.length }}</span> results
+        </span>
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-on-surface-variant">Rows per page:</span>
+          <select
+            [(ngModel)]="rowsPerPage"
+            (ngModelChange)="onRowsPerPageChange()"
+            class="bg-transparent border-none text-sm font-bold text-slate-900 focus:ring-0 cursor-pointer">
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="25">25</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex items-center gap-1">
+        <button
+          (click)="goToPage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+          class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 disabled:opacity-30">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <ng-container *ngFor="let page of pageNumbers">
+          <span *ngIf="page === -1" class="px-2 text-slate-400">...</span>
+          <button
+            *ngIf="page !== -1"
+            (click)="goToPage(page)"
+            [class]="page === currentPage
+              ? 'w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-on-primary font-bold shadow-lg shadow-primary/20'
+              : 'w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 font-bold'">
+            {{ page }}
+          </button>
+        </ng-container>
+        <button
+          (click)="goToPage(currentPage + 1)"
+          [disabled]="currentPage === totalPages"
+          class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 disabled:opacity-30">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Coverage Insight -->
+  <div
+    *ngIf="showAiInsight && !loading && filteredScenarios.length > 0"
+    class="bg-white p-6 rounded-2xl shadow-lg flex items-start gap-6 relative overflow-hidden"
+    style="border-top: 2px solid; border-image: linear-gradient(to right, #712ae2, #1e40af) 1;">
+    <div class="absolute top-0 right-0 p-8 opacity-5">
+      <span class="material-symbols-outlined text-8xl" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+    </div>
+    <div class="w-12 h-12 flex-shrink-0 bg-secondary/10 text-secondary rounded-2xl flex items-center justify-center">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+    </div>
+    <div>
+      <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+        AI Coverage Insight
+        <span class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold rounded-full">PREMIUM</span>
+      </h3>
+      <p class="text-on-surface-variant mt-1 text-sm leading-relaxed max-w-3xl">
+        Analyze your scenario coverage to detect potential edge cases missing from your test suite. AI-powered suggestions can help improve test coverage.
+      </p>
+      <div class="flex gap-4 mt-4">
+        <button class="px-4 py-2 bg-secondary text-on-secondary rounded-lg text-xs font-bold hover:shadow-lg hover:shadow-secondary/30 transition-all">
+          Review Suggested Scenarios
+        </button>
+        <button
+          (click)="showAiInsight = false"
+          class="px-4 py-2 text-slate-500 hover:text-slate-900 text-xs font-bold transition-colors">
+          Dismiss
+        </button>
+      </div>
+    </div>
+  </div>
+
+  </ng-container><!-- end !showProjectPicker -->
+
+</div>

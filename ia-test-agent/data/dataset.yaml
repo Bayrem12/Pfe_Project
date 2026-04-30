@@ -1,0 +1,37 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║  YOLO UI-Element Dataset — v2                                           ║
+# ║  17 classes (v1 had 8; indices 0-7 are backward-compatible)             ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+
+# Path to dataset root (relative to the repo root when running yolo train)
+path: data/dataset
+
+train: images/train   # 70 %
+val:   images/val     # 20 %
+test:  images/test    # 10 %
+
+# ── Class definitions ────────────────────────────────────────────────────────
+# IMPORTANT: never reorder existing indices — append new classes at the end.
+nc: 17
+names:
+  0:  button          # Clickable buttons (button, input[submit/button/reset], [role=button], a.btn)
+  1:  input_text      # Single-line text fields (text/email/tel/number/search/url/date/time)
+  2:  input_password  # Password input fields
+  3:  link            # Anchor links not styled as buttons
+  4:  checkbox        # Square checkbox inputs (type=checkbox only)
+  5:  dropdown        # Select, combobox, listbox
+  6:  label           # Form labels, legends, headings (h1-h3), [role=heading]
+  7:  modal           # Dialog / modal overlays ([role=dialog], .modal.show)
+  8:  radio           # Round radio button inputs (type=radio)          [v2]
+  9:  textarea        # Multi-line text areas                           [v2]
+  10: image           # Image elements (img)                            [v2]
+  11: table           # Data tables / grids (table, [role=grid])        [v2]
+  12: tab             # Tab controls ([role=tab])                       [v2]
+  13: toggle          # Toggle / switch controls ([role=switch])        [v2]
+  14: slider          # Range sliders (input[type=range], [role=slider])[v2]
+  15: alert           # Alert / notification banners ([role=alert])     [v2]
+  16: navbar          # Navigation bars (nav, [role=navigation])        [v2]
+
+# ── Suggested training hyperparameters ───────────────────────────────────────
+# yolo train model=yolov8s.pt data=data/dataset.yaml epochs=100 imgsz=1280
+#              batch=16 patience=20 project=trained_models name=ui_v2

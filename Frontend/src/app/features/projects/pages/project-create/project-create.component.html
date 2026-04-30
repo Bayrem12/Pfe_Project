@@ -1,0 +1,112 @@
+<div class="project-create-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Create New Project</h1>
+    <p class="subtitle">
+      Initialize a new automation workspace. Define your scope and 
+      architectural constraints to begin building precision tests.
+    </p>
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
+    <!-- Project Name -->
+    <div class="form-group">
+      <label for="name">
+        PROJECT NAME <span class="required">*</span>
+      </label>
+      <input 
+        type="text" 
+        id="name" 
+        formControlName="name"
+        placeholder="e.g. Enterprise CRM Regression"
+        [class.error]="f['name'].touched && f['name'].invalid">
+      <div *ngIf="f['name'].touched && f['name'].errors" class="error-message">
+        <span *ngIf="f['name'].errors['required']">Project name is required</span>
+        <span *ngIf="f['name'].errors['minlength']">Minimum 3 characters required</span>
+      </div>
+    </div>
+
+    <!-- Project URL (IMPORTANT - Added as per requirements) -->
+    <div class="form-group">
+      <label for="url">
+        PROJECT URL
+      </label>
+      <input 
+        type="text" 
+        id="url" 
+        formControlName="url"
+        placeholder="e.g. https://myproject.example.com"
+        [class.error]="f['url'].touched && f['url'].invalid">
+      <div *ngIf="f['url'].touched && f['url'].errors" class="error-message">
+        <span *ngIf="f['url'].errors['pattern']">Please enter a valid URL</span>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group">
+      <label for="description">
+        DESCRIPTION <span class="required">*</span>
+      </label>
+      <textarea 
+        id="description" 
+        formControlName="description"
+        placeholder="Briefly describe the architectural goals of this project..."
+        rows="4"
+        [class.error]="f['description'].touched && f['description'].invalid">
+      </textarea>
+      <div *ngIf="f['description'].touched && f['description'].errors" class="error-message">
+        <span *ngIf="f['description'].errors['required']">Description is required</span>
+      </div>
+    </div>
+
+    <!-- Project Status Toggle -->
+    <div class="form-group status-group">
+      <div class="status-content">
+        <div class="status-info">
+          <span class="status-title">Project Status</span>
+          <span class="status-description">Set to active to enable immediate CI/CD integration.</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" formControlName="isActive">
+          <span class="slider"></span>
+        </label>
+        <span class="status-label" [class.active]="projectForm.value.isActive">
+          {{ projectForm.value.isActive ? 'ACTIVE' : 'INACTIVE' }}
+        </span>
+      </div>
+    </div>
+
+    <div *ngIf="createProjectError" class="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <span class="material-symbols-outlined text-base flex-shrink-0">error_outline</span>
+      {{ createProjectError }}
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="cancel()">
+        CANCEL
+      </button>
+      <button 
+        type="submit" 
+        class="btn-submit" 
+        [disabled]="isSubmitting || isViewerOrManager">
+        <svg *ngIf="!isSubmitting" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M11.5 1.5v3h3v10h-13v-13h10zm1-1h-12v15h15v-12l-3-3z"/>
+          <path d="M11 2v3h3l-3-3z"/>
+        </svg>
+        <span *ngIf="isSubmitting" class="spinner-small"></span>
+        {{ isSubmitting ? 'SAVING...' : 'SAVE PROJECT' }}
+      </button>
+    </div>
+  </form>
+
+  <!-- Footer note -->
+  <div class="footer-note">
+    <span class="dot"></span>
+    CHANGES ARE TRACKED IN THE AUDIT LOG
+  </div>
+</div>

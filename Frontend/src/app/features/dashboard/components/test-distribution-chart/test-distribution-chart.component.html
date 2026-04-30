@@ -1,0 +1,32 @@
+<div class="bg-surface-container-lowest p-6 rounded-3xl shadow-[0_8px_30px_rgba(0,40,142,0.04)] border border-slate-50 flex flex-col">
+  <h4 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-6">Distribution</h4>
+  
+  <div class="flex-1 flex items-center justify-center relative">
+    <apx-chart
+      *ngIf="chartOptions && distribution"
+      [series]="chartOptions.series!"
+      [chart]="chartOptions.chart!"
+      [labels]="chartOptions.labels!"
+      [colors]="chartOptions.colors!"
+      [legend]="chartOptions.legend!"
+      [dataLabels]="chartOptions.dataLabels!"
+      [plotOptions]="chartOptions.plotOptions!"
+      [stroke]="chartOptions.stroke!"
+    ></apx-chart>
+  </div>
+  
+  <div class="mt-6 flex justify-center gap-4">
+    <div class="flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full" style="background-color: #1e40af;"></span>
+      <span class="text-[10px] font-bold uppercase text-slate-500">Passed</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full" style="background-color: #ffdad6;"></span>
+      <span class="text-[10px] font-bold uppercase text-slate-500">Failed</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full" style="background-color: #e2e8f0;"></span>
+      <span class="text-[10px] font-bold uppercase text-slate-500">Skipped</span>
+    </div>
+  </div>
+</div>

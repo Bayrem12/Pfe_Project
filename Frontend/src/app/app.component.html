@@ -1,0 +1,21 @@
+<!-- Auth Pages Layout (No Sidebar/Topbar) -->
+<ng-container *ngIf="!showLayout">
+  <router-outlet></router-outlet>
+</ng-container>
+
+<!-- Main App Layout (With Sidebar/Topbar) -->
+<ng-container *ngIf="showLayout">
+  <!-- Sidebar (Fixed Left) -->
+  <app-sidebar-nav></app-sidebar-nav>
+
+  <!-- Main Content Area (With left padding for sidebar) -->
+  <div class="main-content" [class.sidebar-collapsed]="!(sidebarService.isOpen$ | async)">
+    <!-- Topbar (Sticky Top) -->
+    <app-topbar></app-topbar>
+    
+    <!-- Page Content -->
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</ng-container>

@@ -1,0 +1,594 @@
+// Topbar Navigation Styles
+// Uses SCSS for maintainable, consistent styling
+
+// Variables
+$topbar-height: 72px;
+$primary: #00288e;
+$secondary: #712ae2;
+
+:host {
+  display: block;
+}
+
+.topbar {
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(24px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  min-height: $topbar-height;
+  
+  // Left section with toggle and breadcrumbs
+  .breadcrumb-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  // Toggle button
+  .toggle-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #64748b;
+    
+    &:hover {
+      background-color: #f1f5f9;
+      color: $primary;
+    }
+  }
+  
+  // Breadcrumb navigation
+  .breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #64748b;
+    
+    .breadcrumb-item {
+      cursor: pointer;
+      
+      &.current {
+        font-weight: 600;
+        color: #2563eb;
+        border-bottom: 2px solid #2563eb;
+      }
+      
+      &.parent {
+        font-weight: 600;
+        color: #0f172a;
+      }
+    }
+    
+    .breadcrumb-separator {
+      font-size: 12px;
+    }
+  }
+  
+  // Right side actions
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    
+    // Search bar
+    .search-container {
+      position: relative;
+      
+      .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        transition: color 0.2s;
+      }
+      
+      .search-input {
+        padding: 8px 16px 8px 40px;
+        background-color: #f8fafc;
+        border: none;
+        border-radius: 9999px;
+        font-size: 14px;
+        width: 256px;
+        outline: none;
+        transition: all 0.2s;
+        
+        &:focus {
+          box-shadow: 0 0 0 2px rgba($primary, 0.1);
+          
+          & + .search-icon,
+          & ~ .search-icon {
+            color: $primary;
+          }
+        }
+        
+        &::placeholder {
+          color: #94a3b8;
+        }
+      }
+    }
+    
+    // Action buttons container
+    .action-buttons {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      .action-btn {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        position: relative;
+        
+        &:hover {
+          background-color: #f1f5f9;
+        }
+        
+        .icon {
+          color: #475569;
+        }
+        
+        // Notification badge
+        .notification-badge {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          width: 8px;
+          height: 8px;
+          background-color: $secondary;
+          border-radius: 50%;
+          border: 2px solid white;
+        }
+      }
+      
+      // Divider
+      .divider {
+        height: 32px;
+        width: 1px;
+        background-color: #e2e8f0;
+        margin: 0 4px;
+      }
+      
+      // User avatar
+      .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1px solid #e2e8f0;
+        padding: 2px;
+        cursor: pointer;
+        transition: all 0.2s;
+        
+        &:hover {
+          box-shadow: 0 0 0 2px rgba($primary, 0.2);
+        }
+      }
+    }
+  }
+}
+
+// Responsive
+@media screen and (max-width: 768px) {
+  .topbar {
+    padding: 12px 16px;
+    
+    .search-container {
+      display: none;
+    }
+    
+    .breadcrumb-nav {
+      font-size: 12px;
+    }
+  }
+}
+
+// ── Notifications panel ────────────────────────────────────────────────────
+// Self-contained — does NOT reuse `.action-btn` to avoid specificity wars
+// with the existing nested rules above. Owns its own trigger styling.
+
+.notif-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+// Spin animation reused for the bell + per-item running icons.
+.notif-spin { animation: notif-spin 1.4s linear infinite; }
+@keyframes notif-spin { to { transform: rotate(360deg); } }
+
+@keyframes notif-fade {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes notif-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(1.4); }
+}
+
+// ── Bell trigger ─────────────────────────────────────────────────────────
+.notif-trigger {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.15s;
+  position: relative;
+  padding: 0;
+
+  &:hover { background-color: #f1f5f9; }
+  &:active { transform: scale(0.94); }
+
+  &.active {
+    background-color: rgba(99, 102, 241, 0.1);
+    .notif-trigger-icon { color: #4f46e5; }
+  }
+
+  .notif-trigger-icon {
+    color: #475569;
+    font-size: 22px;
+    transition: color 0.15s;
+  }
+}
+
+.notif-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 0 0 0 2px #fff;
+  pointer-events: none;
+  letter-spacing: 0;
+
+  &.notif-badge-running {
+    background: #6366f1;
+  }
+}
+
+// ── Panel ────────────────────────────────────────────────────────────────
+.notif-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 400px;
+  max-width: calc(100vw - 32px);
+  max-height: min(560px, calc(100vh - 100px));
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow:
+    0 4px 12px -4px rgba(15, 23, 42, 0.08),
+    0 24px 48px -12px rgba(15, 23, 42, 0.22);
+  z-index: 1100;          // above the topbar's z:50 stacking context
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: notif-fade 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  transform-origin: top right;
+
+  // Little arrow tail above panel
+  &::before {
+    content: '';
+    position: absolute;
+    top: -7px;
+    right: 14px;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+    border-left: 1px solid #e2e8f0;
+    transform: rotate(45deg);
+  }
+}
+
+// ── Header ───────────────────────────────────────────────────────────────
+.notif-header {
+  flex-shrink: 0;
+  padding: 14px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  .notif-header-text { min-width: 0; }
+
+  .notif-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+  }
+
+  .notif-subtitle {
+    margin-top: 3px;
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &.dot-running {
+    background: #6366f1;
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.6);
+    animation: notif-pulse 1.6s ease-in-out infinite;
+  }
+}
+
+.notif-clear-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6366f1;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 8px;
+  transition: all 0.15s;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(99, 102, 241, 0.08);
+    border-color: rgba(99, 102, 241, 0.2);
+  }
+}
+
+// ── Empty state ──────────────────────────────────────────────────────────
+.notif-empty {
+  padding: 44px 24px;
+  text-align: center;
+  color: #94a3b8;
+
+  .notif-empty-icon {
+    font-size: 44px;
+    color: #cbd5e1;
+    display: block;
+    margin: 0 auto 8px;
+  }
+
+  .notif-empty-title {
+    margin: 4px 0 6px;
+    font-weight: 700;
+    color: #475569;
+    font-size: 14px;
+  }
+
+  .notif-empty-sub {
+    font-size: 12px;
+    line-height: 1.5;
+    color: #94a3b8;
+    display: block;
+    max-width: 240px;
+    margin: 0 auto;
+  }
+}
+
+// ── List ─────────────────────────────────────────────────────────────────
+.notif-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+
+  // Pretty scrollbar
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 3px;
+    &:hover { background: #cbd5e1; }
+  }
+}
+
+// ── Item ─────────────────────────────────────────────────────────────────
+.notif-item {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  border-left: 3px solid transparent;
+  transition: background 0.12s, border-left-color 0.15s;
+
+  &:last-child { border-bottom: 0; }
+
+  &.is-running { border-left-color: #6366f1; }
+  &.is-passed  { border-left-color: #10b981; }
+  &.is-failed  { border-left-color: #f43f5e; }
+
+  &.is-clickable { cursor: pointer; }
+  &.is-clickable:hover { background: #f8fafc; }
+
+  &.is-unread::before {
+    content: '';
+    position: absolute;
+    right: 42px;
+    top: 12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #6366f1;
+  }
+
+  // Icon — flat, no bubble background
+  .notif-icon-wrap {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+
+    .material-symbols-outlined { font-size: 20px; }
+
+    &.state-running { color: #4f46e5; }
+    &.state-passed  { color: #059669; }
+    &.state-failed  { color: #e11d48; }
+  }
+
+  // Body
+  .notif-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-right: 20px;
+  }
+
+  .notif-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .notif-kind {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+  }
+
+  .notif-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #fef3c7;
+    color: #92400e;
+
+    .notif-tag-icon {
+      font-size: 11px !important;
+      line-height: 1;
+    }
+  }
+
+  .notif-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.3;
+  }
+
+  .notif-sub {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .notif-meta {
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+
+    &.meta-running { color: #4f46e5; }
+    &.meta-passed  { color: #047857; }
+    &.meta-failed  { color: #be123c; }
+  }
+
+  .notif-cta {
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #6366f1;
+    transition: transform 0.15s;
+  }
+
+  &.is-clickable:hover .notif-cta {
+    transform: translateX(2px);
+  }
+
+  // Dismiss
+  .notif-dismiss {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: 0;
+    color: #cbd5e1;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    padding: 0;
+
+    .material-symbols-outlined { font-size: 14px; }
+
+    &:hover {
+      background: #f1f5f9;
+      color: #475569;
+    }
+  }
+}
+
+// Mobile: full-width panel anchored to right edge
+@media (max-width: 480px) {
+  .notif-panel {
+    width: calc(100vw - 24px);
+    right: -8px;
+  }
+}

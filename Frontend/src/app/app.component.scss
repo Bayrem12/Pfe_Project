@@ -1,0 +1,54 @@
+// Main Layout Styles with SCSS
+// Responsive design that looks consistent on all screen sizes
+
+// Variables
+$sidebar-width: 256px;
+$sidebar-collapsed-width: 72px;
+$topbar-height: 72px;
+$content-padding: 24px;
+
+// Colors (matching your brand)
+$primary: #00288e;
+$secondary: #712ae2;
+$tertiary: #003d27;
+$bg-main: #f8fafc;
+
+// Main content area (when sidebar is visible)
+.main-content {
+  margin-left: $sidebar-width;
+  min-height: 100vh;
+  background-color: $bg-main;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease;
+  
+  // When sidebar is collapsed
+  &.sidebar-collapsed {
+    margin-left: $sidebar-collapsed-width;
+  }
+}
+
+// Page content wrapper
+.page-content {
+  padding: $content-padding;
+  flex: 1;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+// Responsive breakpoints
+@media screen and (max-width: 1024px) {
+  .main-content {
+    margin-left: 0;
+    
+    &.sidebar-collapsed {
+      margin-left: 0;
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .page-content {
+    padding: 16px;
+  }
+}

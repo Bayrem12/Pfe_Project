@@ -1,0 +1,162 @@
+<section class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+  <div class="mx-auto max-w-[1400px] space-y-6">
+    <header class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <div class="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 px-6 py-8 text-white sm:px-8 sm:py-10">
+        <p class="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]">
+          <span class="material-symbols-outlined !text-sm">help</span>
+          Help Center
+        </p>
+        <h1 class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">How To Use AutoTestify End To End</h1>
+        <p class="mt-3 max-w-3xl text-sm text-blue-100 sm:text-base">
+          This page explains the complete platform workflow: project setup, scenario design, suite execution, result analysis,
+          role permissions, troubleshooting, and daily best practices.
+        </p>
+      </div>
+
+      <div class="grid gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:grid-cols-2 lg:grid-cols-6 sm:px-8">
+        <a href="#getting-started" class="rounded-lg bg-white px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-600 transition hover:bg-blue-50 hover:text-blue-700">Getting Started</a>
+        <a href="#modules" class="rounded-lg bg-white px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-600 transition hover:bg-blue-50 hover:text-blue-700">Modules</a>
+        <a href="#roles" class="rounded-lg bg-white px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-600 transition hover:bg-blue-50 hover:text-blue-700">Roles</a>
+        <a href="#workflow" class="rounded-lg bg-white px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-600 transition hover:bg-blue-50 hover:text-blue-700">Workflow</a>
+        <a href="#faq" class="rounded-lg bg-white px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-600 transition hover:bg-blue-50 hover:text-blue-700">FAQ</a>
+        <a href="#troubleshooting" class="rounded-lg bg-white px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-600 transition hover:bg-blue-50 hover:text-blue-700">Troubleshooting</a>
+      </div>
+    </header>
+
+    <section id="getting-started" class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <h2 class="text-lg font-black uppercase tracking-[0.14em] text-slate-600">Quick Start</h2>
+      <p class="mt-2 text-sm text-slate-600">Follow this sequence if you are new or onboarding a new project:</p>
+
+      <div class="mt-4 grid gap-4 lg:grid-cols-2">
+        @for (step of quickStartSteps; track step.title) {
+          <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div class="flex items-center justify-between gap-3">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-700 text-xs font-black text-white">{{ step.step }}</span>
+              <a [routerLink]="step.route" class="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-bold text-blue-700 transition hover:bg-blue-50">
+                {{ step.action }}
+                <span class="material-symbols-outlined !text-sm">arrow_forward</span>
+              </a>
+            </div>
+            <h3 class="mt-3 text-base font-bold text-slate-900">{{ step.title }}</h3>
+            <p class="mt-2 text-sm leading-6 text-slate-600">{{ step.description }}</p>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section id="modules" class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <h2 class="text-lg font-black uppercase tracking-[0.14em] text-slate-600">Module By Module Guide</h2>
+      <p class="mt-2 text-sm text-slate-600">Use this reference to understand what each area does and how to work efficiently inside it.</p>
+
+      <div class="mt-4 space-y-4">
+        @for (guide of moduleGuides; track guide.title) {
+          <article class="rounded-2xl border border-slate-200 p-4 sm:p-5">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div class="min-w-0">
+                <p class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-blue-700">
+                  <span class="material-symbols-outlined !text-sm">{{ guide.icon }}</span>
+                  {{ guide.title }}
+                </p>
+                <p class="mt-2 text-sm text-slate-600">{{ guide.summary }}</p>
+                <p class="mt-2 text-xs font-semibold text-slate-500">Roles: {{ guide.roles }}</p>
+              </div>
+              <a [routerLink]="guide.route" class="inline-flex h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-xs font-bold uppercase tracking-widest text-slate-700 transition hover:bg-slate-100">
+                Open
+              </a>
+            </div>
+
+            <ul class="mt-4 space-y-2">
+              @for (line of guide.howTo; track line) {
+                <li class="flex items-start gap-2 text-sm text-slate-700">
+                  <span class="material-symbols-outlined mt-0.5 !text-sm text-blue-700">check_circle</span>
+                  <span>{{ line }}</span>
+                </li>
+              }
+            </ul>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section id="roles" class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <h2 class="text-lg font-black uppercase tracking-[0.14em] text-slate-600">Role Permissions</h2>
+      <p class="mt-2 text-sm text-slate-600">Permissions are role-driven. If an action is disabled, it usually means your role does not allow it.</p>
+
+      <div class="mt-4 grid gap-4 xl:grid-cols-2">
+        @for (role of roleGuides; track role.role) {
+          <article class="rounded-2xl border p-4" [ngClass]="role.accent">
+            <h3 class="text-base font-black uppercase tracking-widest">{{ role.role }}</h3>
+
+            <div class="mt-3 space-y-2">
+              @for (permission of role.can; track permission) {
+                <p class="flex items-start gap-2 text-sm">
+                  <span class="material-symbols-outlined mt-0.5 !text-sm">check_circle</span>
+                  <span>{{ permission }}</span>
+                </p>
+              }
+            </div>
+
+            @if (role.cannot.length) {
+              <div class="mt-3 border-t border-current/20 pt-3">
+                @for (blocked of role.cannot; track blocked) {
+                  <p class="flex items-start gap-2 text-sm opacity-90">
+                    <span class="material-symbols-outlined mt-0.5 !text-sm">block</span>
+                    <span>{{ blocked }}</span>
+                  </p>
+                }
+              </div>
+            }
+          </article>
+        }
+      </div>
+    </section>
+
+    <section id="workflow" class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <h2 class="text-lg font-black uppercase tracking-[0.14em] text-slate-600">Recommended Daily Workflow</h2>
+      <div class="mt-4 grid gap-3 md:grid-cols-2">
+        @for (item of workflowChecklist; track item; let i = $index) {
+          <article class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <p class="text-xs font-black uppercase tracking-[0.12em] text-blue-700">Step {{ i + 1 }}</p>
+            <p class="mt-1 text-sm text-slate-700">{{ item }}</p>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section id="faq" class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <h2 class="text-lg font-black uppercase tracking-[0.14em] text-slate-600">Frequently Asked Questions</h2>
+      <div class="mt-4 space-y-3">
+        @for (item of faqItems; track item.question) {
+          <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <summary class="cursor-pointer text-sm font-bold text-slate-900">{{ item.question }}</summary>
+            <p class="mt-3 text-sm leading-6 text-slate-700">{{ item.answer }}</p>
+          </details>
+        }
+      </div>
+    </section>
+
+    <section id="troubleshooting" class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <h2 class="text-lg font-black uppercase tracking-[0.14em] text-slate-600">Troubleshooting</h2>
+      <div class="mt-4 grid gap-3 md:grid-cols-2">
+        @for (item of troubleshooting; track item.issue) {
+          <article class="rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <h3 class="text-sm font-black text-amber-900">{{ item.issue }}</h3>
+            <p class="mt-2 text-sm text-amber-800">{{ item.solution }}</p>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-6">
+      <h2 class="text-lg font-black text-blue-900">Need More Help?</h2>
+      <p class="mt-2 text-sm text-blue-800">
+        If you are blocked after following this guide, contact your workspace Owner with: page name, action attempted,
+        your role, and a screenshot or error message.
+      </p>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <a routerLink="/dashboard" class="inline-flex h-10 items-center rounded-xl bg-blue-700 px-4 text-sm font-bold text-white transition hover:bg-blue-800">Back to Dashboard</a>
+        <a routerLink="/about" class="inline-flex h-10 items-center rounded-xl border border-blue-300 bg-white px-4 text-sm font-bold text-blue-700 transition hover:bg-blue-100">About AutoTestify</a>
+      </div>
+    </section>
+  </div>
+</section>

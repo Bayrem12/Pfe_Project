@@ -1,0 +1,179 @@
+<header class="topbar">
+  <!-- Left Side: Toggle + Breadcrumb -->
+  <div class="breadcrumb-section">
+    <!-- Sidebar Toggle Button -->
+    <button (click)="toggleSidebar()" class="toggle-btn">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+    
+    <nav class="breadcrumb-nav">
+      <ng-container *ngIf="breadcrumbs.length === 0 && !dynamicCrumb && dynamicCrumbs.length === 0">
+        <span class="breadcrumb-item parent">Home</span>
+      </ng-container>
+      
+      <ng-container *ngFor="let breadcrumb of breadcrumbs; let last = last; let first = first">
+        <span *ngIf="!first" class="material-symbols-outlined breadcrumb-separator">chevron_right</span>
+        <a
+          class="breadcrumb-item"
+          [class.current]="last && !dynamicCrumb && dynamicCrumbs.length === 0"
+          [class.parent]="!last || dynamicCrumb || dynamicCrumbs.length > 0"
+          [routerLink]="breadcrumb.url">
+          {{ breadcrumb.label }}
+        </a>
+      </ng-container>
+
+      <!-- Single dynamic segment (e.g. project name) -->
+      <ng-container *ngIf="dynamicCrumb">
+        <span class="material-symbols-outlined breadcrumb-separator">chevron_right</span>
+        <span class="breadcrumb-item current">{{ dynamicCrumb.label }}</span>
+      </ng-container>
+
+      <!-- Multiple dynamic segments (e.g. project name > page) -->
+      <ng-container *ngFor="let crumb of dynamicCrumbs; let last = last">
+        <span class="material-symbols-outlined breadcrumb-separator">chevron_right</span>
+        <a *ngIf="!last && crumb.url" class="breadcrumb-item parent" style="cursor:pointer" (click)="navigateCrumb(crumb)">{{ crumb.label }}</a>
+        <span *ngIf="!last && !crumb.url" class="breadcrumb-item parent">{{ crumb.label }}</span>
+        <span *ngIf="last" class="breadcrumb-item current">{{ crumb.label }}</span>
+      </ng-container>
+    </nav>
+  </div>
+
+  <!-- Right Side: Search & User Actions -->
+  <div class="topbar-actions">
+    <!-- Search Bar -->
+    <div class="search-container">
+      <span class="material-symbols-outlined search-icon">search</span>
+      <input 
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="onSearch()"
+        class="search-input" 
+        placeholder="Quick search..." 
+        type="text"/>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <!-- Notifications -->
+      <div class="notif-wrap" (click)="$event.stopPropagation()">
+        <button
+          type="button"
+          (click)="openNotifications()"
+          class="notif-trigger"
+          [class.active]="notificationsOpen"
+          aria-label="Test run notifications">
+          <span
+            class="material-symbols-outlined notif-trigger-icon"
+            [class.notif-spin]="runNotifications.runningCount > 0">
+            notifications
+          </span>
+          <span
+            *ngIf="runNotifications.totalBadgeCount > 0"
+            class="notif-badge"
+            [class.notif-badge-running]="runNotifications.runningCount > 0">
+            {{ runNotifications.totalBadgeCount > 9 ? '9+' : runNotifications.totalBadgeCount }}
+          </span>
+        </button>
+
+        <div *ngIf="notificationsOpen" class="notif-panel" role="dialog" aria-label="Notifications">
+
+          <header class="notif-header">
+            <div class="notif-header-text">
+              <div class="notif-title">Test Runs</div>
+              <div class="notif-subtitle">
+                <ng-container *ngIf="runNotifications.runningCount > 0">
+                  <span class="dot dot-running"></span>
+                  {{ runNotifications.runningCount }} running
+                  <ng-container *ngIf="notifications.length - runNotifications.runningCount > 0">
+                    · {{ notifications.length - runNotifications.runningCount }} completed
+                  </ng-container>
+                </ng-container>
+                <ng-container *ngIf="runNotifications.runningCount === 0 && notifications.length > 0">
+                  {{ notifications.length }} recent
+                </ng-container>
+                <ng-container *ngIf="notifications.length === 0">No activity</ng-container>
+              </div>
+            </div>
+            <button
+              *ngIf="notifications.length > 0"
+              (click)="clearCompleted($event)"
+              class="notif-clear-btn"
+              type="button">Clear completed</button>
+          </header>
+
+          <div *ngIf="notifications.length === 0" class="notif-empty">
+            <span class="material-symbols-outlined notif-empty-icon">inbox</span>
+            <p class="notif-empty-title">No test runs yet</p>
+            <small class="notif-empty-sub">Trigger a scenario or suite from anywhere — progress will appear here.</small>
+          </div>
+
+          <ul class="notif-list" *ngIf="notifications.length > 0">
+            <li
+              *ngFor="let n of notifications; trackBy: trackByNotifId"
+              class="notif-item"
+              [class.is-unread]="!n.read"
+              [class.is-clickable]="n.executionId"
+              [class.is-running]="n.state === 'running'"
+              [class.is-passed]="n.state === 'passed'"
+              [class.is-failed]="n.state === 'failed'"
+              (click)="onNotificationClick(n)">
+
+              <span class="notif-icon-wrap" [ngClass]="'state-' + n.state">
+                <span
+                  class="material-symbols-outlined"
+                  [class.notif-spin]="n.state === 'running'"
+                  style="font-variation-settings: 'FILL' 1;">
+                  {{ notifIcon(n) }}
+                </span>
+              </span>
+
+              <div class="notif-body">
+                <div class="notif-row">
+                  <span class="notif-kind">{{ n.kind === 'scenario' ? 'Scenario' : 'Test Suite' }}</span>
+                  <span *ngIf="!n.isHeadless" class="notif-tag">
+                    <span class="material-symbols-outlined notif-tag-icon">visibility</span>
+                    Headed
+                  </span>
+                </div>
+                <div class="notif-name" [title]="n.title">{{ n.title }}</div>
+                <div class="notif-sub" *ngIf="n.subtitle" [title]="n.subtitle">{{ n.subtitle }}</div>
+
+                <div class="notif-meta" [ngClass]="'meta-' + n.state">
+                  <ng-container *ngIf="n.state === 'running'">Running · started {{ formatRelative(n.startedAt) }}</ng-container>
+                  <ng-container *ngIf="n.state === 'passed'">Passed · {{ formatDuration(n.durationMs) }} · {{ formatRelative(n.completedAt!) }}</ng-container>
+                  <ng-container *ngIf="n.state === 'failed'">Failed · {{ formatDuration(n.durationMs) }} · {{ formatRelative(n.completedAt!) }}</ng-container>
+                </div>
+
+                <div *ngIf="n.executionId" class="notif-cta">View details →</div>
+              </div>
+
+              <button
+                *ngIf="n.state !== 'running'"
+                (click)="dismissNotification($event, n.id)"
+                class="notif-dismiss"
+                title="Dismiss"
+                type="button">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- History -->
+      <button (click)="openHistory()" class="action-btn">
+        <span class="material-symbols-outlined icon">history</span>
+      </button>
+
+      <!-- Divider -->
+      <div class="divider"></div>
+
+      <!-- User Avatar -->
+<img 
+  [src]="userAvatar"
+  alt="User profile avatar" 
+  class="user-avatar"
+  (click)="goToProfile()"
+  style="cursor: pointer;"/>
+    </div>
+  </div>
+</header>

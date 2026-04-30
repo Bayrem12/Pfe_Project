@@ -1,0 +1,43 @@
+services:
+
+  postgres:
+    image: postgres:16
+
+    environment:
+      POSTGRES_DB: TestAutomation_Db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "5432:5432"
+    
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  api:
+    image: ${API_IMAGE}
+
+    depends_on:
+      - postgres
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development 
+      ASPNETCORE_URLS: http://+:5288 
+     
+      
+      DataConnection__Hostname: postgres
+
+      DataConnection__Database: TestAutomation_Db
+      DataConnection__Username: ${POSTGRES_USER}
+      DataConnection__Password: ${POSTGRES_PASSWORD}
+
+      Jwt__Key: ${JWT_KEY}
+      Jwt__Issuer: TestApi
+      Jwt__Audience: TestApiUsers
+
+    ports:
+      - "5288:5288"
+
+volumes:
+  postgres_data: 
+

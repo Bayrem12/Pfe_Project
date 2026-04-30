@@ -1,0 +1,140 @@
+<div class="fixed inset-0 z-[60] flex items-center justify-center p-6 backdrop-blur-sm bg-on-background/10">
+  <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-8">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xl font-extrabold tracking-tight text-on-background">
+        Create Module
+      </h3>
+      <button
+        (click)="cancel()"
+        class="material-symbols-outlined text-slate-400 hover:text-red-500 transition-colors cursor-pointer">
+        close
+      </button>
+    </div>
+
+    <!-- Error message -->
+    <div
+      *ngIf="errorMessage"
+      class="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="!isRoleLoaded" class="text-center py-8">
+      <p class="text-slate-500 text-sm">Loading...</p>
+    </div>
+
+    <!-- No permission -->
+    <div *ngIf="isRoleLoaded && !canCreate()" class="text-center py-8">
+      <span class="material-symbols-outlined text-4xl text-slate-300">lock</span>
+      <p class="text-slate-500 mt-3 text-sm">You do not have permission to create modules.</p>
+      <button
+        (click)="cancel()"
+        class="mt-4 px-6 py-2 rounded-xl text-slate-500 font-bold hover:bg-slate-100 transition-colors">
+        Go back
+      </button>
+    </div>
+
+    <!-- Form -->
+    <ng-container *ngIf="isRoleLoaded && canCreate()">
+      <form [formGroup]="moduleForm" (ngSubmit)="onSubmit()" novalidate class="space-y-6">
+
+        <!-- Module Name -->
+        <div>
+          <label class="block text-xs font-medium uppercase tracking-widest text-slate-500 mb-2">
+            Module Name <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="name"
+            placeholder="e.g., Billing & Invoicing"
+            [class.ring-2]="f['name'].invalid && f['name'].touched"
+            [class.ring-red-400]="f['name'].invalid && f['name'].touched"
+            [class.ring-primary]="f['name'].valid"
+            class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-background
+                   placeholder:text-slate-400 focus:ring-2 focus:ring-primary focus:bg-white
+                   transition-all outline-none"
+          />
+          <div *ngIf="f['name'].invalid && f['name'].touched" class="mt-1.5 text-xs text-red-500 pl-1">
+            <span *ngIf="f['name'].errors?.['required']">Name is required.</span>
+            <span *ngIf="f['name'].errors?.['minlength']">At least 3 characters required.</span>
+            <span *ngIf="f['name'].errors?.['maxlength']">Maximum 100 characters.</span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-xs font-medium uppercase tracking-widest text-slate-500 mb-2">
+            Description <span class="text-red-500">*</span>
+          </label>
+          <textarea
+            formControlName="description"
+            rows="3"
+            placeholder="Define the scope of this testing module..."
+            [class.ring-2]="f['description'].invalid && f['description'].touched"
+            [class.ring-red-400]="f['description'].invalid && f['description'].touched"
+            class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-background
+                   placeholder:text-slate-400 focus:ring-2 focus:ring-primary focus:bg-white
+                   transition-all outline-none resize-none"
+          ></textarea>
+          <div *ngIf="f['description'].invalid && f['description'].touched" class="mt-1.5 text-xs text-red-500 pl-1">
+            <span *ngIf="f['description'].errors?.['required']">Description is required.</span>
+            <span *ngIf="f['description'].errors?.['maxlength']">Maximum 500 characters.</span>
+          </div>
+        </div>
+
+        <!-- Display Order -->
+        <div>
+          <label class="block text-xs font-medium uppercase tracking-widest text-slate-500 mb-2">
+            Display Order
+          </label>
+          <input
+            type="number"
+            formControlName="displayOrder"
+            min="0"
+            placeholder="0"
+            class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-background
+                   placeholder:text-slate-400 focus:ring-2 focus:ring-primary focus:bg-white
+                   transition-all outline-none"
+          />
+          <p class="mt-1.5 text-xs text-slate-400 pl-1">
+            Controls the order modules appear in the project.
+          </p>
+          <div *ngIf="f['displayOrder'].invalid && f['displayOrder'].touched" class="mt-1 text-xs text-red-500 pl-1">
+            <span *ngIf="f['displayOrder'].errors?.['min']">Must be 0 or greater.</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-3 pt-2">
+          <button
+            type="button"
+            (click)="cancel()"
+            [disabled]="isSubmitting"
+            class="flex-1 py-3 px-6 rounded-xl text-slate-500 font-bold
+                   hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="isSubmitting || moduleForm.invalid"
+            class="flex-1 py-3 px-6 rounded-xl bg-primary text-white font-bold
+                   shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95
+                   transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+            <span *ngIf="isSubmitting" class="flex items-center justify-center gap-2">
+              <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+              </svg>
+              Creating...
+            </span>
+            <span *ngIf="!isSubmitting">Create Module</span>
+          </button>
+        </div>
+
+      </form>
+    </ng-container>
+
+  </div>
+</div>

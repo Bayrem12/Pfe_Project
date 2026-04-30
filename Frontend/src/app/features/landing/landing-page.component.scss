@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #db2777 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.btn-gradient {
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.25);
+  }
+}
+
+.btn-gradient-tertiary {
+  background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%);
+}
+
+.pulse-dot {
+  box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4);
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
+  70%  { box-shadow: 0 0 0 10px rgba(124, 58, 237, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+}
+
+.hero-glow {
+  filter: blur(120px);
+  opacity: 0.15;
+}
+
+// Scroll animations
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+
+  &.animate-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-delay-100 { transition-delay: 0.1s; }
+.animate-delay-200 { transition-delay: 0.2s; }
+.animate-delay-300 { transition-delay: 0.3s; }
+.animate-delay-400 { transition-delay: 0.4s; }
+
+// Floating animation
+@keyframes float-anim {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+
+.float-badge {
+  animation: float-anim 3s ease-in-out infinite;
+}
+
+.float-badge-delay {
+  animation: float-anim 3s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+// Stat counter style
+.stat-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.12);
+  }
+}
+
+// Feature card hover
+.feature-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  &:hover {
+    transform: translateY(-4px);
+  }
+}
+
+// Testimonial card
+.testimonial-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.08);
+  }
+}
+
+// Dashboard mockup glow
+.mockup-glow {
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0.1;
+    filter: blur(8px);
+    transition: opacity 0.5s ease;
+  }
+  &:hover::before {
+    opacity: 0.25;
+  }
+}
+
+// Navbar scroll state
+nav.scrolled {
+  background: rgba(248, 250, 252, 0.95) !important;
+  box-shadow: 0 1px 20px rgba(0, 0, 0, 0.06);
+}
+
+// Mobile menu
+.mobile-menu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  &.open {
+    max-height: 400px;
+  }
+}
+
+// Comparison table rows
+.compare-row {
+  transition: background-color 0.2s ease;
+  &:hover {
+    background-color: #f8fafc;
+  }
+}
+
+// CTA section
+.cta-section {
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.03) 0%,
+    rgba(124, 58, 237, 0.05) 50%,
+    rgba(219, 39, 119, 0.03) 100%
+  );
+}

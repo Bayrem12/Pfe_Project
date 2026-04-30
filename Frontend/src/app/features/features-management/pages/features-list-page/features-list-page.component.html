@@ -1,0 +1,157 @@
+<!-- src/app/features/features-management/pages/features-list-page/features-list-page.component.html -->
+<div class="min-h-screen bg-background px-8 py-10 lg:px-12">
+
+  <!-- Page Header -->
+  <div class="mb-10">
+    <button
+      (click)="navigateToProject()"
+      class="flex items-center gap-2 text-on-surface-variant hover:text-primary mb-6 transition-colors group">
+      <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+      <span class="text-sm font-semibold">Back to Project</span>
+    </button>
+
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div>
+        <h1 class="text-4xl font-extrabold tracking-tight text-on-background">Features</h1>
+        <p class="text-on-surface-variant mt-2 text-sm">
+          Functional components grouped by module for your automation suite.
+        </p>
+      </div>
+
+      <button
+        *ngIf="canWrite"
+        (click)="createFeature()"
+        [disabled]="!selectedModuleId"
+        class="flex items-center gap-2 px-8 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none">
+        <span class="material-symbols-outlined text-lg">add</span>
+        New Feature
+      </button>
+    </div>
+  </div>
+
+  <!-- Module Selector Tabs -->
+  <div class="mb-8" *ngIf="modules.length > 0">
+    <p class="text-xs font-bold uppercase tracking-[0.1em] text-on-surface-variant mb-3">Select Module</p>
+    <div class="flex flex-wrap gap-2">
+      <button
+        *ngFor="let module of modules"
+        (click)="onModuleChange(module.id)"
+        [class.bg-primary]="module.id === selectedModuleId"
+        [class.text-on-primary]="module.id === selectedModuleId"
+        [class.shadow-lg]="module.id === selectedModuleId"
+        [class.shadow-primary-20]="module.id === selectedModuleId"
+        [class.bg-surface-container]="module.id !== selectedModuleId"
+        [class.text-on-surface-variant]="module.id !== selectedModuleId"
+        class="px-5 py-2.5 rounded-xl font-semibold text-sm transition-all hover:-translate-y-0.5">
+        {{ module.name }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="flex flex-col items-center gap-4 py-32">
+    <div class="w-10 h-10 border-[3px] border-surface-container border-t-primary rounded-full animate-spin"></div>
+    <span class="text-on-surface-variant text-sm font-medium">Loading features...</span>
+  </div>
+
+  <!-- Error -->
+  <div
+    *ngIf="error && !isLoading"
+    class="mb-6 p-4 bg-error-container border border-error/20 rounded-xl text-on-error-container text-sm flex items-center gap-3">
+    <span class="material-symbols-outlined text-error">error</span>
+    {{ error }}
+  </div>
+
+  <!-- No modules -->
+  <div *ngIf="!isLoading && modules.length === 0 && !error" class="text-center py-24">
+    <div class="w-20 h-20 rounded-2xl bg-surface-container flex items-center justify-center mx-auto mb-6">
+      <span class="material-symbols-outlined text-4xl text-on-surface-variant">account_tree</span>
+    </div>
+    <h3 class="text-xl font-bold text-on-background mb-2">No modules found</h3>
+    <p class="text-on-surface-variant text-sm mb-6">Create a module in your project first.</p>
+    <button
+      (click)="navigateToProject()"
+      class="px-6 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm hover:bg-primary/90 transition-all">
+      Go to Project
+    </button>
+  </div>
+
+  <!-- Empty Features -->
+  <div
+    *ngIf="!isLoading && modules.length > 0 && features.length === 0 && !error"
+    class="text-center py-24">
+    <div class="w-20 h-20 rounded-2xl bg-surface-container flex items-center justify-center mx-auto mb-6">
+      <span class="material-symbols-outlined text-4xl text-on-surface-variant">inventory_2</span>
+    </div>
+    <h3 class="text-xl font-bold text-on-background mb-2">No features yet</h3>
+    <p class="text-on-surface-variant text-sm mb-6">Add the first feature to this module.</p>
+    <button
+      *ngIf="canWrite"
+      (click)="createFeature()"
+      class="px-8 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
+      + Create First Feature
+    </button>
+  </div>
+
+  <!-- Features Grid -->
+  <div
+    *ngIf="!isLoading && features.length > 0"
+    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+    <div
+      *ngFor="let feature of features"
+      (click)="viewFeature(feature.id)"
+      class="group bg-surface-container-lowest rounded-2xl border border-outline-variant p-6 hover:shadow-[0_8px_24px_rgba(0,40,142,0.1)] hover:border-primary/30 transition-all cursor-pointer hover:-translate-y-1 relative overflow-hidden">
+
+      <!-- Top accent line -->
+      <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-secondary to-primary-container opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+      <!-- Card Header -->
+      <div class="flex items-start justify-between mb-5">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-2xl text-primary">inventory_2</span>
+        </div>
+        <div class="flex items-center gap-1" *ngIf="canWrite" (click)="$event.stopPropagation()">
+          <button
+            (click)="viewFeature(feature.id)"
+            class="w-8 h-8 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-all"
+            title="View details">
+            <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+          </button>
+          <button
+            (click)="deleteFeature(feature.id, $event)"
+            [disabled]="deletingId === feature.id"
+            class="w-8 h-8 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-error-container hover:text-error transition-all disabled:opacity-50"
+            title="Delete">
+            <span *ngIf="deletingId !== feature.id" class="material-symbols-outlined text-[18px]">delete</span>
+            <span *ngIf="deletingId === feature.id" class="w-4 h-4 border-2 border-error border-t-transparent rounded-full animate-spin"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Feature Name & Description -->
+      <h3 class="text-base font-bold text-on-background mb-2 line-clamp-1">{{ feature.name }}</h3>
+      <p class="text-on-surface-variant text-sm leading-relaxed mb-5 line-clamp-2">{{ feature.description }}</p>
+
+      <!-- Footer stats -->
+      <div class="flex items-center justify-between pt-4 border-t border-outline-variant">
+        <div class="flex items-center gap-2 text-sm text-on-surface-variant">
+          <span class="material-symbols-outlined text-[16px]">description</span>
+          <span>{{ feature.scenarioCount || 0 }} scenario{{ (feature.scenarioCount || 0) !== 1 ? 's' : '' }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-1 bg-surface-container text-on-surface-variant rounded-lg text-xs font-medium">
+            #{{ feature.displayOrder }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Date -->
+      <p class="text-xs text-on-surface-variant mt-3">
+        Created {{ feature.createdDate | date: 'MMM d, yyyy' }}
+      </p>
+    </div>
+
+  </div>
+
+</div>

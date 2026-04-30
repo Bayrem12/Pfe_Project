@@ -1,0 +1,204 @@
+// Sidebar Navigation Styles
+// Uses SCSS for maintainable, consistent styling
+
+// Variables
+$sidebar-width: 256px;
+$sidebar-collapsed-width: 72px;
+$primary: #00288e;
+$secondary: #712ae2;
+
+// Main sidebar container
+:host {
+  display: block;
+}
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: $sidebar-width;
+  height: 100vh;
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 4px;
+  box-shadow: 12px 0 40px rgba(0, 40, 142, 0.04);
+  z-index: 40;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.3s ease;
+  
+  // Collapsed state
+  &.collapsed {
+    width: $sidebar-collapsed-width;
+    padding: 16px 12px;
+    
+    .logo-section {
+      .logo-text {
+        display: none;
+      }
+    }
+    
+    .nav-link {
+      justify-content: center;
+      padding: 12px;
+      
+      .nav-label {
+        display: none;
+      }
+      
+      &:hover {
+        transform: none;
+      }
+    }
+    
+    .bottom-actions {
+      .nav-link {
+        justify-content: center;
+      }
+    }
+  }
+  
+  // Logo section
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    margin-bottom: 32px;
+    margin-top: 8px;
+    
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 12px;
+      background-color: $primary;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+    
+    .logo-text {
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity 0.2s;
+      
+      h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e40af;
+        letter-spacing: -0.05em;
+        margin: 0;
+      }
+      
+      p {
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin: 0;
+      }
+    }
+  }
+  
+  // Navigation section
+  nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  // Navigation link styles
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: #64748b;
+    
+    &:hover {
+      background-color: rgba(226, 232, 240, 0.5);
+      transform: translateX(4px);
+    }
+    
+    .nav-icon {
+      font-size: 20px;
+      min-width: 20px;
+    }
+    
+    .nav-label {
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity 0.2s;
+    }
+    
+    // Active state
+    &.active {
+      background-color: white;
+      color: #1d4ed8;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      border-left: 4px solid #2563eb;
+      
+      .nav-label {
+        font-weight: 600;
+      }
+    }
+  }
+  
+  // Bottom actions section
+  .bottom-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 16px;
+    margin-top: auto;
+    
+    .logout-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      
+      &:hover {
+        background-color: #fef2f2;
+        color: #dc2626;
+      }
+    }
+  }
+}
+
+// Responsive - hide sidebar on small screens
+@media screen and (max-width: 1024px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease, width 0.3s ease;
+    
+    &:not(.collapsed) {
+      transform: translateX(0);
+    }
+    
+    &.collapsed {
+      transform: translateX(-100%);
+    }
+  }
+}

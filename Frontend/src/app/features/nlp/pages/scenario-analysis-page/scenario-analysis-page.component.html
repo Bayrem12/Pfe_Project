@@ -1,0 +1,40 @@
+<div class="px-6 py-8">
+  <!-- Page Header -->
+  <div class="flex justify-between items-end mb-8">
+    <div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">Scenario Analysis</h1>
+      <p class="text-slate-500">AI-powered analysis of test scenario steps with intent detection and action mapping</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex items-center justify-center py-16">
+    <div class="flex flex-col items-center gap-3">
+      <div class="h-10 w-10 rounded-full border-4 border-blue-100 border-t-[#2563eb] animate-spin"></div>
+      <span class="text-sm text-slate-400">Analyzing scenario steps...</span>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage && !isLoading" class="mb-6 flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 px-5 py-3 text-sm text-red-700">
+    <span class="material-symbols-outlined text-red-500">error</span>
+    <div class="flex-1">
+      <p class="font-bold">Analysis Error</p>
+      <p class="text-xs mt-0.5">{{ errorMessage }}</p>
+    </div>
+    <button
+      (click)="retryAnalysis()"
+      class="px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:opacity-90 transition-all flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-sm">refresh</span>
+      Retry
+    </button>
+  </div>
+
+  <!-- Analysis Display Component -->
+  <app-analysis-display
+    *ngIf="!isLoading"
+    [analyses]="analyses"
+    [scenarioId]="scenarioId"
+    [showHeader]="true">
+  </app-analysis-display>
+</div>

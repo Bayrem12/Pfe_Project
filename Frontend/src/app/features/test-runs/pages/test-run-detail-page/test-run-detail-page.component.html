@@ -1,0 +1,366 @@
+<section class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+  <div class="mx-auto max-w-[1400px] space-y-6">
+
+    <!-- ── Top action bar ─────────────────────────────────────────────── -->
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <button type="button" (click)="goBack()"
+              class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50">
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+        Back to Test Runs
+      </button>
+      <a *ngIf="run?.reportUrl" [href]="run!.reportUrl" target="_blank" rel="noopener"
+         class="inline-flex items-center gap-2 rounded-xl border border-secondary/30 bg-secondary/5 px-4 py-2 text-sm font-bold text-secondary transition hover:bg-secondary/10">
+        <span class="material-symbols-outlined text-base">open_in_new</span>
+        Open Full Report
+      </a>
+    </div>
+
+    <!-- ── Loading / error states ─────────────────────────────────────── -->
+    <div *ngIf="loading" class="rounded-2xl border border-slate-200 bg-white px-4 py-20 text-center text-slate-500 sm:px-6">
+      <span class="material-symbols-outlined mb-3 block animate-spin text-slate-400">progress_activity</span>
+      <p class="text-sm font-medium">Loading test run details…</p>
+    </div>
+
+    <div *ngIf="!loading && errorMessage"
+         class="rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-sm font-semibold text-red-700 sm:px-6">
+      {{ errorMessage }}
+    </div>
+
+    <ng-container *ngIf="!loading && !errorMessage && run">
+
+      <!-- ════ HERO ═══════════════════════════════════════════════════ -->
+      <header [class]="'rounded-3xl border bg-gradient-to-br ' + heroAccentClass(run.status) + ' p-6 sm:p-8'">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+
+          <div class="flex items-start gap-5 min-w-0">
+            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-sm">
+              <span [class]="'material-symbols-outlined text-3xl ' + heroIconColor(run.status)"
+                    [class.animate-spin]="(run.status || '').toLowerCase() === 'running'"
+                    style="font-variation-settings: 'FILL' 1;">
+                {{ heroIcon(run.status) }}
+              </span>
+            </div>
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2 mb-2">
+                <span [class]="getStatusClass(run.status)">{{ run.status }}</span>
+                <span *ngIf="isAiRun(run)"
+                      class="inline-flex items-center gap-1 rounded-full bg-secondary/10 border border-secondary/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-secondary">
+                  <span class="material-symbols-outlined !text-sm" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+                  AI Agent
+                </span>
+                <span class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                  <span class="material-symbols-outlined !text-sm">{{ run.isHeadless ? 'visibility_off' : 'visibility' }}</span>
+                  {{ run.isHeadless ? 'Headless' : 'Headed' }}
+                </span>
+              </div>
+
+              <h1 class="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl truncate">{{ run.runLabel }}</h1>
+              <p class="mt-1 text-sm text-slate-600 sm:text-base">{{ run.projectName }} · {{ run.environment }} · {{ run.browserType || 'Chromium' }}</p>
+
+              <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-slate-600">
+                <span class="inline-flex items-center gap-1.5">
+                  <span class="material-symbols-outlined !text-base text-slate-400">person</span>
+                  {{ run.executedBy }}
+                </span>
+                <span class="inline-flex items-center gap-1.5">
+                  <span class="material-symbols-outlined !text-base text-slate-400">schedule</span>
+                  {{ run.startedAt | date:'MMM d, y · HH:mm' }}
+                </span>
+                <span class="inline-flex items-center gap-1.5">
+                  <span class="material-symbols-outlined !text-base text-slate-400">timer</span>
+                  {{ formatDuration(run.durationSeconds) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compact KPI block -->
+          <div class="grid grid-cols-4 gap-2 lg:gap-3 lg:min-w-[460px]">
+            <article class="rounded-xl bg-white px-3 py-3 text-center shadow-sm ring-1 ring-slate-200">
+              <p class="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Total</p>
+              <p class="mt-0.5 text-2xl font-black text-slate-900">{{ run.totalTests }}</p>
+            </article>
+            <article class="rounded-xl bg-white px-3 py-3 text-center shadow-sm ring-1 ring-emerald-200">
+              <p class="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-600">Passed</p>
+              <p class="mt-0.5 text-2xl font-black text-emerald-700">{{ run.passedTests }}</p>
+            </article>
+            <article class="rounded-xl bg-white px-3 py-3 text-center shadow-sm ring-1 ring-rose-200">
+              <p class="text-[10px] font-black uppercase tracking-[0.14em] text-rose-600">Failed</p>
+              <p class="mt-0.5 text-2xl font-black text-rose-700">{{ run.failedTests }}</p>
+            </article>
+            <article class="rounded-xl bg-white px-3 py-3 text-center shadow-sm ring-1 ring-slate-200">
+              <p class="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Pass Rate</p>
+              <p class="mt-0.5 text-2xl font-black" [class]="getPassRateClass(run.passRate)">{{ run.passRate | number:'1.0-1' }}%</p>
+            </article>
+          </div>
+        </div>
+
+        <!-- Pass distribution bar embedded in hero -->
+        <div class="mt-6 h-2 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-slate-200/60">
+          <div class="flex h-full">
+            <span class="h-full bg-emerald-500" [style.width.%]="run.totalTests ? (run.passedTests * 100) / run.totalTests : 0"></span>
+            <span class="h-full bg-rose-500" [style.width.%]="run.totalTests ? (run.failedTests * 100) / run.totalTests : 0"></span>
+            <span class="h-full bg-slate-300" [style.width.%]="run.totalTests ? (run.skippedTests * 100) / run.totalTests : 0"></span>
+          </div>
+        </div>
+      </header>
+
+      <!-- ════ TABS ════════════════════════════════════════════════════ -->
+      <nav class="flex gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm w-fit">
+        <button type="button" (click)="activeTab = 'overview'"
+                [class]="activeTab === 'overview'
+                  ? 'inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white'
+                  : 'inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-slate-500 transition hover:bg-slate-50 hover:text-slate-700'">
+          <span class="material-symbols-outlined !text-base">dashboard</span>
+          Overview
+        </button>
+        <button type="button" (click)="activeTab = 'scenarios'"
+                [class]="activeTab === 'scenarios'
+                  ? 'inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white'
+                  : 'inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-slate-500 transition hover:bg-slate-50 hover:text-slate-700'">
+          <span class="material-symbols-outlined !text-base">checklist</span>
+          Scenarios
+          <span class="rounded-full bg-slate-200 px-1.5 py-0.5 text-[10px] font-bold text-slate-700">{{ run.testResults.length }}</span>
+        </button>
+      </nav>
+
+      <!-- ════ TAB: OVERVIEW ═══════════════════════════════════════════ -->
+      <ng-container *ngIf="activeTab === 'overview'">
+
+        <!-- Row 1: Config card + AI Report CTA -->
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
+
+          <!-- Run Configuration (spans 2 cols) -->
+          <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
+            <h2 class="mb-5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
+              <span class="material-symbols-outlined !text-base">settings</span>
+              Run Configuration
+            </h2>
+            <dl class="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3">
+              <div>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Environment</dt>
+                <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.environment || '—' }}</dd>
+              </div>
+              <div>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Browser</dt>
+                <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.browserType || 'Chromium' }}</dd>
+              </div>
+              <div>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Mode</dt>
+                <dd class="mt-1 flex items-center gap-1.5 text-sm font-semibold text-slate-800">
+                  <span class="material-symbols-outlined !text-base text-slate-400">{{ run.isHeadless ? 'visibility_off' : 'visibility' }}</span>
+                  {{ run.isHeadless ? 'Headless' : 'Headed' }}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Executed By</dt>
+                <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.executedBy || '—' }}</dd>
+              </div>
+              <div>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Started At</dt>
+                <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.startedAt | date:'MMM d, y · HH:mm' }}</dd>
+              </div>
+              <div>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Total Duration</dt>
+                <dd class="mt-1 text-sm font-semibold text-slate-800">{{ formatDuration(run.durationSeconds) }}</dd>
+              </div>
+              <div *ngIf="run.scenarioName">
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Scenario</dt>
+                <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.scenarioName }}</dd>
+              </div>
+              <div *ngIf="run.testSuiteName">
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Test Suite</dt>
+                <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.testSuiteName }}</dd>
+              </div>
+              <div>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Skipped</dt>
+                <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.skippedTests }} scenario(s)</dd>
+              </div>
+            </dl>
+          </section>
+
+          <!-- AI Report CTA -->
+          <section *ngIf="run.reportUrl"
+                   class="flex flex-col gap-4 rounded-2xl border border-secondary/20 bg-gradient-to-br from-secondary/5 to-white p-6 shadow-sm">
+            <div class="flex items-center gap-3">
+              <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary/10">
+                <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+              </span>
+              <div>
+                <p class="text-sm font-black text-slate-900">AI Execution Report</p>
+                <p class="text-xs text-slate-500">Full step-by-step analysis</p>
+              </div>
+            </div>
+            <p class="text-xs leading-5 text-slate-500">
+              The AI agent generated a detailed HTML report with screenshots, selector debug info, and assertion traces for this run.
+            </p>
+            <div class="flex flex-wrap items-center gap-2">
+              <a *ngIf="primaryReportUrl" [href]="primaryReportUrl" target="_blank" rel="noopener"
+                 class="inline-flex items-center gap-2 rounded-xl bg-secondary px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:opacity-90 active:scale-[0.98]">
+                <span class="material-symbols-outlined text-base">open_in_new</span>
+                Open AI Report
+              </a>
+              <a *ngIf="technicalTraceUrl" [href]="technicalTraceUrl" target="_blank" rel="noopener"
+                 class="inline-flex items-center gap-2 rounded-xl border border-violet-300 bg-gradient-to-br from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:opacity-90 active:scale-[0.98]"
+                 title="Vision-aware diagnostic page: per-step YOLO + DOM detections, similarity scores, and annotated screenshots">
+                <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">visibility</span>
+                Technical Trace
+                <span class="ml-1 rounded-md bg-white/20 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em]">Pro</span>
+              </a>
+            </div>
+            <p *ngIf="technicalTraceUrl" class="-mt-1 text-[11px] leading-5 text-violet-700/80">
+              <span class="font-bold">Technical Trace</span> reveals what YOLO and the DOM each detected, similarity scores per candidate, and the chosen winner — with side-by-side annotated screenshots.
+            </p>
+            <div *ngIf="run.reports && run.reports.length > 2" class="w-full border-t border-secondary/10 pt-3">
+              <p class="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Per-scenario</p>
+              <div class="flex flex-wrap gap-1.5">
+                <a *ngFor="let r of run.reports; let i = index" [href]="r.url" target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-1 rounded-lg border border-secondary/20 bg-white px-2.5 py-1 text-xs font-semibold text-secondary transition hover:bg-secondary/5">
+                  <span class="material-symbols-outlined !text-sm">description</span>
+                  #{{ i + 1 }}
+                </a>
+              </div>
+            </div>
+          </section>
+
+          <!-- No AI report placeholder -->
+          <section *ngIf="!run.reportUrl"
+                   class="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center shadow-sm">
+            <span class="material-symbols-outlined text-4xl text-slate-300">description_off</span>
+            <p class="text-sm font-semibold text-slate-500">No AI report generated</p>
+            <p class="text-xs text-slate-400">This run was executed without the AI agent.</p>
+          </section>
+        </div>
+
+        <!-- Scenario Performance Timeline -->
+        <section *ngIf="run.testResults.length" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div class="border-b border-slate-100 px-6 py-4">
+            <h2 class="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
+              <span class="material-symbols-outlined !text-base">bar_chart</span>
+              Scenario Performance
+            </h2>
+          </div>
+          <div class="divide-y divide-slate-100">
+            <div *ngFor="let result of run.testResults; trackBy: trackByResultId"
+                 class="flex flex-col gap-2 px-6 py-4 transition hover:bg-slate-50/80 sm:flex-row sm:items-center sm:gap-4">
+              <span [class]="getStatusClass(result.status)" class="hidden shrink-0 justify-center sm:inline-flex">{{ result.status }}</span>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-semibold text-slate-800">{{ result.scenarioName }}</p>
+                <div class="mt-2 flex items-center gap-2">
+                  <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                    <div class="h-full rounded-full transition-all"
+                         [style.width.%]="maxScenarioDuration ? (result.durationSeconds / maxScenarioDuration) * 100 : 100"
+                         [class]="(result.status || '').toLowerCase() === 'passed' ? 'bg-emerald-500' : (result.status || '').toLowerCase() === 'failed' ? 'bg-rose-500' : 'bg-slate-400'"></div>
+                  </div>
+                  <span class="w-16 shrink-0 text-right text-xs font-semibold text-slate-500">{{ formatDuration(result.durationSeconds) }}</span>
+                </div>
+              </div>
+              <div class="flex shrink-0 items-center gap-3 text-xs">
+                <span class="font-semibold text-emerald-600">✓ {{ getPassedStepCount(result) }}</span>
+                <span *ngIf="getFailedStepCount(result)" class="font-semibold text-rose-500">✗ {{ getFailedStepCount(result) }}</span>
+                <span class="font-semibold text-slate-400">{{ result.stepResults.length }} steps</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Failure Analysis -->
+        <section *ngIf="failedStepsFlat.length" class="overflow-hidden rounded-2xl border border-rose-200 bg-rose-50/30 shadow-sm">
+          <div class="border-b border-rose-100 px-6 py-4">
+            <h2 class="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-rose-600">
+              <span class="material-symbols-outlined !text-base">bug_report</span>
+              Failure Analysis — {{ failedStepsFlat.length }} Failed Step{{ failedStepsFlat.length !== 1 ? 's' : '' }}
+            </h2>
+          </div>
+          <div class="divide-y divide-rose-100/70">
+            <div *ngFor="let step of failedStepsFlat" class="px-6 py-4">
+              <p class="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-rose-400">{{ step.scenarioName }}</p>
+              <p class="text-sm font-semibold text-slate-800">{{ step.stepText }}</p>
+              <p *ngIf="step.errorMessage"
+                 class="mt-2 whitespace-pre-wrap rounded-lg border border-rose-200 bg-white px-3 py-2 font-mono text-xs text-rose-700">{{ step.errorMessage }}</p>
+              <div *ngIf="step.selectorUsed || step.actionPerformed" class="mt-2 flex flex-wrap gap-2 text-xs">
+                <span *ngIf="step.actionPerformed" class="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-500">
+                  Action: <strong>{{ step.actionPerformed }}</strong>
+                </span>
+                <span *ngIf="step.selectorUsed" class="rounded-md border border-slate-200 bg-white px-2 py-1 font-mono text-slate-500">{{ step.selectorUsed }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </ng-container>
+
+      <!-- ════ TAB: SCENARIOS ══════════════════════════════════════════ -->
+      <ng-container *ngIf="activeTab === 'scenarios'">
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div *ngIf="!run.testResults.length" class="px-5 py-12 text-center text-sm text-slate-500 sm:px-6">
+            No scenario-level results available for this run.
+          </div>
+
+          <div *ngFor="let result of run.testResults; trackBy: trackByResultId"
+               class="border-b border-slate-100 last:border-b-0">
+            <button type="button"
+                    class="flex w-full items-center gap-3 px-5 py-4 text-left transition hover:bg-slate-50 sm:px-6"
+                    (click)="toggleResult(result.id)">
+              <span [class]="getStatusClass(result.status)">{{ result.status }}</span>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-bold text-slate-900 sm:text-[15px]">{{ result.scenarioName }}</p>
+                <p class="mt-1 text-xs text-slate-500">Duration: {{ formatDuration(result.durationSeconds) }}</p>
+              </div>
+              <span class="material-symbols-outlined text-slate-500 transition">{{ isExpanded(result.id) ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</span>
+            </button>
+
+            <div *ngIf="isExpanded(result.id)" class="bg-slate-50/70 px-5 pb-5 pt-1 sm:px-6 sm:pb-6">
+              <div *ngIf="result.errorMessage"
+                   class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {{ result.errorMessage }}
+              </div>
+
+              <div *ngIf="result.stepResults.length; else noSteps" class="space-y-3">
+                <article *ngFor="let step of result.stepResults"
+                         class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition hover:shadow-md sm:p-4">
+                  <div class="mb-2 flex flex-wrap items-center gap-2">
+                    <span [class]="getStatusClass(step.status)">{{ step.status }}</span>
+                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">{{ step.stepType }}</span>
+                    <span class="ml-auto text-xs font-semibold text-slate-500">{{ formatDuration(step.durationSeconds) }}</span>
+                  </div>
+
+                  <p class="text-sm font-semibold leading-6 text-slate-800">{{ step.stepText }}</p>
+                  <p *ngIf="step.errorMessage" class="mt-2 text-xs font-semibold text-red-600">{{ step.errorMessage }}</p>
+
+                  <div class="mt-3 grid grid-cols-1 gap-2 text-xs text-slate-500 sm:grid-cols-2">
+                    <p class="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2">Action: <span class="font-semibold text-slate-700">{{ step.actionPerformed || '—' }}</span></p>
+                    <p *ngIf="step.selectorUsed" class="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 font-mono">{{ step.selectorUsed }}</p>
+                  </div>
+
+                  <!-- Screenshot -->
+                  <div *ngIf="step.screenshot" class="mt-3">
+                    <a [href]="screenshotUrl(step.screenshot.filePath)" target="_blank" rel="noopener"
+                       class="group relative block overflow-hidden rounded-lg border border-blue-100 hover:border-blue-300 transition">
+                      <img [src]="screenshotUrl(step.screenshot.filePath)"
+                           [alt]="step.screenshot.fileName"
+                           class="w-full max-h-64 object-contain bg-slate-50"
+                           loading="lazy"
+                           (error)="$any($event.target).style.display='none'" />
+                      <div class="flex items-center gap-1.5 border-t border-blue-100 bg-blue-50 px-3 py-1.5 text-xs text-blue-600">
+                        <span class="material-symbols-outlined !text-sm">photo_camera</span>
+                        {{ step.screenshot.fileName }}
+                        <span class="material-symbols-outlined !text-sm ml-auto">open_in_new</span>
+                      </div>
+                    </a>
+                  </div>
+                </article>
+              </div>
+
+              <ng-template #noSteps>
+                <p class="text-sm italic text-slate-400">No step-level results available.</p>
+              </ng-template>
+            </div>
+          </div>
+        </section>
+      </ng-container>
+
+
+    </ng-container>
+  </div>
+</section>

@@ -1,0 +1,68 @@
+# Version control and CI metadata
+.git
+.gitignore
+.gitlab-ci.yml
+
+# Local configuration and secrets
+.env
+*.env
+*.Development.json
+*.local.json
+*.user
+*.userosscache
+*.suo
+*.rsuser
+*.pfx
+*.pubxml
+*.publishsettings
+
+# IDE/editor files
+.vs/
+.vscode/
+.idea/
+*.sln.docstates
+
+# .NET build output and caches
+bin/
+obj/
+**/bin/
+**/obj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+TestResults/
+[Tt]est[Rr]esult*/
+coverage/
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+*.coveragexml
+*.trx
+*.binlog
+
+# NuGet/package artifacts
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+
+# Logs and temporary files
+logs/
+*.log
+*.tmp
+*.temp
+*.cache
+*.pid
+*.svclog
+
+# Docker/local orchestration files not needed inside the image
+docker-compose*.yml
+docker-compose*.yaml
+k8s/
+
+# Documentation and OS files
+README.md
+*.md
+.DS_Store
+Thumbs.db
