@@ -62,7 +62,7 @@ namespace Application.Features.NlpFeature.Commands
                         return new ResponseHttp
                         {
                             Status = StatusCodes.Status400BadRequest,
-                            Fail_Messages = $"Scenario with ID {request.ScenarioId} not found."
+                            FailMessages = $"Scenario with ID {request.ScenarioId} not found."
                         };
                     }
 
@@ -76,7 +76,7 @@ namespace Application.Features.NlpFeature.Commands
                         return new ResponseHttp
                         {
                             Status = StatusCodes.Status400BadRequest,
-                            Fail_Messages = "Scenario has no steps to analyze."
+                            FailMessages = "Scenario has no steps to analyze."
                         };
                     }
 
@@ -112,7 +112,7 @@ namespace Application.Features.NlpFeature.Commands
                         return new ResponseHttp
                         {
                             Status = StatusCodes.Status502BadGateway,
-                            Fail_Messages = $"Failed to reach IA Agent NLP service: {ex.Message}"
+                            FailMessages = $"Failed to reach IA Agent NLP service: {ex.Message}"
                         };
                     }
 
@@ -121,7 +121,7 @@ namespace Application.Features.NlpFeature.Commands
                         return new ResponseHttp
                         {
                             Status = StatusCodes.Status502BadGateway,
-                            Fail_Messages = "IA Agent returned no analysis results."
+                            FailMessages = "IA Agent returned no analysis results."
                         };
                     }
 
@@ -172,7 +172,7 @@ namespace Application.Features.NlpFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = ex.Message,
+                        FailMessages = ex.Message,
                         Status = StatusCodes.Status400BadRequest
                     };
                 }

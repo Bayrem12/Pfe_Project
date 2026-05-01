@@ -87,13 +87,17 @@ namespace Persistance.Repositories.Identity
 
         public async Task<List<User>> SearchUsersAsync(string keyword)
         {
-            if (string.IsNullOrWhiteSpace(keyword))
-                return await GetAllUsersAsync();
-
-            keyword = keyword.ToLower();
-            return await _context.Users
+            // Exclude Admin users — they should not appear in member-add dropdowns
+            var baseQuery = _context.Users
                 .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
+                .Where(u => !u.UserRoles.Any(ur => ur.Role.Name == "Admin"));
+
+            if (string.IsNullOrWhiteSpace(keyword))
+                return await baseQuery.ToListAsync();
+
+            keyword = keyword.ToLower();
+            return await baseQuery
                 .Where(u =>
                     (u.FirstName != null && u.FirstName.ToLower().Contains(keyword)) ||
                     (u.LastName != null && u.LastName.ToLower().Contains(keyword)) ||
@@ -145,6 +149,17 @@ namespace Persistance.Repositories.Identity
         {
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.EmailVerificationToken == token);
+        }
+
+        // ✅ Critique 2 — Refresh token : récupère l'utilisateur par refresh token haché
+        public async Task<User?> GetByRefreshTokenAsync(string hashedRefreshToken)
+        {
+            return await _context.Users
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u =>
+                    u.RefreshToken == hashedRefreshToken &&
+                    u.RefreshTokenExpiryTime > DateTime.UtcNow);
         }
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
+using Asp.Versioning;
 namespace API.Controllers
 {
     /// <summary>
@@ -12,14 +13,17 @@ namespace API.Controllers
     /// </summary>
     [Authorize]
     [Route("api/ai-runs")]
+    [ApiVersion("1.0")]
     [ApiController]
     public class AiRunsController : ControllerBase
     {
         private readonly IIAAgentService _iaAgentService;
+        private readonly ILogger<AiRunsController> _logger;
 
-        public AiRunsController(IIAAgentService iaAgentService)
+        public AiRunsController(IIAAgentService iaAgentService, ILogger<AiRunsController> logger)
         {
             _iaAgentService = iaAgentService;
+            _logger = logger;
         }
 
         private Guid CurrentUserId => Guid.Parse(
@@ -61,39 +65,43 @@ namespace API.Controllers
             {
                 return Unauthorized(new ResponseHttp
                 {
-                    Fail_Messages = "You must be authenticated to run AI tests.",
+                    FailMessages = "You must be authenticated to run AI tests.",
                     Status = StatusCodes.Status401Unauthorized
                 });
             }
             catch (ArgumentException ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return NotFound(new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status404NotFound
                 });
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return BadRequest(new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status400BadRequest
                 });
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status502BadGateway, new ResponseHttp
                 {
-                    Fail_Messages = $"IA Agent is unreachable: {ex.Message}",
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status502BadGateway
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -132,39 +140,43 @@ namespace API.Controllers
             {
                 return Unauthorized(new ResponseHttp
                 {
-                    Fail_Messages = "You must be authenticated to run AI tests.",
+                    FailMessages = "You must be authenticated to run AI tests.",
                     Status = StatusCodes.Status401Unauthorized
                 });
             }
             catch (ArgumentException ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return NotFound(new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status404NotFound
                 });
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return BadRequest(new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status400BadRequest
                 });
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status502BadGateway, new ResponseHttp
                 {
-                    Fail_Messages = $"IA Agent is unreachable: {ex.Message}",
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status502BadGateway
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status500InternalServerError
                 });
             }

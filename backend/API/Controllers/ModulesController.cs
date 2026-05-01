@@ -4,21 +4,25 @@ using Microsoft.AspNetCore.Mvc;
 using Application.Features.ModulesFeature.Commands;
 using Application.Setting;
 
+using Asp.Versioning;
 namespace API.Controllers
 {
     /// <summary>
     /// Gestion des modules d'un projet
     /// </summary>
     [Route("api/modules")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize] // Fix : tous les endpoints modules nécessitent une authentification
     public class ModulesController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<ModulesController> _logger;
 
-        public ModulesController(IMediator mediator)
+        public ModulesController(IMediator mediator, ILogger<ModulesController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         /// <summary>

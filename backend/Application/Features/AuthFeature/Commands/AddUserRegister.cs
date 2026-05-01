@@ -31,28 +31,28 @@ namespace Application.Features.UserFeature.Commands
                     if (request is null)
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Requête invalide.",
+                            FailMessages = "Requête invalide.",
                             Status = StatusCodes.Status400BadRequest
                         };
 
                     if (string.IsNullOrWhiteSpace(request.Email))
                         return new ResponseHttp
                         {
-                            Fail_Messages = "L'adresse e-mail est requise.",
+                            FailMessages = "L'adresse e-mail est requise.",
                             Status = StatusCodes.Status400BadRequest
                         };
 
                     if (string.IsNullOrWhiteSpace(request.Password))
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Le mot de passe est requis.",
+                            FailMessages = "Le mot de passe est requis.",
                             Status = StatusCodes.Status400BadRequest
                         };
 
                     if (await _userRepository.ExistsAsync(request.Email))
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Un utilisateur avec cet email existe déjà.",
+                            FailMessages = "Un utilisateur avec cet email existe déjà.",
                             Status = StatusCodes.Status400BadRequest
                         };
 
@@ -89,7 +89,7 @@ namespace Application.Features.UserFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = ex.Message,
+                        FailMessages = ex.Message,
                         Status = StatusCodes.Status400BadRequest
                     };
                 }

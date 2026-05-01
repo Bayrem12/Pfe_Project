@@ -4,9 +4,11 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Asp.Versioning;
 namespace API.Controllers
 {
     [Route("api/dashboard")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     public class DashboardController : ControllerBase
@@ -36,8 +38,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 _logger.LogError(ex, "Error retrieving dashboard summary");
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { Fail_Messages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { FailMessages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
             }
         }
 
@@ -62,8 +65,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 _logger.LogError(ex, "Error retrieving statistics for project {ProjectId}", projectId);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { Fail_Messages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { FailMessages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
             }
         }
 
@@ -83,8 +87,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 _logger.LogError(ex, "Error retrieving execution trends for project {ProjectId}", projectId);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { Fail_Messages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { FailMessages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
             }
         }
 
@@ -104,8 +109,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 _logger.LogError(ex, "Error retrieving audit logs");
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { Fail_Messages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { FailMessages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
             }
         }
     }

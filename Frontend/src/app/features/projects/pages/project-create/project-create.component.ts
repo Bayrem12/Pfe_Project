@@ -54,7 +54,7 @@ export class ProjectCreateComponent {
   }
 
   onSubmit(): void {
-    if (!(this.currentRole === 'owner' || this.currentRole === 'tester')) {
+    if (!(this.currentRole === 'admin' || this.currentRole === 'manager')) {
       return;
     }
 

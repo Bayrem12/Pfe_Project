@@ -7,18 +7,22 @@ using Microsoft.EntityFrameworkCore;
 using Persistance.Data;
 using System.Security.Claims;
 
+using Asp.Versioning;
 namespace API.Controllers
 {
     [Route("api/test-runs")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     public class TestRunsController : ControllerBase
     {
         private readonly TestAutoumatisationContext _dbContext;
+        private readonly ILogger<TestRunsController> _logger;
 
-        public TestRunsController(TestAutoumatisationContext dbContext)
+        public TestRunsController(TestAutoumatisationContext dbContext, ILogger<TestRunsController> logger)
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         private Guid CurrentUserId => Guid.TryParse(
@@ -58,7 +62,7 @@ namespace API.Controllers
                     .Include(e => e.TestResults)
                     .AsQueryable();
 
-                if (!string.Equals(roleName, "owner", StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(roleName, "admin", StringComparison.OrdinalIgnoreCase))
                 {
                     query = query.Where(e =>
                         e.ExecutedById == CurrentUserId ||
@@ -136,9 +140,10 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -178,7 +183,7 @@ namespace API.Controllers
                 {
                     return NotFound(new ResponseHttp
                     {
-                        Fail_Messages = "Test run not found.",
+                        FailMessages = "Test run not found.",
                         Status = StatusCodes.Status404NotFound
                     });
                 }
@@ -187,7 +192,7 @@ namespace API.Controllers
                 var memberProjectIds = await GetCurrentMemberProjectIdsAsync();
                 var executionProjectId = ResolveProjectId(execution);
 
-                var canAccess = string.Equals(roleName, "owner", StringComparison.OrdinalIgnoreCase)
+                var canAccess = string.Equals(roleName, "admin", StringComparison.OrdinalIgnoreCase)
                                 || execution.ExecutedById == CurrentUserId
                                 || (executionProjectId.HasValue && memberProjectIds.Contains(executionProjectId.Value));
 
@@ -195,7 +200,7 @@ namespace API.Controllers
                 {
                     return StatusCode(StatusCodes.Status403Forbidden, new ResponseHttp
                     {
-                        Fail_Messages = "Access denied for this test run.",
+                        FailMessages = "Access denied for this test run.",
                         Status = StatusCodes.Status403Forbidden
                     });
                 }
@@ -298,9 +303,10 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status500InternalServerError
                 });
             }

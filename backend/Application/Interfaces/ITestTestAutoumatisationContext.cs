@@ -1,5 +1,4 @@
 ﻿using Domain.Entities;
-using Domain.Entities.ComputerVision;
 using Domain.Entities.Execution;
 using Domain.Entities.Identity;
 using Domain.Entities.NLP;
@@ -15,16 +14,9 @@ namespace Application.Interfaces
     {
         public DbSet<Test> Tests { get; set; }
         /// <summary>
-        /// ComputerVision
-        /// </summary>
-        public DbSet<DetectionResult> DetectionResults { get; set; }
-        public DbSet<UIElementCache> UIElementcaches { get; set; }
-        public DbSet<UIPattern> UIPatterns { get; set; }
-        /// <summary>
         /// Execution
         /// </summary>
         public DbSet<ExecutionLog> ExecutionLogs { get; set; }
-        public DbSet<ExecutionSchedule> ExecutionSchedules { get; set; }
         public DbSet<Screenshot> Screenshots { get; set; }
         public DbSet<StepResult> StepResults { get; set; }
         public DbSet<TestExecution> TestExecutions { get; set; }
@@ -68,10 +60,6 @@ namespace Application.Interfaces
         /// TestData
         /// </summary>
         public DbSet<Domain.Entities.TestData.Environment> Environments { get; set; }
-        public DbSet<EnvironmentVariable> EnvironmentVariables { get; set; }
-        
-        public DbSet<TestDataEntry> TestDataEntries { get; set; }
-        public DbSet<TestDataSet> TestDataSets { get; set; }
 
 
     }

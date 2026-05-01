@@ -26,7 +26,7 @@ namespace Application.Features.AuthFeature.Commands
                     return new ResponseHttp
                     {
                         Status = StatusCodes.Status400BadRequest,
-                        Fail_Messages = "Les mots de passe ne correspondent pas."
+                        FailMessages = "Les mots de passe ne correspondent pas."
                     };
 
                 var users = await _userRepository.GetAllUsersAsync();
@@ -38,7 +38,7 @@ namespace Application.Features.AuthFeature.Commands
                     return new ResponseHttp
                     {
                         Status = StatusCodes.Status400BadRequest,
-                        Fail_Messages = "Token invalide ou expiré."
+                        FailMessages = "Token invalide ou expiré."
                     };
 
                 // Fix : utiliser BCrypt avec salt automatique au lieu de SHA256

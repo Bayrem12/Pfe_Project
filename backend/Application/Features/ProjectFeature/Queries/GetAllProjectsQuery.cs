@@ -36,7 +36,7 @@ namespace Application.Features.ProjectFeature.Queries
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = "No projects found!",
+                        FailMessages = "No projects found!",
                         Status = StatusCodes.Status400BadRequest,
                     };
                 }

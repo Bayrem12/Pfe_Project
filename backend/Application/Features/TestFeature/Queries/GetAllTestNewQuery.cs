@@ -28,7 +28,7 @@ namespace Application.Features.TestFeature.Queries
                 if (test == null)
                     return new ResponseHttp
                     {
-                        Fail_Messages = "No test found !",
+                        FailMessages = "No test found !",
                         Status = StatusCodes.Status400BadRequest,
                     };
 

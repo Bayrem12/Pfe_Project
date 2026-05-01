@@ -63,7 +63,7 @@ export class FeaturesListPageComponent implements OnInit, OnDestroy {
     const user = this.authService.getCurrentUser();
     if (!user) return false;
     const role = (user.roles?.[0] || '').toLowerCase();
-    return role === 'owner' || role === 'tester' || role === 'admin';
+    return role === 'admin' || role === 'manager' || role === 'tester';
   }
 
   ngOnDestroy(): void {

@@ -68,7 +68,7 @@ export class FeatureDetailPageComponent implements OnInit, OnDestroy {
   }
 
   canEdit(): boolean {
-    return this.currentRole === 'owner' || this.currentRole === 'tester' || this.currentRole === 'admin';
+    return this.currentRole === 'admin' || this.currentRole === 'manager' || this.currentRole === 'tester';
   }
 
   navigateToEdit(): void {

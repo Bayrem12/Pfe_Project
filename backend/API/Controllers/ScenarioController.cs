@@ -9,6 +9,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Asp.Versioning;
 namespace API.Controllers
 {
     /// <summary>
@@ -16,14 +17,17 @@ namespace API.Controllers
     /// </summary>
     [Authorize] // ← FIX SÉCURITÉ #1
     [Route("api/scenarios")]
+    [ApiVersion("1.0")]
     [ApiController]
     public class ScenariosController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<ScenariosController> _logger;
 
-        public ScenariosController(IMediator mediator)
+        public ScenariosController(IMediator mediator, ILogger<ScenariosController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         // ✅ FIX SÉCURITÉ #2 : CurrentUserId toujours actif
@@ -76,15 +80,16 @@ namespace API.Controllers
                 return Unauthorized(new ResponseHttp
                 {
                     Status = StatusCodes.Status401Unauthorized,
-                    Fail_Messages = "You must be authenticated to access scenarios"
+                    FailMessages = "You must be authenticated to access scenarios"
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }
@@ -115,26 +120,29 @@ namespace API.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status403Forbidden, new ResponseHttp
                 {
                     Status = StatusCodes.Status403Forbidden,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
             catch (KeyNotFoundException ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return NotFound(new ResponseHttp
                 {
                     Status = StatusCodes.Status404NotFound,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }
@@ -186,18 +194,20 @@ namespace API.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status403Forbidden, new ResponseHttp
                 {
                     Status = StatusCodes.Status403Forbidden,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }
@@ -257,18 +267,20 @@ namespace API.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status403Forbidden, new ResponseHttp
                 {
                     Status = StatusCodes.Status403Forbidden,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }
@@ -310,18 +322,20 @@ namespace API.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status403Forbidden, new ResponseHttp
                 {
                     Status = StatusCodes.Status403Forbidden,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }
@@ -353,10 +367,11 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }
@@ -397,18 +412,20 @@ namespace API.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status403Forbidden, new ResponseHttp
                 {
                     Status = StatusCodes.Status403Forbidden,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }

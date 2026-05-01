@@ -22,190 +22,6 @@ namespace Persistance.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Entities.ComputerVision.DetectionResult", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("BoundingBox")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<double>("Confidence")
-                        .HasColumnType("double precision");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTimeOffset?>("DeletedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DetectedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("ElementType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("Method")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ModifiedById")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("ScreenshotPath")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("StepResultId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StepResultId");
-
-                    b.ToTable("DetectionResults");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ComputerVision.UIElementCache", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<double>("Confidence")
-                        .HasColumnType("double precision");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTimeOffset?>("DeletedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("DetectionCount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ElementIdentifier")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("LastDetectedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ModifiedById")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("PageUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("SelectorType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("SelectorValue")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("UIElementcaches");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ComputerVision.UIPattern", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTimeOffset?>("DeletedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ModifiedById")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("PatternName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PatternType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("TemplateData")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("UsageCount")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("UIPatterns");
-                });
-
             modelBuilder.Entity("Domain.Entities.Execution.ExecutionLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -257,69 +73,6 @@ namespace Persistance.Migrations
                     b.HasIndex("ExecutionId");
 
                     b.ToTable("ExecutionLogs");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Execution.ExecutionSchedule", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("CronExpression")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("DeletedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("EnvironmentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("LastRunAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ModifiedById")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime?>("NextRunAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid>("TestSuiteId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UsersId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EnvironmentId");
-
-                    b.HasIndex("TestSuiteId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("ExecutionSchedules");
                 });
 
             modelBuilder.Entity("Domain.Entities.Execution.Screenshot", b =>
@@ -620,9 +373,9 @@ namespace Persistance.Migrations
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                             CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Owner with full access",
+                            Description = "Admin with full access",
                             IsDeleted = false,
-                            Name = "Owner"
+                            Name = "Admin"
                         },
                         new
                         {
@@ -1783,190 +1536,6 @@ namespace Persistance.Migrations
                     b.ToTable("Environments");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TestData.EnvironmentVariable", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTimeOffset?>("DeletedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("EnvironmentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsSecret")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ModifiedById")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EnvironmentId");
-
-                    b.ToTable("EnvironmentVariables");
-                });
-
-            modelBuilder.Entity("Domain.Entities.TestData.TestDataEntry", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid>("DataSetId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("DataType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("DeletedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ModifiedById")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DataSetId");
-
-                    b.ToTable("TestDataEntries");
-                });
-
-            modelBuilder.Entity("Domain.Entities.TestData.TestDataSet", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTimeOffset?>("DeletedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ModifiedById")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("TestDataSets");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ComputerVision.DetectionResult", b =>
-                {
-                    b.HasOne("Domain.Entities.Execution.StepResult", "StepResult")
-                        .WithMany()
-                        .HasForeignKey("StepResultId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("StepResult");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ComputerVision.UIElementCache", b =>
-                {
-                    b.HasOne("Domain.Entities.ProjectManagement.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Project");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ComputerVision.UIPattern", b =>
-                {
-                    b.HasOne("Domain.Entities.ProjectManagement.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Project");
-                });
-
             modelBuilder.Entity("Domain.Entities.Execution.ExecutionLog", b =>
                 {
                     b.HasOne("Domain.Entities.Execution.TestExecution", "Execution")
@@ -1976,33 +1545,6 @@ namespace Persistance.Migrations
                         .IsRequired();
 
                     b.Navigation("Execution");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Execution.ExecutionSchedule", b =>
-                {
-                    b.HasOne("Domain.Entities.TestData.Environment", "Environment")
-                        .WithMany()
-                        .HasForeignKey("EnvironmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Scenarios.TestSuite", "TestSuite")
-                        .WithMany()
-                        .HasForeignKey("TestSuiteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Identity.User", "Users")
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Environment");
-
-                    b.Navigation("TestSuite");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Domain.Entities.Execution.Screenshot", b =>
@@ -2337,39 +1879,6 @@ namespace Persistance.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TestData.EnvironmentVariable", b =>
-                {
-                    b.HasOne("Domain.Entities.TestData.Environment", "Environment")
-                        .WithMany("Variables")
-                        .HasForeignKey("EnvironmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Environment");
-                });
-
-            modelBuilder.Entity("Domain.Entities.TestData.TestDataEntry", b =>
-                {
-                    b.HasOne("Domain.Entities.TestData.TestDataSet", "DataSet")
-                        .WithMany("Entries")
-                        .HasForeignKey("DataSetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DataSet");
-                });
-
-            modelBuilder.Entity("Domain.Entities.TestData.TestDataSet", b =>
-                {
-                    b.HasOne("Domain.Entities.ProjectManagement.Project", "Project")
-                        .WithMany("TestDataSets")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Project");
-                });
-
             modelBuilder.Entity("Domain.Entities.Execution.StepResult", b =>
                 {
                     b.Navigation("Screenshot");
@@ -2422,8 +1931,6 @@ namespace Persistance.Migrations
 
                     b.Navigation("Tags");
 
-                    b.Navigation("TestDataSets");
-
                     b.Navigation("TestSuites");
                 });
 
@@ -2453,16 +1960,6 @@ namespace Persistance.Migrations
             modelBuilder.Entity("Domain.Entities.Scenarios.TestSuite", b =>
                 {
                     b.Navigation("TestSuiteScenarios");
-                });
-
-            modelBuilder.Entity("Domain.Entities.TestData.Environment", b =>
-                {
-                    b.Navigation("Variables");
-                });
-
-            modelBuilder.Entity("Domain.Entities.TestData.TestDataSet", b =>
-                {
-                    b.Navigation("Entries");
                 });
 #pragma warning restore 612, 618
         }

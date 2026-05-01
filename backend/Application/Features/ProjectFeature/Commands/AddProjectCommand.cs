@@ -13,7 +13,8 @@ namespace Application.Features.ProjectFeature.Commands
         string Name,
         string Description,
         Guid UserId,
-        bool IsActive = true)
+        bool IsActive = true,
+        string GlobalRole = "")
         : IRequest<ResponseHttp>
     {
         public class AddProjectCommandHandler : IRequestHandler<AddProjectCommand, ResponseHttp>
@@ -45,18 +46,21 @@ namespace Application.Features.ProjectFeature.Commands
                     project = await _projectRepository.Post(project);
                     await _projectRepository.SaveChange(cancellationToken);
 
-                    // Add creator as Owner member
-                    var ownerMember = new ProjectMember
+                    // Add creator as member only if they're not the Owner/Admin (Owner sees everything without membership)
+                    if (!string.Equals(request.GlobalRole, "admin", StringComparison.OrdinalIgnoreCase))
                     {
-                        Id = Guid.NewGuid(),
-                        ProjectId = project.Id,
-                        UserId = request.UserId,
-                        Role = ProjectRole.Owner,
-                        JoinedAt = DateTime.UtcNow,
-                        CreatedDate = DateTime.UtcNow
-                    };
-                    await _projectRepository.AddMemberAsync(ownerMember, cancellationToken);
-                    await _projectRepository.SaveChange(cancellationToken);
+                        var creatorMember = new ProjectMember
+                        {
+                            Id = Guid.NewGuid(),
+                            ProjectId = project.Id,
+                            UserId = request.UserId,
+                            Role = ProjectRole.Admin,
+                            JoinedAt = DateTime.UtcNow,
+                            CreatedDate = DateTime.UtcNow
+                        };
+                        await _projectRepository.AddMemberAsync(creatorMember, cancellationToken);
+                        await _projectRepository.SaveChange(cancellationToken);
+                    }
 
                     return new ResponseHttp()
                     {
@@ -69,7 +73,7 @@ namespace Application.Features.ProjectFeature.Commands
                     var innerMessage = ex.InnerException?.Message ?? ex.Message;
                     return new ResponseHttp
                     {
-                        Fail_Messages = innerMessage,
+                        FailMessages = innerMessage,
                         Status = StatusCodes.Status400BadRequest,
                     };
                 }

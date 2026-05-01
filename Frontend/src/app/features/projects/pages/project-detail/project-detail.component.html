@@ -72,7 +72,7 @@
     <div class="flex flex-wrap gap-3">
       <button
         class="px-5 py-2.5 bg-white text-red-600 border border-red-200 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-50 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none"
-        [disabled]="isArchiving || isViewerOrManager"
+        [disabled]="isArchiving || isViewerOrTester"
         (click)="archiveProject()"
       >
         <span class="material-symbols-outlined text-lg">archive</span>

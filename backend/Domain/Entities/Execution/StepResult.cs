@@ -1,5 +1,4 @@
 ﻿using Domain.Common;
-using Domain.Entities.ComputerVision;
 using Domain.Entities.Scenarios;
 using Domain.Enums;
 

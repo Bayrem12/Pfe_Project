@@ -131,7 +131,7 @@ export class ScenarioDetailPageComponent implements OnInit, OnDestroy {
 
   runScenario(isHeadless: boolean = true): void {
     if (!this.canRunScenarioTests) {
-      this.error = 'Only Owner and Tester roles can run scenario tests.';
+      this.error = 'Only Admin and Tester roles can run scenario tests.';
       return;
     }
     if (!this.scenarioId) return;

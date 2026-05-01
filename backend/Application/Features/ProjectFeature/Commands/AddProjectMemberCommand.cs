@@ -36,7 +36,7 @@ namespace Application.Features.ProjectFeature.Commands
                     {
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Project not found",
+                            FailMessages = "Project not found",
                             Status = StatusCodes.Status400BadRequest,
                         };
                     }
@@ -47,7 +47,7 @@ namespace Application.Features.ProjectFeature.Commands
                     {
                         return new ResponseHttp
                         {
-                            Fail_Messages = "User is already a member of this project",
+                            FailMessages = "User is already a member of this project",
                             Status = StatusCodes.Status400BadRequest,
                         };
                     }
@@ -79,7 +79,7 @@ namespace Application.Features.ProjectFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = ex.Message,
+                        FailMessages = ex.Message,
                         Status = StatusCodes.Status400BadRequest,
                     };
                 }

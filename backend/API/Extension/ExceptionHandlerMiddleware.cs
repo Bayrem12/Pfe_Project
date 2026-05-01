@@ -36,7 +36,7 @@ namespace API.Extension
                 var response = new ResponseHttp
                 {
                     Status = StatusCodes.Status400BadRequest,
-                    Fail_Messages = message
+                    FailMessages = message
                 };
 
                 await context.Response.WriteAsJsonAsync(response);

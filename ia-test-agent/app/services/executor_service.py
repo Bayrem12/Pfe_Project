@@ -121,6 +121,12 @@ def _parse_target_from_line(line: str) -> Optional[str]:
         )
         if attr_val_m:
             return attr_val_m.group(1)  # e.g. "Email"
+        # For selectors like input[type='email'], extract the type value as a
+        # semantic hint: DOM enrichment often stores 'userEmail name@example.com'
+        # which contains 'email' — enough for similarity matching to win.
+        type_val_m = re.search(r"\[type=['\"]([^'\"]+)['\"]", sel)
+        if type_val_m:
+            return type_val_m.group(1)  # e.g. 'email', 'password', 'text'
         # CSS selector present but no extractable label → type-only fallback
         return ""
     return None
@@ -166,7 +172,9 @@ def _score_candidates(elements, target: str, type_filter: list[str]):
                 score += 0.3  # substring bonus
         scored.append((elem, score))
 
-    scored.sort(key=lambda t: t[1], reverse=True)
+    # Sort by score DESC; break ties using YOLO confidence DESC so that the
+    # highest-confidence detection of a given type wins when scores are equal.
+    scored.sort(key=lambda t: (t[1], t[0].confiance_detection), reverse=True)
     return scored
 
 
@@ -178,17 +186,23 @@ def _find_best_element(elements, target: str, type_filter: list[str]):
 
     best, best_score = scored[0]
 
-    # Accept when:
-    #   - text similarity is good enough (>0.25), OR
-    #   - no text label was given (pure type-only lookup), OR
-    #   - type filter was explicitly set AND the best candidate matched that type
-    has_type_match = (
-        bool(type_filter)
-        and best is not None
-        and best.type in type_filter
-    )
-    if best is not None and (best_score > 0.25 or not target or has_type_match):
+    # Good text similarity → accept immediately.
+    if best_score > 0.25:
         return best
+
+    # Pure type-only lookup (no target text specified → return first type match).
+    if not target:
+        return best
+
+    # Target IS specified but every candidate scored ≤ 0.1 — meaning no element
+    # had any readable text at all (OCR failed AND DOM enrichment was empty).
+    # Accept the first type-matched candidate as a last resort, since we literally
+    # have no text signal to do better.
+    if bool(type_filter) and best is not None and best.type in type_filter:
+        all_type_only = all(s <= 0.1 for _, s in scored)
+        if all_type_only:
+            return best  # last resort: accept first type-matched element
+
     return None
 
 

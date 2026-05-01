@@ -107,27 +107,13 @@
 
         }
 
-        public enum DetectionMethod
-        {
+        // ✅ Critique 7 — DetectionMethod supprimé (uniquement utilisé par les entités ComputerVision retirées)
 
-            Selector = 0,
-
-            XPath = 1,
-
-            CSS = 2,
-
-            OCR = 3,
-
-            YOLO = 4,
-
-            OpenCV = 5
-
-        }
 
         public enum ProjectRole
         {
 
-            Owner = 0,
+            Admin = 0,
 
             Manager = 1,
 

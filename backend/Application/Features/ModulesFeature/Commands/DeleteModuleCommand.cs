@@ -26,7 +26,7 @@ namespace Application.Features.ModulesFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = "Module not found",
+                        FailMessages = "Module not found",
                         Status = StatusCodes.Status404NotFound
                     };
                 }
@@ -36,7 +36,7 @@ namespace Application.Features.ModulesFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = "Unable to delete module",
+                        FailMessages = "Unable to delete module",
                         Status = StatusCodes.Status400BadRequest
                     };
                 }
@@ -53,7 +53,7 @@ namespace Application.Features.ModulesFeature.Commands
             {
                 return new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = ex.Message,
                     Status = StatusCodes.Status400BadRequest
                 };
             }

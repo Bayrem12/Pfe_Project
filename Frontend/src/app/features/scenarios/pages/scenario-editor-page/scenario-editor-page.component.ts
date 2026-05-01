@@ -576,7 +576,7 @@ export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
 
   onSubmit(asDraft: boolean = false): void {
     if (!this.isEditMode && !this.canCreateScenario) {
-      this.validationErrors = ['Only Owner and Tester roles can create scenarios.'];
+      this.validationErrors = ['Only Admin and Tester roles can create scenarios.'];
       return;
     }
 

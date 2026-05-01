@@ -39,7 +39,7 @@ namespace Application.Features.ScenariosFeature.Commands
                     {
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Scenario not found",
+                            FailMessages = "Scenario not found",
                             Status = StatusCodes.Status404NotFound
                         };
                     }
@@ -50,7 +50,7 @@ namespace Application.Features.ScenariosFeature.Commands
                     {
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Unable to determine project ownership",
+                            FailMessages = "Unable to determine project ownership",
                             Status = StatusCodes.Status400BadRequest
                         };
                     }
@@ -64,7 +64,7 @@ namespace Application.Features.ScenariosFeature.Commands
                     {
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Project not found",
+                            FailMessages = "Project not found",
                             Status = StatusCodes.Status404NotFound
                         };
                     }
@@ -77,7 +77,7 @@ namespace Application.Features.ScenariosFeature.Commands
                     {
                         return new ResponseHttp
                         {
-                            Fail_Messages = "You are not a member of this project",
+                            FailMessages = "You are not a member of this project",
                             Status = StatusCodes.Status403Forbidden
                         };
                     }
@@ -98,7 +98,7 @@ namespace Application.Features.ScenariosFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = ex.InnerException?.Message ?? ex.Message,
+                        FailMessages = ex.InnerException?.Message ?? ex.Message,
                         Status = StatusCodes.Status400BadRequest
                     };
                 }

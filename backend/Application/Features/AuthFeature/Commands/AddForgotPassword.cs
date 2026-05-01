@@ -31,7 +31,7 @@ namespace Application.Features.AuthFeature.Commands
                     return new ResponseHttp
                     {
                         Status = StatusCodes.Status404NotFound,
-                        Fail_Messages = "No account found with this email address."
+                        FailMessages = "No account found with this email address."
                     };
 
                 // Générer le token sécurisé

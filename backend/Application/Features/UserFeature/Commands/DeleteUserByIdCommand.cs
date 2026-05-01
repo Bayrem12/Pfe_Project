@@ -26,7 +26,7 @@ namespace Application.Features.UserFeature.Commands
                     {
                         return new ResponseHttp
                         {
-                            Fail_Messages = "User with this Id not found.",
+                            FailMessages = "User with this Id not found.",
                             Status = StatusCodes.Status404NotFound
                         };
                     }
@@ -45,7 +45,7 @@ namespace Application.Features.UserFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = ex.Message,
+                        FailMessages = ex.Message,
                         Status = StatusCodes.Status400BadRequest
                     };
                 }

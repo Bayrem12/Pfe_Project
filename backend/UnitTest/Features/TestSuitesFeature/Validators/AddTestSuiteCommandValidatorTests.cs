@@ -48,7 +48,7 @@ namespace UnitTest.Features.TestSuitesFeature.Validators
 
             // Assert
             result.Status.Should().Be(StatusCodes.Status400BadRequest);
-            result.Fail_Messages.Should().Contain("Project ID is required");
+            result.FailMessages.Should().Contain("Project ID is required");
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace UnitTest.Features.TestSuitesFeature.Validators
 
             // Assert
             result.Status.Should().Be(StatusCodes.Status400BadRequest);
-            result.Fail_Messages.Should().Contain("Name is required");
+            result.FailMessages.Should().Contain("Name is required");
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace UnitTest.Features.TestSuitesFeature.Validators
 
             // Assert
             result.Status.Should().Be(StatusCodes.Status400BadRequest);
-            result.Fail_Messages.Should().Contain("Name cannot exceed 200 characters");
+            result.FailMessages.Should().Contain("Name cannot exceed 200 characters");
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace UnitTest.Features.TestSuitesFeature.Validators
 
             // Assert
             result.Status.Should().Be(StatusCodes.Status400BadRequest);
-            result.Fail_Messages.Should().Contain("Description cannot exceed 1000 characters");
+            result.FailMessages.Should().Contain("Description cannot exceed 1000 characters");
         }
 
         [Fact]
@@ -122,7 +122,7 @@ namespace UnitTest.Features.TestSuitesFeature.Validators
 
             // Assert
             result.Status.Should().Be(StatusCodes.Status400BadRequest);
-            result.Fail_Messages.Should().Contain("CreatedById is required");
+            result.FailMessages.Should().Contain("CreatedById is required");
         }
 
         [Fact]

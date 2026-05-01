@@ -2,6 +2,7 @@ using API.Extension;
 using Application.Behaviors;
 using Application.Interfaces;
 using Application.Mappings;
+using Asp.Versioning;
 using Domain.Common;
 using FluentValidation;
 using Infrastructure.Services;
@@ -18,13 +19,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 IConfiguration configuration = builder.Configuration;
 
-builder.Services.ConfigureContext(configuration);
+builder.Services.ConfigureContext(configuration, builder.Environment);
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        // ✅ Critique 6 — camelCase JSON pour convention Angular/JS frontend
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
     });
-builder.Services.RetryExtension(configuration);
 builder.Services.AddMemoryCache();
 builder.Services.AddSignalR();
 
@@ -113,6 +116,22 @@ foreach (var type in applicationAssembly.GetTypes()
 builder.Services.ConfigureSwagger();
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<AutoMapperProfiles>());
 builder.Services.AddHttpContextAccessor();
+
+// ✅ Critique 9 — API versioning par URL segment (/api/v1/...) et header Accept-Version
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new UrlSegmentApiVersionReader(),
+        new HeaderApiVersionReader("Accept-Version")
+    );
+}).AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+});
 
 var app = builder.Build();
 

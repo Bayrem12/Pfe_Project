@@ -205,15 +205,15 @@ export class AuthService {
   }
 
   canManageUsers(): boolean {
-    return this.hasRole('Owner');
+    return this.hasRole('Admin');
   }
 
   canCreateScenarios(): boolean {
-    return this.hasAnyRole(['Owner', 'Tester']);
+    return this.hasAnyRole(['Admin', 'Manager', 'Tester']);
   }
 
   canRunTests(): boolean {
-    return this.hasAnyRole(['Owner', 'Tester']);
+    return this.hasAnyRole(['Admin', 'Manager', 'Tester']);
   }
 
   isProjectReadOnly(): boolean {
@@ -227,11 +227,11 @@ export class AuthService {
   }
 
   canParseGherkinText(): boolean {
-    return this.hasAnyRole(['Owner', 'Manager', 'Tester', 'Viewer']);
+    return this.hasAnyRole(['Admin', 'Manager', 'Tester', 'Viewer']);
   }
 
   canViewAuditLogs(): boolean {
-    return this.hasAnyRole(['Owner', 'Manager', 'Tester']);
+    return this.hasAnyRole(['Admin', 'Manager', 'Tester']);
   }
 
   extractApiErrorMessage(

@@ -246,7 +246,7 @@ export class TestSuiteBuilderPageComponent implements OnInit, OnDestroy {
 
   runSuite(isHeadless: boolean = true): void {
     if (!this.canRunTests) {
-      this.errorMessage = 'Only Owner and Tester roles can run test suites.';
+      this.errorMessage = 'Only Admin and Tester roles can run test suites.';
       return;
     }
 

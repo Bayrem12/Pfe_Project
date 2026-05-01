@@ -80,7 +80,7 @@ export class FeatureFormPageComponent implements OnInit, OnDestroy {
   }
 
   canSubmit(): boolean {
-    return this.currentRole === 'owner' || this.currentRole === 'tester' || this.currentRole === 'admin';
+    return this.currentRole === 'admin' || this.currentRole === 'manager' || this.currentRole === 'tester';
   }
     // ================= MODULES =================
 

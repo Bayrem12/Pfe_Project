@@ -30,24 +30,24 @@ namespace Application.Features.ProjectFeature.Commands
                     {
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Member not found in this project",
+                            FailMessages = "Member not found in this project",
                             Status = StatusCodes.Status400BadRequest,
                         };
                     }
 
-                    if (member.Role == ProjectRole.Owner)
+                    if (member.Role == ProjectRole.Admin)
                     {
                         var projectMembers = await _projectRepository.GetProjectMembersAsync(request.ProjectId, cancellationToken);
 
-                        var remainingOwnersCount = projectMembers.Count(m =>
-                            m.Role == ProjectRole.Owner &&
+                        var remainingAdminsCount = projectMembers.Count(m =>
+                            m.Role == ProjectRole.Admin &&
                             m.UserId != request.UserId);
 
-                        if (remainingOwnersCount == 0)
+                        if (remainingAdminsCount == 0)
                         {
                             return new ResponseHttp
                             {
-                                Fail_Messages = "Cannot remove the last owner of the project",
+                                FailMessages = "Cannot remove the last owner of the project",
                                 Status = StatusCodes.Status400BadRequest,
                             };
                         }
@@ -65,7 +65,7 @@ namespace Application.Features.ProjectFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = ex.Message,
+                        FailMessages = ex.Message,
                         Status = StatusCodes.Status400BadRequest,
                     };
                 }

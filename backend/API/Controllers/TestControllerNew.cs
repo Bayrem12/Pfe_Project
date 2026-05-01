@@ -7,17 +7,23 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
+using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 namespace API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
+    [ApiVersion("1.0")]
     [ApiController]
     public class TestControllerNew : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<TestControllerNew> _logger;
 
-        public TestControllerNew(IMediator mediator)
+        public TestControllerNew(IMediator mediator, ILogger<TestControllerNew> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -41,7 +47,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
         }
 
@@ -66,7 +73,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
 
         }

@@ -58,13 +58,10 @@ namespace Application.Mappings
                         : (src.User != null ? src.User.Email : string.Empty)))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User != null ? src.User.Email : string.Empty))
                 .ForMember(dest => dest.Role, opt => opt.MapFrom(src =>
-                    // Prefer the user's global role name when available, otherwise fall back to the project role enum
+                    // Use the user's global role name when available, otherwise fall back to the project role enum
                     (src.User != null && src.User.UserRoles != null && src.User.UserRoles.Any() && src.User.UserRoles.First().Role != null && !string.IsNullOrWhiteSpace(src.User.UserRoles.First().Role.Name))
                         ? src.User.UserRoles.First().Role.Name
-                        : (
-                            // Map project role enum to a display string. Keep Admin label for Manager enum value to match frontend labels.
-                            src.Role == Domain.Enums.ProjectRole.Manager ? "Admin" : src.Role.ToString()
-                          )));
+                        : src.Role.ToString()));
             CreateMap<ProjectMemberDTO, ProjectMember>();
 
             // ===== NLP Feature Mappings =====

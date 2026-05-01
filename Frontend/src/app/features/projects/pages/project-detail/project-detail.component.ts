@@ -27,8 +27,14 @@ import { CreatedFeaturePayload, FeatureCreateModalComponent } from '../../featur
 })
 export class ProjectDetailComponent implements OnInit, OnDestroy {
 
+  // Only Viewer is blocked from content write actions (add/delete modules, features, tags)
   get isViewerOrManager(): boolean {
-    return this.currentRole === 'viewer' || this.currentRole === 'manager';
+    return this.currentRole === 'viewer';
+  }
+
+  // Viewer and Tester cannot perform project-level actions (archive, edit project)
+  get isViewerOrTester(): boolean {
+    return this.currentRole === 'viewer' || this.currentRole === 'tester';
   }
 
   private static readonly STEP_KEYWORDS = ['GIVEN', 'WHEN', 'THEN', 'AND', 'BUT'];
@@ -640,7 +646,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
   }
 
   canManageProjects(): boolean {
-    return this.currentRole === 'owner' || this.currentRole === 'tester';
+    return this.currentRole === 'admin' || this.currentRole === 'manager';
   }
 
   // ─── Utilitaires affichage ────────────────────────────────────────────────

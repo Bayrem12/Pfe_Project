@@ -40,7 +40,7 @@ namespace Application.Features.ScenariosFeature.Commands
                     var innerMessage = ex.InnerException?.Message ?? ex.Message;
                     return Task.FromResult(new ResponseHttp
                     {
-                        Fail_Messages = innerMessage,
+                        FailMessages = innerMessage,
                         Status = StatusCodes.Status400BadRequest
                     });
                 }

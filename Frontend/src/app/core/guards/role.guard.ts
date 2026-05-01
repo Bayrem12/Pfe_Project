@@ -6,7 +6,7 @@ export const roleGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (authService.hasRole('Owner')) {
+  if (authService.hasRole('Admin')) {
     return true;
   }
 

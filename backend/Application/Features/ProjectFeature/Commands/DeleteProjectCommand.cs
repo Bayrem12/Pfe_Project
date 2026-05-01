@@ -24,7 +24,7 @@ namespace Application.Features.ProjectFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = "Project not found",
+                        FailMessages = "Project not found",
                         Status = StatusCodes.Status400BadRequest,
                     };
                 }

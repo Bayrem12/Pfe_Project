@@ -6,7 +6,7 @@ namespace Infrastructure.Persistence
     public static class ModelBuilderExtensions
     {
         // Fixed Role IDs for seeding - these are the 4 system roles (matching ProjectRole enum)
-        public static readonly Guid OwnerRoleId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        public static readonly Guid AdminRoleId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
         public static readonly Guid ManagerRoleId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
         public static readonly Guid TesterRoleId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
         public static readonly Guid ViewerRoleId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
@@ -22,9 +22,9 @@ namespace Infrastructure.Persistence
             modelBuilder.Entity<Role>().HasData(
                 new Role
                 {
-                    Id = OwnerRoleId,
-                    Name = "Owner",
-                    Description = "Owner with full access",
+                    Id = AdminRoleId,
+                    Name = "Admin",
+                    Description = "Admin with full access",
                     CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                     IsDeleted = false
                 },

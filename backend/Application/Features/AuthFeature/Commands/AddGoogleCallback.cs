@@ -47,7 +47,7 @@ namespace Application.Features.AuthFeature.Commands
                         return new ResponseHttp
                         {
                             Status = StatusCodes.Status400BadRequest,
-                            Fail_Messages = "Invalid Google token."
+                            FailMessages = "Invalid Google token."
                         };
 
                     // 2. Trouver ou créer l'utilisateur
@@ -67,10 +67,13 @@ namespace Application.Features.AuthFeature.Commands
                     }
 
                     // 3. Générer le JWT — même logique que AddUserLogin
+                    // ✅ Critique 1 — Inclure le rôle dans le JWT
+                    var roleName = user.UserRoles.FirstOrDefault()?.Role?.Name ?? "Viewer";
                     var claims = new[]
                     {
                         new Claim(ClaimTypes.Name,           user.Email),
-                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                        new Claim(ClaimTypes.Role,           roleName)
                     };
 
                     var key = new SymmetricSecurityKey(
@@ -106,7 +109,7 @@ namespace Application.Features.AuthFeature.Commands
                     return new ResponseHttp
                     {
                         Status = StatusCodes.Status500InternalServerError,
-                        Fail_Messages = ex.Message
+                        FailMessages = ex.Message
                     };
                 }
             }

@@ -56,18 +56,17 @@ namespace Application.Features.ModulesFeature.Commands
 
             var currentUserGuid = Guid.Parse(currentUserId);
 
-            // ✅ Fix ProjectMembers → utilise p.Members (nom réel dans l'entité Project)
-            // ✅ Fix Role == "Owner" → Role == ProjectRole.Owner (c'est un enum, pas une string)
+            // Any project member who is not Viewer can create modules
             var isMember = await _context.Projects
                 .AnyAsync(p => p.Id == request.ProjectId
                     && p.Members.Any(m =>
                         m.UserId == currentUserGuid &&
-                        (m.Role == ProjectRole.Owner || m.Role == ProjectRole.Tester)),
+                        (m.Role == ProjectRole.Admin || m.Role == ProjectRole.Manager || m.Role == ProjectRole.Tester)),
                     cancellationToken);
 
             if (!isMember)
                 throw new UnauthorizedAccessException(
-                    "Vous devez être Owner ou Tester du projet pour créer un module.");
+                    "Vous devez être membre actif du projet pour créer un module.");
 
             var module = new Module
             {

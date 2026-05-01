@@ -86,7 +86,9 @@ namespace Persistance.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            optionsBuilder.EnableSensitiveDataLogging(true); // To show sql queries parameters values 
+            // ✅ Critique 4 — EnableSensitiveDataLogging supprimé de la base.
+            // Le logging des valeurs SQL (mots de passe, données personnelles) est désormais
+            // activé uniquement en Development, via ContextExtension.cs.
         }
 
         /// <summary>

@@ -1136,7 +1136,7 @@ namespace Persistance.Migrations
                 columns: new[] { "Id", "CreatedBy", "CreatedById", "CreatedDate", "DeletedDate", "Description", "IsDeleted", "ModifiedBy", "ModifiedById", "ModifiedDate", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), null, null, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "Owner with full access", false, null, null, null, "Owner" },
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), null, null, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "Admin with full access", false, null, null, null, "Admin" },
                     { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, null, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "Manager with elevated permissions", false, null, null, null, "Manager" },
                     { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, null, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "Tester with test execution permissions", false, null, null, null, "Tester" },
                     { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, null, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "Viewer with read-only access (default role)", false, null, null, null, "Viewer" }

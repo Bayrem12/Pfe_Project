@@ -35,7 +35,7 @@ namespace Application.Features.DashboardFeature.Queries
                         return new ResponseHttp
                         {
                             Status = StatusCodes.Status400BadRequest,
-                            Fail_Messages = $"Project with ID {request.ProjectId} not found."
+                            FailMessages = $"Project with ID {request.ProjectId} not found."
                         };
                     }
 
@@ -49,7 +49,7 @@ namespace Application.Features.DashboardFeature.Queries
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = ex.Message,
+                        FailMessages = ex.Message,
                         Status = StatusCodes.Status400BadRequest
                     };
                 }

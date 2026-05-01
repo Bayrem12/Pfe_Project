@@ -43,7 +43,7 @@ export class TagCreateModalComponent {
   }
 
   get canCreate(): boolean {
-    return this.currentRole === 'owner' || this.currentRole === 'tester';
+    return this.currentRole === 'admin' || this.currentRole === 'manager' || this.currentRole === 'tester';
   }
 
   get controls() {

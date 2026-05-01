@@ -222,7 +222,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   getRoleClass(): string {
     const role = this.getPrimaryRole().toLowerCase();
-    if (role === 'owner') return 'border border-blue-200 bg-blue-50 text-blue-700';
+    if (role === 'admin') return 'border border-blue-200 bg-blue-50 text-blue-700';
     if (role === 'manager') return 'border border-violet-200 bg-violet-50 text-violet-700';
     if (role === 'tester') return 'border border-emerald-200 bg-emerald-50 text-emerald-700';
     return 'border border-slate-200 bg-slate-100 text-slate-700';

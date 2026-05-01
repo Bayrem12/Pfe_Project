@@ -24,28 +24,17 @@ namespace Persistance.Repositories
                 .FirstOrDefaultAsync(cancellationToken);
 
             var normalizedRole = (globalRole ?? string.Empty).Trim().ToLowerInvariant();
-            var isOwner = normalizedRole == "owner";
-            var isTester = normalizedRole == "tester";
+            var isAdmin = normalizedRole == "admin";
 
             IQueryable<Project> query = _context.Projects
                 .AsNoTracking()
                 .Where(p => !p.IsDeleted);
 
-            if (!isOwner)
+            if (!isAdmin)
             {
-                if (isTester)
-                {
-                    // Tester: projets créés + projets où il est membre
-                    query = query.Where(p =>
-                        p.UserId == userId ||
-                        p.CreatedById == userIdString ||
-                        p.Members.Any(m => !m.IsDeleted && m.UserId == userId));
-                }
-                else
-                {
-                    // Viewer / Manager: uniquement les projets où l'utilisateur est membre
-                    query = query.Where(p => p.Members.Any(m => !m.IsDeleted && m.UserId == userId));
-                }
+                // Manager, Tester, Viewer: only see projects they are a member of
+                query = query.Where(p =>
+                    p.Members.Any(m => !m.IsDeleted && m.UserId == userId));
             }
 
             query = query

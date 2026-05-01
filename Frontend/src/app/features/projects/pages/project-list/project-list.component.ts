@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { Subject, debounceTime } from 'rxjs';
 import { filter, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { ProjectService } from '../../../../core/services/project.service';
 import { toSlug } from '../../../../core/services/project.service';
@@ -100,9 +100,11 @@ export class ProjectListComponent implements OnInit, OnDestroy {
   showAddMemberModal = false;
   selectedProject: Project | null = null;
   availableUsers: UserWithOptionalName[] = [];
+  isSearchingUsers = false;
   isAddingMember = false;
   addMemberError = '';
   selectedMembers: Array<{userId: string, firstName: string, lastName: string, role: string}> = [];
+  private memberSearch$ = new Subject<string>();
 
   // Modal state - Members List
   showMembersListModal = false;
@@ -113,7 +115,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
   userId = '';
   currentRole = 'viewer';
   get isViewerOrManager(): boolean {
-    return this.currentRole === 'viewer' || this.currentRole === 'manager';
+    return this.currentRole === 'viewer' || this.currentRole === 'tester';
   }
 
   private apiUrl = environment.apiUrl;
@@ -134,7 +136,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initCurrentUserContextAndProjects();
-    this.loadUsers();
+    this.initMemberSearch();
   }
 
   ngOnDestroy(): void {
@@ -178,7 +180,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
   }
 
   canManageProjects(): boolean {
-    return this.currentRole === 'owner' || this.currentRole === 'tester';
+    return this.currentRole === 'admin' || this.currentRole === 'manager';
   }
 
   canCreateProjects(): boolean {
@@ -230,35 +232,43 @@ export class ProjectListComponent implements OnInit, OnDestroy {
     } as Project;
   }
 
-  loadUsers(): void {
-    this.http.get<UsersResponse>(`${this.apiUrl}/user`)
+  private initMemberSearch(): void {
+    this.memberSearch$
+      .pipe(
+        debounceTime(300),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(keyword => this.fetchUsers(keyword));
+  }
+
+  private fetchUsers(keyword: string): void {
+    this.isSearchingUsers = true;
+    const url = `${this.apiUrl}/user/search?keyword=${encodeURIComponent(keyword)}`;
+    console.log('[AddMember] fetching users from:', url);
+    this.http.get<UsersResponse>(url)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          // Support multiple response shapes:
-          // 1) direct array of users
-          // 2) ResponseHttp wrapper { resultat: [...] }
-          // 3) paged { items: [...] } or { Items: [...] }
-          if (Array.isArray(response)) {
-            this.availableUsers = response;
-          } else {
-            const data = response.resultat ?? response.data ?? response;
-            if (Array.isArray(data)) {
-              this.availableUsers = data;
-            } else if (data && Array.isArray(data.items)) {
-              this.availableUsers = data.items;
-            } else if (data && Array.isArray(data.Items)) {
-              this.availableUsers = data.Items;
-            } else {
-              this.availableUsers = [];
-            }
-          }
+          console.log('[AddMember] raw response:', response);
+          const raw = response as any;
+          const data = Array.isArray(raw)
+            ? raw
+            : (raw?.resultat ?? raw?.Resultat ?? raw?.data ?? raw?.Data ?? []);
+          this.availableUsers = Array.isArray(data) ? data : [];
+          console.log('[AddMember] availableUsers length:', this.availableUsers.length, this.availableUsers);
+          this.isSearchingUsers = false;
         },
-        error: (error) => {
-          console.error('Erreur lors du chargement des utilisateurs:', error);
+        error: (err) => {
+          console.error('[AddMember] search error:', err);
           this.availableUsers = [];
+          this.isSearchingUsers = false;
         }
       });
+  }
+
+  loadUsers(): void {
+    // Called from (ngModelChange) on the search input — debounced
+    this.memberSearch$.next(this.memberSearchQuery);
   }
 
   applyFilter(): void {
@@ -455,6 +465,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
   }
 
   openAddMemberModal(project: Project, event: Event): void {
+    console.log('[AddMember] openAddMemberModal called. currentRole=', this.currentRole, 'canManage=', this.canManageProjects());
     if (!this.canManageProjects()) {
       return;
     }
@@ -465,7 +476,10 @@ export class ProjectListComponent implements OnInit, OnDestroy {
     this.addMemberError = '';
     this.selectedMembers = [];
     this.memberSearchQuery = '';
+    this.availableUsers = [];
     this.showAddMemberModal = true;
+    // Direct call (no debounce) so users load immediately when modal opens
+    this.fetchUsers('');
   }
 
   closeAddMemberModal(): void {
@@ -473,6 +487,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
     this.selectedProject = null;
     this.addMemberError = '';
     this.selectedMembers = [];
+    this.availableUsers = [];
   }
 
   getFilteredAvailableUsers(): UserWithOptionalName[] {
@@ -480,17 +495,11 @@ export class ProjectListComponent implements OnInit, OnDestroy {
       (this.selectedProject?.members || []).map(m => m.userId || m.id)
     );
     const selectedIds = new Set(this.selectedMembers.map(m => m.userId));
-    let users = this.availableUsers.filter(u => !existingMemberIds.has(u.id) && !selectedIds.has(u.id));
-    if (this.memberSearchQuery.trim()) {
-      const q = this.memberSearchQuery.trim().toLowerCase();
-      users = users.filter(u =>
-        (u.firstName || '').toLowerCase().includes(q) ||
-        (u.lastName || '').toLowerCase().includes(q) ||
-        (u.userName || '').toLowerCase().includes(q) ||
-        (u.email || '').toLowerCase().includes(q)
-      );
-    }
-    return users;
+    return this.availableUsers.filter(u =>
+      !existingMemberIds.has(u.id) &&
+      !selectedIds.has(u.id) &&
+      !u.roles?.some(r => r.toLowerCase() === 'admin')
+    );
   }
 
   selectUserToAdd(user: UserWithOptionalName): void {
@@ -536,8 +545,8 @@ export class ProjectListComponent implements OnInit, OnDestroy {
     this.addMemberError = '';
 
     const roleMap: { [key: string]: number } = {
-      'Owner': 0,
-      'Admin': 1,
+      'Admin': 0,
+      'Manager': 1,
       'Tester': 2,
       'Viewer': 3
     };
@@ -671,7 +680,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
 
   getRoleName(role: number | string): string {
     const roleNames: { [key: number]: string } = {
-      0: 'Owner',
+      0: 'Admin',
       1: 'Admin',
       2: 'Tester',
       3: 'Viewer'

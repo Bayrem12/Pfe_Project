@@ -623,9 +623,9 @@ namespace Persistance.Migrations
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                             CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Owner with full access",
+                            Description = "Admin with full access",
                             IsDeleted = false,
-                            Name = "Owner"
+                            Name = "Admin"
                         },
                         new
                         {

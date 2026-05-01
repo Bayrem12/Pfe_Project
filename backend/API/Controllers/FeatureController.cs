@@ -7,20 +7,26 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
+using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 namespace API.Controllers
 {
     /// <summary>
     /// Gestion des features dans un module
     /// </summary>
+    [Authorize]
     [Route("api/features")]
+    [ApiVersion("1.0")]
     [ApiController]
     public class FeaturesController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<FeaturesController> _logger;
 
-        public FeaturesController(IMediator mediator)
+        public FeaturesController(IMediator mediator, ILogger<FeaturesController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         private Guid CurrentUserId => Guid.Parse(
@@ -47,7 +53,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
         }
 
@@ -72,7 +79,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
         }
 
@@ -115,7 +123,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
         }
 
@@ -159,7 +168,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
         }
 
@@ -184,7 +194,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
         }
 
