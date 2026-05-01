@@ -1,5 +1,6 @@
-import { Component, OnDestroy, OnInit, HostListener } from '@angular/core';
+﻿import { Component, OnDestroy, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -11,6 +12,8 @@ import { ResponseHttp } from '../../../../core/models/response-http.model';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ConfirmService } from '../../../../core/services/confirm.service';
+import { TranslationService } from '../../../../core/services/translation.service';
 
 interface User {
   id: string;
@@ -30,6 +33,7 @@ type ProjectStatusSource = Partial<Project> & {
   IsActive?: ProjectStatusValue;
   status?: ProjectStatusValue;
   Status?: ProjectStatusValue;
+  Url?: string;
 };
 
 type ProjectCollection = ProjectStatusSource[] | {
@@ -70,7 +74,7 @@ type ProjectMemberPayload = {
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [TranslatePipe, CommonModule, RouterModule, FormsModule],
   templateUrl: './project-list.component.html',
   styleUrl: './project-list.component.scss'
 })
@@ -123,6 +127,8 @@ export class ProjectListComponent implements OnInit, OnDestroy {
     private projectService: ProjectService,
     private http: HttpClient,
     private authService: AuthService,
+    private confirmService: ConfirmService,
+    private translationService: TranslationService,
     private router: Router
   ) {}
 
@@ -226,6 +232,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
 
     return {
       ...project,
+      url: project.url ?? project.Url ?? '',
       isActive
     } as Project;
   }
@@ -365,7 +372,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
           };
         },
         error: (error) => {
-          console.error('Erreur lors du chargement du projet à modifier:', error);
+          console.error('Erreur lors du chargement du projet Ã  modifier:', error);
         }
       });
   }
@@ -417,7 +424,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
           this.loadProjects();
         },
         error: (error) => {
-          console.error('Erreur lors de la mise à jour du projet:', error);
+          console.error('Erreur lors de la mise Ã  jour du projet:', error);
           this.editProjectError = error?.error?.fail_Messages || error?.error?.Fail_Messages || 'Failed to update project';
           this.isUpdatingProject = false;
         }
@@ -682,25 +689,34 @@ export class ProjectListComponent implements OnInit, OnDestroy {
     return role || 'Unknown';
   }
 
-  deleteProject(id: string, event: Event): void {
+  async deleteProject(id: string, event: Event): Promise<void> {
     if (!this.canManageProjects()) {
       return;
     }
 
     event.stopPropagation();
     this.openActionsMenuProjectId = null;
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) {
-      this.projectService.deleteProject(id)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.projects = this.projects.filter(p => p.id !== id);
-            this.applyFilter();
-          },
-          error: (error) => {
-            console.error('Erreur lors de la suppression:', error);
-          }
-        });
-    }
+
+    const project = this.projects.find(p => p.id === id);
+    const ok = await this.confirmService.open({
+      title: this.translationService.t('project.list.confirmDeleteTitle', project?.name || ''),
+      description: this.translationService.t('delete.dialog.defaultDesc'),
+      confirmLabel: this.translationService.t('action.delete'),
+      cancelLabel: this.translationService.t('action.cancel'),
+    });
+    if (!ok) return;
+
+    this.projectService.deleteProject(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.projects = this.projects.filter(p => p.id !== id);
+          this.applyFilter();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la suppression:', error);
+        }
+      });
   }
 }
+

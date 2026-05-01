@@ -1,5 +1,5 @@
 <!-- src/app/features/features-management/pages/features-list-page/features-list-page.component.html -->
-<div class="min-h-screen bg-background px-8 py-10 lg:px-12">
+<div class="min-h-screen bg-background px-6 py-8">
 
   <!-- Page Header -->
   <div class="mb-10">
@@ -7,14 +7,14 @@
       (click)="navigateToProject()"
       class="flex items-center gap-2 text-on-surface-variant hover:text-primary mb-6 transition-colors group">
       <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
-      <span class="text-sm font-semibold">Back to Project</span>
+      <span class="text-sm font-semibold">{{ 'feature.list.backToProject' | translate }}</span>
     </button>
 
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div>
-        <h1 class="text-4xl font-extrabold tracking-tight text-on-background">Features</h1>
+        <h1 class="text-4xl font-extrabold tracking-tight text-on-background">{{ 'feature.list.title' | translate }}</h1>
         <p class="text-on-surface-variant mt-2 text-sm">
-          Functional components grouped by module for your automation suite.
+          {{ 'feature.list.subtitle' | translate }}
         </p>
       </div>
 
@@ -24,14 +24,14 @@
         [disabled]="!selectedModuleId"
         class="flex items-center gap-2 px-8 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none">
         <span class="material-symbols-outlined text-lg">add</span>
-        New Feature
+        {{ 'feature.list.newFeature' | translate }}
       </button>
     </div>
   </div>
 
   <!-- Module Selector Tabs -->
   <div class="mb-8" *ngIf="modules.length > 0">
-    <p class="text-xs font-bold uppercase tracking-[0.1em] text-on-surface-variant mb-3">Select Module</p>
+    <p class="text-xs font-bold uppercase tracking-[0.1em] text-on-surface-variant mb-3">{{ 'feature.list.selectModule' | translate }}</p>
     <div class="flex flex-wrap gap-2">
       <button
         *ngFor="let module of modules"
@@ -51,7 +51,7 @@
   <!-- Loading -->
   <div *ngIf="isLoading" class="flex flex-col items-center gap-4 py-32">
     <div class="w-10 h-10 border-[3px] border-surface-container border-t-primary rounded-full animate-spin"></div>
-    <span class="text-on-surface-variant text-sm font-medium">Loading features...</span>
+    <span class="text-on-surface-variant text-sm font-medium">{{ 'feature.list.loading' | translate }}</span>
   </div>
 
   <!-- Error -->
@@ -67,12 +67,12 @@
     <div class="w-20 h-20 rounded-2xl bg-surface-container flex items-center justify-center mx-auto mb-6">
       <span class="material-symbols-outlined text-4xl text-on-surface-variant">account_tree</span>
     </div>
-    <h3 class="text-xl font-bold text-on-background mb-2">No modules found</h3>
-    <p class="text-on-surface-variant text-sm mb-6">Create a module in your project first.</p>
+    <h3 class="text-xl font-bold text-on-background mb-2">{{ 'feature.list.noModules' | translate }}</h3>
+    <p class="text-on-surface-variant text-sm mb-6">{{ 'feature.list.noModulesHint' | translate }}</p>
     <button
       (click)="navigateToProject()"
       class="px-6 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm hover:bg-primary/90 transition-all">
-      Go to Project
+      {{ 'feature.list.goToProject' | translate }}
     </button>
   </div>
 
@@ -83,13 +83,13 @@
     <div class="w-20 h-20 rounded-2xl bg-surface-container flex items-center justify-center mx-auto mb-6">
       <span class="material-symbols-outlined text-4xl text-on-surface-variant">inventory_2</span>
     </div>
-    <h3 class="text-xl font-bold text-on-background mb-2">No features yet</h3>
-    <p class="text-on-surface-variant text-sm mb-6">Add the first feature to this module.</p>
+    <h3 class="text-xl font-bold text-on-background mb-2">{{ 'feature.list.noFeatures' | translate }}</h3>
+    <p class="text-on-surface-variant text-sm mb-6">{{ 'feature.list.noFeaturesHint' | translate }}</p>
     <button
       *ngIf="canWrite"
       (click)="createFeature()"
       class="px-8 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
-      + Create First Feature
+      {{ 'feature.list.createFirst' | translate }}
     </button>
   </div>
 
@@ -115,14 +115,14 @@
           <button
             (click)="viewFeature(feature.id)"
             class="w-8 h-8 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-all"
-            title="View details">
+            title="{{ 'feature.list.viewDetails' | translate }}">
             <span class="material-symbols-outlined text-[18px]">open_in_new</span>
           </button>
           <button
             (click)="deleteFeature(feature.id, $event)"
             [disabled]="deletingId === feature.id"
             class="w-8 h-8 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-error-container hover:text-error transition-all disabled:opacity-50"
-            title="Delete">
+            title="{{ 'action.delete' | translate }}">
             <span *ngIf="deletingId !== feature.id" class="material-symbols-outlined text-[18px]">delete</span>
             <span *ngIf="deletingId === feature.id" class="w-4 h-4 border-2 border-error border-t-transparent rounded-full animate-spin"></span>
           </button>
@@ -146,12 +146,22 @@
         </div>
       </div>
 
-      <!-- Date -->
-      <p class="text-xs text-on-surface-variant mt-3">
-        Created {{ feature.createdDate | date: 'MMM d, yyyy' }}
+        <p class="text-xs text-on-surface-variant mt-3">
+        {{ 'feature.list.created' | translate }} {{ feature.createdDate | date: 'MMM d, yyyy' }}
       </p>
     </div>
 
   </div>
 
 </div>
+
+<app-confirm-delete-dialog
+  [visible]="!!featureToDelete"
+  [title]="'Delete feature &quot;' + (featureToDelete?.name || '') + '&quot;?'"
+  description="feature.list.deleteDesc"
+  confirmLabel="feature.list.deleteLabel"
+  cancelLabel="action.cancel"
+  [loading]="!!deletingId"
+  (confirmed)="confirmDeleteFeature()"
+  (cancelled)="featureToDelete = null"
+></app-confirm-delete-dialog>

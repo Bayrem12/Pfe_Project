@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Collections.Concurrent;
 using Application.Interfaces;
 using Domain.Entities.Execution;
 using Domain.Enums;
@@ -16,6 +17,8 @@ namespace Persistance.Services
     /// </summary>
     public class IAAgentService : IIAAgentService
     {
+        private static readonly ConcurrentDictionary<Guid, CancellationTokenSource> ActiveExecutionTokens = new();
+
         private readonly HttpClient _http;
         private readonly TestAutoumatisationContext _db;
         private readonly IActionMappingRepository _actionMappings;
@@ -56,19 +59,38 @@ namespace Persistance.Services
                 IsHeadless = isHeadless
             };
             _db.TestExecutions.Add(execution);
+            var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            ActiveExecutionTokens[execution.Id] = linkedCts;
             // Persist the Running record immediately so the frontend can display
             // the live row in the test-runs list while the agent is executing.
             await _db.SaveChangesAsync(ct);
 
-            var (passed, durationMs) = await RunSingleScenarioAsync(scenario, execution, executedById, isHeadless, ct);
+            try
+            {
+                var (passed, durationMs) = await RunSingleScenarioAsync(scenario, execution, executedById, isHeadless, linkedCts.Token);
 
-            var completedAt = DateTime.UtcNow;
-            execution.CompletedAt = completedAt;
-            execution.Duration = TimeSpan.FromMilliseconds(durationMs);
-            execution.Status = passed ? ExecutionStatus.Completed : ExecutionStatus.Failed;
+                var completedAt = DateTime.UtcNow;
+                execution.CompletedAt = completedAt;
+                execution.Duration = TimeSpan.FromMilliseconds(durationMs);
+                execution.Status = passed ? ExecutionStatus.Completed : ExecutionStatus.Failed;
 
-            await _db.SaveChangesAsync(ct);
-            return execution.Id;
+                await _db.SaveChangesAsync(CancellationToken.None);
+                return execution.Id;
+            }
+            catch (OperationCanceledException)
+            {
+                var completedAt = DateTime.UtcNow;
+                execution.CompletedAt = completedAt;
+                execution.Duration = completedAt - startedAt;
+                execution.Status = ExecutionStatus.Cancelled;
+                await _db.SaveChangesAsync(CancellationToken.None);
+                throw new InvalidOperationException("AI run was cancelled.");
+            }
+            finally
+            {
+                ActiveExecutionTokens.TryRemove(execution.Id, out _);
+                linkedCts.Dispose();
+            }
         }
 
         public async Task<Guid> RunTestSuiteAsync(
@@ -117,47 +139,106 @@ namespace Persistance.Services
                 IsHeadless = isHeadless
             };
             _db.TestExecutions.Add(execution);
+            var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            ActiveExecutionTokens[execution.Id] = linkedCts;
             // Persist the Running record immediately so the frontend can display
             // the live row in the test-runs list while the agent is executing.
             await _db.SaveChangesAsync(ct);
 
-            // ── 3. Run each scenario, accumulating results in the same execution ───
-            bool allPassed = true;
-            double totalDurationMs = 0;
-
-            foreach (var scenario in orderedScenarios)
+            try
             {
-                bool passed;
-                double durationMs;
-                try
+                // ── 3. Run each scenario, accumulating results in the same execution ───
+                bool allPassed = true;
+                double totalDurationMs = 0;
+
+                foreach (var scenario in orderedScenarios)
                 {
-                    (passed, durationMs) = await RunSingleScenarioAsync(scenario, execution, executedById, isHeadless, ct);
-                }
-                catch (Exception ex)
-                {
-                    passed = false;
-                    durationMs = 0;
-                    _db.ExecutionLogs.Add(new ExecutionLog
+                    bool passed;
+                    double durationMs;
+                    try
                     {
-                        Id = Guid.NewGuid(),
-                        ExecutionId = execution.Id,
-                        Level = Domain.Enums.LogLevel.Error,
-                        Message = $"AI Agent failed to run scenario '{scenario.Title}'.",
-                        Details = ex.Message,
-                        Timestamp = DateTime.UtcNow
-                    });
+                        (passed, durationMs) = await RunSingleScenarioAsync(scenario, execution, executedById, isHeadless, linkedCts.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        passed = false;
+                        durationMs = 0;
+                        _db.ExecutionLogs.Add(new ExecutionLog
+                        {
+                            Id = Guid.NewGuid(),
+                            ExecutionId = execution.Id,
+                            Level = Domain.Enums.LogLevel.Error,
+                            Message = $"AI Agent failed to run scenario '{scenario.Title}'.",
+                            Details = ex.Message,
+                            Timestamp = DateTime.UtcNow
+                        });
+                    }
+
+                    allPassed &= passed;
+                    totalDurationMs += durationMs;
                 }
 
-                allPassed &= passed;
-                totalDurationMs += durationMs;
+                execution.CompletedAt = DateTime.UtcNow;
+                execution.Duration = TimeSpan.FromMilliseconds(totalDurationMs);
+                execution.Status = allPassed ? ExecutionStatus.Completed : ExecutionStatus.Failed;
+
+                await _db.SaveChangesAsync(CancellationToken.None);
+                return execution.Id;
+            }
+            catch (OperationCanceledException)
+            {
+                var completedAt = DateTime.UtcNow;
+                execution.CompletedAt = completedAt;
+                execution.Duration = completedAt - startedAt;
+                execution.Status = ExecutionStatus.Cancelled;
+                await _db.SaveChangesAsync(CancellationToken.None);
+                throw new InvalidOperationException("AI run was cancelled.");
+            }
+            finally
+            {
+                ActiveExecutionTokens.TryRemove(execution.Id, out _);
+                linkedCts.Dispose();
+            }
+        }
+
+        public async Task<bool> CancelExecutionAsync(Guid executionId)
+        {
+            // Cooperative cancel — if the run is still active in this process,
+            // signal its cancellation token so the worker stops cleanly.
+            if (ActiveExecutionTokens.TryGetValue(executionId, out var cts))
+            {
+                if (!cts.IsCancellationRequested)
+                {
+                    cts.Cancel();
+                }
             }
 
-            execution.CompletedAt = DateTime.UtcNow;
-            execution.Duration = TimeSpan.FromMilliseconds(totalDurationMs);
-            execution.Status = allPassed ? ExecutionStatus.Completed : ExecutionStatus.Failed;
+            // Best-effort DB fallback: even if the token is no longer tracked
+            // (e.g. server restart, run started by another instance, or run
+            // already past the cancellation point), as long as the execution
+            // is still flagged as Running we mark it Cancelled so the user
+            // is never stuck with a "running forever" row.
+            var execution = await _db.TestExecutions.FirstOrDefaultAsync(e => e.Id == executionId && !e.IsDeleted);
+            if (execution == null)
+            {
+                return false;
+            }
 
-            await _db.SaveChangesAsync(ct);
-            return execution.Id;
+            if (execution.Status == ExecutionStatus.Running || execution.Status == ExecutionStatus.Pending)
+            {
+                execution.Status = ExecutionStatus.Cancelled;
+                execution.CompletedAt = DateTime.UtcNow;
+                await _db.SaveChangesAsync(CancellationToken.None);
+                return true;
+            }
+
+            // Already finished (Completed / Failed / Cancelled) — nothing to do
+            // but report success so the UI stops showing it as cancellable.
+            return execution.Status == ExecutionStatus.Cancelled;
         }
 
         // ── Private helpers ────────────────────────────────────────────────────────

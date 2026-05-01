@@ -21,4 +21,8 @@ export class TestRunService {
   getTestRunDetail(runId: string): Observable<ResponseHttp<TestRunDetail>> {
     return this.apiService.get<TestRunDetail>(`test-runs/${runId}`);
   }
+
+  cancelTestRun(runId: string): Observable<ResponseHttp<{ cancelled: boolean }>> {
+    return this.apiService.post<{ cancelled: boolean }>(`test-runs/${runId}/cancel`, {});
+  }
 }

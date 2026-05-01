@@ -179,42 +179,42 @@
 
       <!-- Heading -->
       <div class="su-1 mb-10">
-        <h2 style="font-family:'Inter',sans-serif;font-size:2rem;font-weight:800;color:#0f172a;letter-spacing:-.03em;" class="mb-1">Sign In</h2>
-        <p class="text-slate-500 text-sm">Enter your credentials to access your dashboard</p>
+        <h2 style="font-family:'Inter',sans-serif;font-size:2rem;font-weight:800;color:#0f172a;letter-spacing:-.03em;" class="mb-1">{{ 'auth.login.title' | translate }}</h2>
+        <p class="text-slate-500 text-sm">{{ 'auth.login.subtitle' | translate }}</p>
       </div>
 
       <!-- Form -->
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
         <div class="su-2 mb-4">
-          <input formControlName="email" class="input-field" type="email" placeholder="Email address"
+          <input formControlName="email" class="input-field" type="email" [placeholder]="'auth.email.placeholder' | translate"
                  [class.has-error]="email?.invalid && email?.touched"/>
           @if (email?.touched && email?.hasError('required')) {
-            <p class="text-red-500 mt-1" style="font-size:.75rem;animation:fadeInUp .2s ease both;">Email is required.</p>
+            <p class="text-red-500 mt-1" style="font-size:.75rem;animation:fadeInUp .2s ease both;">{{ 'auth.email.required' | translate }}</p>
           }
           @if (email?.touched && email?.hasError('email')) {
-            <p class="text-red-500 mt-1" style="font-size:.75rem;animation:fadeInUp .2s ease both;">Please enter a valid email address.</p>
+            <p class="text-red-500 mt-1" style="font-size:.75rem;animation:fadeInUp .2s ease both;">{{ 'auth.email.invalid' | translate }}</p>
           }
         </div>
 
         <div class="su-3 mb-5">
-          <input formControlName="password" type="password" class="input-field" placeholder="Password"
+          <input formControlName="password" type="password" class="input-field" [placeholder]="'auth.password.placeholder' | translate"
                  [class.has-error]="password?.invalid && password?.touched"/>
           @if (password?.touched && password?.hasError('required')) {
-            <p class="text-red-500 mt-1" style="font-size:.75rem;animation:fadeInUp .2s ease both;">Password is required.</p>
+            <p class="text-red-500 mt-1" style="font-size:.75rem;animation:fadeInUp .2s ease both;">{{ 'auth.password.required' | translate }}</p>
           }
           @if (password?.touched && password?.hasError('minlength')) {
-            <p class="text-red-500 mt-1" style="font-size:.75rem;animation:fadeInUp .2s ease both;">Password must be at least 6 characters.</p>
+            <p class="text-red-500 mt-1" style="font-size:.75rem;animation:fadeInUp .2s ease both;">{{ 'auth.password.minlength' | translate }}</p>
           }
         </div>
 
         <div class="su-3 flex justify-between items-center mb-6">
           <label class="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" class="w-4 h-4 cursor-pointer" style="accent-color:#6366f1;"/>
-            <span class="text-sm text-slate-500">Remember me</span>
+            <span class="text-sm text-slate-500">{{ 'auth.login.remember' | translate }}</span>
           </label>
           <a routerLink="/auth/forgot-password" class="text-sm font-semibold text-blue-500 no-underline cursor-pointer">
-            Forgot password?
+            {{ 'auth.login.forgot' | translate }}
           </a>
         </div>
 
@@ -233,9 +233,9 @@
           <button type="submit" class="btn-submit" [disabled]="isLoading || loginForm.invalid">
             @if (isLoading) {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="animation:spinIcon .75s linear infinite;flex-shrink:0;"><path d="M12 2a10 10 0 0 1 10 10"/></svg>
-              <span>Signing in...</span>
+              <span>{{ 'auth.login.signingIn' | translate }}</span>
             } @else {
-              <span>Sign In</span>
+              <span>{{ 'auth.login.signIn' | translate }}</span>
             }
           </button>
         </div>
@@ -246,7 +246,7 @@
       <div class="su-5 relative mb-6">
         <div class="border-t border-slate-200"></div>
         <div class="absolute inset-0 flex justify-center" style="top:-.65rem;">
-          <span class="px-4 bg-white text-slate-400 font-medium uppercase" style="font-size:.78rem;letter-spacing:.08em;">or continue with</span>
+          <span class="px-4 bg-white text-slate-400 font-medium uppercase" style="font-size:.78rem;letter-spacing:.08em;">{{ 'auth.login.orWith' | translate }}</span>
         </div>
       </div>
 
@@ -272,8 +272,8 @@
       <!-- Sign up -->
       <div class="su-6 text-center">
         <p class="text-sm text-slate-500">
-          Don't have an account?
-          <a routerLink="/auth/register" class="text-blue-500 font-bold no-underline">Sign up</a>
+          {{ 'auth.login.noAccount' | translate }}
+          <a routerLink="/auth/register" class="text-blue-500 font-bold no-underline">{{ 'auth.login.signUp' | translate }}</a>
         </p>
       </div>
 

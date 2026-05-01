@@ -12,6 +12,7 @@ namespace Application.Features.ProjectFeature.Commands
     public record AddProjectCommand(
         string Name,
         string Description,
+        string? Url,
         Guid UserId,
         bool IsActive = true)
         : IRequest<ResponseHttp>
@@ -31,11 +32,29 @@ namespace Application.Features.ProjectFeature.Commands
             {
                 try
                 {
+                    // Unicité du nom
+                    if (await _projectRepository.ExistsWithNameAsync(request.Name, null, cancellationToken))
+                        return new ResponseHttp
+                        {
+                            Fail_Messages = "Ce projet existe déjà, veuillez choisir un autre nom.",
+                            Status = StatusCodes.Status400BadRequest
+                        };
+
+                    // Unicité de l'URL
+                    if (!string.IsNullOrWhiteSpace(request.Url) &&
+                        await _projectRepository.ExistsWithUrlAsync(request.Url, null, cancellationToken))
+                        return new ResponseHttp
+                        {
+                            Fail_Messages = "Cette URL est déjà utilisée par un autre projet.",
+                            Status = StatusCodes.Status400BadRequest
+                        };
+
                     var project = new Project
                     {
                         Id = Guid.NewGuid(),
                         Name = request.Name,
                         Description = request.Description,
+                        Url = request.Url,
                         IsActive = request.IsActive,
                         UserId = request.UserId,
                         CreatedById = request.UserId.ToString(),

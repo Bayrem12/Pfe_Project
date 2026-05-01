@@ -1,7 +1,7 @@
 <div *ngIf="loading" class="builder-state flex-1 flex items-center justify-center">
   <div class="flex flex-col items-center gap-4">
     <div class="h-11 w-11 rounded-full border-4 border-blue-100 border-t-[#2563eb] animate-spin"></div>
-    <span class="text-sm font-medium text-slate-400">Loading suite builder...</span>
+    <span class="text-sm font-medium text-slate-400">{{ 'builder.loading' | translate }}</span>
   </div>
 </div>
 
@@ -27,28 +27,28 @@
     <section class="w-[40%] flex flex-col border-r border-slate-200/30 bg-slate-50">
       <!-- Search & Filters -->
       <div class="p-6 space-y-4">
-        <h2 class="text-[11px] font-black tracking-widest text-slate-500 uppercase">Available Scenarios</h2>
+        <h2 class="text-[11px] font-black tracking-widest text-slate-500 uppercase">{{ 'builder.availableScenarios' | translate }}</h2>
         <div class="relative group">
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">search</span>
           <input [ngModel]="searchTerm"
                  (ngModelChange)="onSearchChange($event)"
                  class="w-full bg-white border-none rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-primary shadow-sm placeholder:text-slate-400"
-                 placeholder="Search scenarios..."
+                 [placeholder]="'builder.searchPh' | translate"
                  type="text"/>
         </div>
         <div class="flex flex-wrap gap-2">
           <button (click)="setStatusFilter('all')"
                   [class]="statusFilter === 'all' ? 'px-3 py-1.5 rounded-lg bg-primary text-white border border-primary text-xs font-semibold' : 'px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-500 hover:border-primary transition-colors'"
-                  type="button">All</button>
+                  type="button">{{ 'label.all' | translate }}</button>
           <button (click)="setStatusFilter('active')"
                   [class]="statusFilter === 'active' ? 'px-3 py-1.5 rounded-lg bg-primary text-white border border-primary text-xs font-semibold' : 'px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-500 hover:border-primary transition-colors'"
-                  type="button">Active</button>
+                  type="button">{{ 'label.active' | translate }}</button>
           <button (click)="setStatusFilter('draft')"
                   [class]="statusFilter === 'draft' ? 'px-3 py-1.5 rounded-lg bg-primary text-white border border-primary text-xs font-semibold' : 'px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-500 hover:border-primary transition-colors'"
-                  type="button">Draft</button>
+                  type="button">{{ 'label.draft' | translate }}</button>
           <button (click)="setStatusFilter('archived')"
                   [class]="statusFilter === 'archived' ? 'px-3 py-1.5 rounded-lg bg-primary text-white border border-primary text-xs font-semibold' : 'px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-500 hover:border-primary transition-colors'"
-                  type="button">Archived</button>
+                  type="button">{{ 'label.archived' | translate }}</button>
         </div>
       </div>
 
@@ -64,7 +64,7 @@
         <div *ngIf="filteredAvailable.length === 0" class="border-2 border-dashed border-slate-200 rounded-xl py-12 flex flex-col items-center justify-center text-center">
           <span class="material-symbols-outlined text-2xl text-slate-300 mb-2">search_off</span>
           <p class="text-xs text-slate-400 max-w-xs">
-            {{ searchTerm || statusFilter !== 'all' ? 'No scenarios match your filters.' : 'All project scenarios are already in this suite.' }}
+            {{ searchTerm || statusFilter !== 'all' ? ('builder.noMatch' | translate) : ('builder.allAdded' | translate) }}
           </p>
         </div>
 
@@ -74,11 +74,11 @@
              [cdkDragData]="scenario"
              class="group bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all border-l-4 border-transparent hover:border-primary/60 relative cursor-grab active:cursor-grabbing">
           <div class="flex justify-between items-start mb-2">
-            <span class="text-[10px] font-black uppercase tracking-wider text-primary bg-blue-50 px-2 py-0.5 rounded">{{ scenario.featureName || 'Feature' }}</span>
-            <span class="text-[10px] text-slate-400 font-medium">{{ scenario.stepCount }} steps</span>
+            <span class="text-[10px] font-black uppercase tracking-wider text-primary bg-blue-50 px-2 py-0.5 rounded">{{ scenario.featureName || ('label.feature' | translate) }}</span>
+            <span class="text-[10px] text-slate-400 font-medium">{{ scenario.stepCount }} {{ 'label.steps' | translate }}</span>
           </div>
           <h3 class="text-sm font-bold text-slate-800 mb-1">{{ scenario.title }}</h3>
-          <p class="text-xs text-slate-400 line-clamp-1 mb-3">{{ scenario.description || 'No description provided.' }}</p>
+          <p class="text-xs text-slate-400 line-clamp-1 mb-3">{{ scenario.description || ('builder.noDescription' | translate) }}</p>
           <div class="flex items-center gap-2">
             <span class="text-[10px] py-0.5 px-2 rounded-full font-bold"
                   [ngClass]="getScenarioStatusClass(scenario.status)">
@@ -96,7 +96,7 @@
 
         <!-- Placeholder -->
         <div *ngIf="filteredAvailable.length > 0" class="border-2 border-dashed border-slate-200/50 rounded-xl h-24 flex items-center justify-center">
-          <span class="text-xs text-slate-400 font-medium">Search for more scenarios</span>
+          <span class="text-xs text-slate-400 font-medium">{{ 'builder.searchMore' | translate }}</span>
         </div>
       </div>
     </section>
@@ -112,24 +112,24 @@
                       class="text-xs font-bold text-slate-500 hover:text-primary transition-colors flex items-center gap-1"
                       type="button">
                 <span class="material-symbols-outlined text-[16px]">arrow_back</span>
-                Back
+                {{ 'action.back' | translate }}
               </button>
             </div>
             <input [(ngModel)]="suiteName"
                    [readonly]="isViewerRole"
                    class="w-full text-2xl font-black tracking-tight text-primary bg-transparent border-none p-0 focus:ring-0 placeholder:text-slate-300"
-                   placeholder="Suite Name"
+                   [placeholder]="'builder.suiteName' | translate"
                    type="text"/>
             <input [(ngModel)]="suiteDescription"
                    [readonly]="isViewerRole"
                    class="w-full text-sm text-slate-500 bg-transparent border-none p-0 focus:ring-0 mt-1 placeholder:text-slate-300"
-                   placeholder="Add a description for this test suite..."
+                   [placeholder]="'builder.suiteDescPh' | translate"
                    type="text"/>
           </div>
           <div class="flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-xl shrink-0">
             <span class="material-symbols-outlined text-primary">layers</span>
             <div class="flex flex-col">
-              <span class="text-[10px] font-black text-slate-500 uppercase">Scenario Count</span>
+              <span class="text-[10px] font-black text-slate-500 uppercase">{{ 'builder.scenarioCount' | translate }}</span>
               <span class="text-sm font-bold text-primary">{{ formatOrder(suiteScenarios.length - 1) }}</span>
             </div>
           </div>
@@ -156,11 +156,11 @@
                 <h4 class="text-sm font-bold text-slate-800">{{ item.scenarioTitle }}</h4>
                 <span class="text-[10px] px-2 py-0.5 bg-slate-100 text-primary font-bold rounded uppercase">{{ getScenarioFeatureName(item.scenarioId) }}</span>
               </div>
-              <p class="text-xs text-slate-400">{{ item.scenarioDescription || 'No description' }}</p>
+              <p class="text-xs text-slate-400">{{ item.scenarioDescription || ('builder.noDesc' | translate) }}</p>
             </div>
             <div class="flex items-center gap-6 shrink-0">
               <div class="text-right">
-                <span class="block text-[10px] text-slate-400 font-bold uppercase">Steps</span>
+                <span class="block text-[10px] text-slate-400 font-bold uppercase">{{ 'builder.steps' | translate }}</span>
                 <span class="text-xs font-bold">{{ getScenarioStepCount(item.scenarioId) }}</span>
               </div>
               <button (click)="removeScenario(item)"
@@ -179,7 +179,7 @@
           <div class="text-xs font-black text-slate-400 w-6 text-right">01</div>
           <div class="flex-1 border-2 border-dashed border-slate-300 rounded-2xl p-8 flex flex-col items-center justify-center gap-2">
             <span class="material-symbols-outlined text-3xl">add_circle</span>
-            <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Add Scenarios from Left Panel</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400">{{ 'builder.addFromLeft' | translate }}</span>
           </div>
         </div>
 
@@ -188,7 +188,7 @@
           <div class="text-xs font-black text-slate-400 w-6 text-right">{{ formatOrder(suiteScenarios.length) }}</div>
           <div class="flex-1 border-2 border-dashed border-slate-300 rounded-2xl p-8 flex flex-col items-center justify-center gap-2">
             <span class="material-symbols-outlined text-3xl">add_circle</span>
-            <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Drop Scenario Here</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400">{{ 'builder.dropHere' | translate }}</span>
           </div>
         </div>
       </div>
@@ -197,12 +197,12 @@
       <div class="sticky bottom-0 z-10 bg-white/90 backdrop-blur-md px-8 py-6 border-t border-slate-100 flex items-center justify-between">
         <div class="flex items-center gap-8">
           <div class="flex flex-col">
-            <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Total Steps</span>
+            <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider">{{ 'builder.totalSteps' | translate }}</span>
             <span class="text-xl font-bold text-slate-900">{{ suiteStepCount }}</span>
           </div>
           <div class="h-10 w-[1px] bg-slate-200"></div>
           <div class="flex flex-col">
-            <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Scenarios</span>
+            <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider">{{ 'builder.scenarios' | translate }}</span>
             <span class="text-xl font-bold text-primary">{{ suiteScenarios.length }}</span>
           </div>
         </div>
@@ -210,22 +210,22 @@
           <button (click)="cancel()"
                   class="px-6 py-3 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 transition-all"
                   type="button">
-            Cancel
+            {{ 'action.cancel' | translate }}
           </button>
           <button (click)="saveSuite()"
               [disabled]="saving || !suiteName.trim() || isViewerRole"
                   class="px-6 py-3 rounded-xl bg-slate-100 text-primary font-black text-sm hover:bg-slate-200 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   type="button">
             <div *ngIf="saving" class="h-4 w-4 rounded-full border-2 border-primary/30 border-t-primary animate-spin"></div>
-            {{ saving ? 'Saving...' : 'Save Suite' }}
+            {{ saving ? ('label.saving' | translate) : ('builder.saveSuite' | translate) }}
           </button>
           <button (click)="runSuite(false)"
               [disabled]="running || suiteScenarios.length === 0 || !canRunTests"
-                  title="Run with browser visible — watch the suite execute live"
+                  [title]="'builder.watchRunHint' | translate"
                   class="px-5 py-3 rounded-xl border-2 border-tertiary text-tertiary font-black text-sm hover:bg-tertiary/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   type="button">
             <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">visibility</span>
-            Watch Run
+            {{ 'builder.watchRun' | translate }}
           </button>
           <button (click)="runSuite(true)"
               [disabled]="running || suiteScenarios.length === 0 || !canRunTests"
@@ -233,7 +233,7 @@
                   type="button">
             <div *ngIf="running" class="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
             <span *ngIf="!running" class="material-symbols-outlined text-sm">play_arrow</span>
-            {{ running ? 'Running...' : 'Run Suite' }}
+            {{ running ? ('builder.running' | translate) : ('builder.runSuite' | translate) }}
           </button>
         </div>
       </div>

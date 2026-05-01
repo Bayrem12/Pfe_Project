@@ -11,6 +11,7 @@ namespace Application.Features.ProjectFeature.Commands
         Guid ProjectId,
         string Name,
         string Description,
+        string? Url,
         bool IsActive)
         : IRequest<ResponseHttp>
     {
@@ -40,6 +41,7 @@ namespace Application.Features.ProjectFeature.Commands
 
                 project.Name = request.Name;
                 project.Description = request.Description;
+                project.Url = request.Url;
                 project.IsActive = request.IsActive;
 
                 await _projectRepository.Update(project);
