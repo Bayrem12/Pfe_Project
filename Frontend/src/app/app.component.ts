@@ -5,12 +5,13 @@ import { filter } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 import { SidebarNavComponent } from './shared/components/sidebar-nav/sidebar-nav.component';
 import { TopbarComponent } from './shared/components/topbar/topbar.component';
+import { ConfirmHostComponent } from './shared/components/confirm-host/confirm-host.component';
 import { SidebarService } from './core/services/sidebar.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, SidebarNavComponent, TopbarComponent,FormsModule],
+  imports: [CommonModule, RouterOutlet, SidebarNavComponent, TopbarComponent, ConfirmHostComponent, FormsModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })

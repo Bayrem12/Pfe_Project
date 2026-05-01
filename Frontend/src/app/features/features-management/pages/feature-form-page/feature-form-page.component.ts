@@ -3,6 +3,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { FeatureService } from '../../../../core/services/feature.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ModuleService } from '../../../../core/services/module.service';
@@ -12,7 +13,7 @@ import { takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'app-feature-form-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe],
   templateUrl: './feature-form-page.component.html',
   styleUrl: './feature-form-page.component.scss'
 })

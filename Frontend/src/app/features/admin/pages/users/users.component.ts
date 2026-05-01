@@ -5,11 +5,12 @@ import { Subject, forkJoin, of } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { catchError } from 'rxjs/operators';
 import { UserService, User, UserDto, CreateUserDto } from '../../../../core/services/user.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss']
 })

@@ -104,5 +104,26 @@ namespace Persistance.Repositories
                 _context.ProjectMembers.Remove(member);
             }
         }
+
+        public async Task<bool> ExistsWithNameAsync(string name, Guid? excludeProjectId, CancellationToken cancellationToken)
+        {
+            return await _context.Projects
+                .AsNoTracking()
+                .AnyAsync(p => !p.IsDeleted &&
+                               p.Name.ToLower() == name.ToLower() &&
+                               (!excludeProjectId.HasValue || p.Id != excludeProjectId.Value),
+                    cancellationToken);
+        }
+
+        public async Task<bool> ExistsWithUrlAsync(string url, Guid? excludeProjectId, CancellationToken cancellationToken)
+        {
+            return await _context.Projects
+                .AsNoTracking()
+                .AnyAsync(p => !p.IsDeleted &&
+                               p.Url != null &&
+                               p.Url.ToLower() == url.ToLower() &&
+                               (!excludeProjectId.HasValue || p.Id != excludeProjectId.Value),
+                    cancellationToken);
+        }
     }
 }

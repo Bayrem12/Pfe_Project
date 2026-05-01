@@ -1,0 +1,29 @@
+                           Table "public.Projects"
+    Column    |            Type             | Collation | Nullable | Default 
+--------------+-----------------------------+-----------+----------+---------
+ Id           | uuid                        |           | not null | 
+ Name         | text                        |           | not null | 
+ Description  | text                        |           | not null | 
+ IsActive     | boolean                     |           | not null | 
+ UserId       | uuid                        |           |          | 
+ CreatedDate  | timestamp without time zone |           |          | 
+ CreatedBy    | text                        |           |          | 
+ CreatedById  | text                        |           |          | 
+ ModifiedDate | timestamp without time zone |           |          | 
+ ModifiedBy   | text                        |           |          | 
+ ModifiedById | text                        |           |          | 
+ IsDeleted    | boolean                     |           | not null | 
+ DeletedDate  | timestamp with time zone    |           |          | 
+Indexes:
+    "PK_Projects" PRIMARY KEY, btree ("Id")
+    "IX_Projects_UserId" btree ("UserId")
+Foreign-key constraints:
+    "FK_Projects_Users_UserId" FOREIGN KEY ("UserId") REFERENCES "Users"("Id")
+Referenced by:
+    TABLE ""ActionMappings"" CONSTRAINT "FK_ActionMappings_Projects_ProjectId" FOREIGN KEY ("ProjectId") REFERENCES "Projects"("Id") ON DELETE CASCADE
+    TABLE ""Environments"" CONSTRAINT "FK_Environments_Projects_ProjectId" FOREIGN KEY ("ProjectId") REFERENCES "Projects"("Id") ON DELETE CASCADE
+    TABLE ""Modules"" CONSTRAINT "FK_Modules_Projects_ProjectId" FOREIGN KEY ("ProjectId") REFERENCES "Projects"("Id") ON DELETE CASCADE
+    TABLE ""ProjectMembers"" CONSTRAINT "FK_ProjectMembers_Projects_ProjectId" FOREIGN KEY ("ProjectId") REFERENCES "Projects"("Id") ON DELETE CASCADE
+    TABLE ""Tags"" CONSTRAINT "FK_Tags_Projects_ProjectId" FOREIGN KEY ("ProjectId") REFERENCES "Projects"("Id") ON DELETE CASCADE
+    TABLE ""TestSuites"" CONSTRAINT "FK_TestSuites_Projects_ProjectId" FOREIGN KEY ("ProjectId") REFERENCES "Projects"("Id") ON DELETE CASCADE
+

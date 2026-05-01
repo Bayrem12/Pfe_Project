@@ -1,18 +1,55 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { ResponseHttp } from '../../../core/models/response-http.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { TranslationService } from '../../../core/services/translation.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+
+// ── Custom validators ─────────────────────────────────────────
+const COMMON_PASSWORDS = new Set([
+  '123456','password','123456789','12345678','12345','1234567',
+  'password1','abc123','qwerty','azerty','letmein','iloveyou',
+  'admin','welcome','monkey','login','sunshine','master'
+]);
+
+function noSpacesValidator(ctrl: AbstractControl): ValidationErrors | null {
+  return /\s/.test(ctrl.value || '') ? { hasSpaces: true } : null;
+}
+
+function alphanumericStartValidator(ctrl: AbstractControl): ValidationErrors | null {
+  const v: string = ctrl.value || '';
+  if (!v) return null;
+  return /^[a-zA-ZÀ-ÿ]/.test(v) ? null : { mustStartWithLetter: true };
+}
+
+function alphanumericOnlyValidator(ctrl: AbstractControl): ValidationErrors | null {
+  const v: string = ctrl.value || '';
+  if (!v) return null;
+  return /^[a-zA-ZÀ-ÿ0-9]+$/.test(v) ? null : { invalidChars: true };
+}
+
+function noCommonPasswordValidator(ctrl: AbstractControl): ValidationErrors | null {
+  return COMMON_PASSWORDS.has((ctrl.value || '').toLowerCase()) ? { commonPassword: true } : null;
+}
+
+function hasLetterValidator(ctrl: AbstractControl): ValidationErrors | null {
+  return /[A-Za-z]/.test(ctrl.value || '') ? null : { noLetter: true };
+}
+
+function hasDigitValidator(ctrl: AbstractControl): ValidationErrors | null {
+  return /[0-9]/.test(ctrl.value || '') ? null : { noDigit: true };
+}
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslatePipe],
   templateUrl: './register.component.html',
   // No styleUrl — styles are inline in the template
 })
@@ -30,16 +67,37 @@ export class RegisterComponent implements OnInit {
     private http: HttpClient,
     private authService: AuthService,
     private router: Router,
+    private ts: TranslationService,
     @Inject(PLATFORM_ID) private platformId: object
   ) {}
 
   ngOnInit(): void {
     this.signupForm = this.fb.group(
       {
-        firstName:       ['', [Validators.required, Validators.minLength(3)]],
-        lastName:        ['', [Validators.required, Validators.minLength(3)]],
+        firstName:       ['', [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(20),
+          noSpacesValidator,
+          alphanumericStartValidator,
+          alphanumericOnlyValidator
+        ]],
+        lastName:        ['', [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(20),
+          noSpacesValidator,
+          alphanumericStartValidator,
+          alphanumericOnlyValidator
+        ]],
         email:           ['', [Validators.required, Validators.email]],
-        password:        ['', [Validators.required, Validators.minLength(8)]],
+        password:        ['', [
+          Validators.required,
+          Validators.minLength(6),
+          hasLetterValidator,
+          hasDigitValidator,
+          noCommonPasswordValidator
+        ]],
         confirmPassword: ['', Validators.required],
         terms:           [false, Validators.requiredTrue],
       },

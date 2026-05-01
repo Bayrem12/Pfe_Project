@@ -10,7 +10,7 @@
     <div class="px-8 pt-10 pb-6 space-y-1">
       <div class="flex items-center justify-between">
         <h2 class="text-3xl font-extrabold tracking-tight text-on-background">
-          {{ isEditMode ? 'Edit Feature' : 'Create Feature' }}
+          {{ isEditMode ? ('feature.form.editTitle' | translate) : ('feature.form.createTitle' | translate) }}
         </h2>
         <button
           (click)="cancel()"
@@ -20,18 +20,18 @@
       </div>
       <p class="text-on-surface-variant text-sm">
         {{ isEditMode
-          ? 'Update this functional component of your automation suite.'
-          : 'Define a new functional component for your automation suite.' }}
+          ? ('feature.form.editSub' | translate)
+          : ('feature.form.createSub' | translate) }}
       </p>
       <p *ngIf="!isEditMode && moduleId && moduleName" class="text-xs text-primary font-semibold pt-1">
-        Module: {{ moduleName }}
+        {{ 'label.module' | translate }}: {{ moduleName }}
       </p>
     </div>
 
     <!-- Loading -->
     <div *ngIf="isLoading" class="flex flex-col items-center gap-4 py-16 px-8">
       <div class="w-10 h-10 border-[3px] border-surface-container border-t-primary rounded-full animate-spin"></div>
-      <span class="text-on-surface-variant text-sm font-medium">Loading...</span>
+      <span class="text-on-surface-variant text-sm font-medium">{{ 'label.loading' | translate }}</span>
     </div>
 
     <!-- Error Banner -->
@@ -47,12 +47,12 @@
       <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mx-auto mb-4">
         <span class="material-symbols-outlined text-3xl text-on-surface-variant">lock</span>
       </div>
-      <h3 class="text-xl font-bold text-on-background mb-2">Permission Denied</h3>
-      <p class="text-on-surface-variant mb-6 text-sm">You do not have permission to create or edit features.</p>
+      <h3 class="text-xl font-bold text-on-background mb-2">{{ 'error.permissionDenied' | translate }}</h3>
+      <p class="text-on-surface-variant mb-6 text-sm">{{ 'feature.form.noPermission' | translate }}</p>
       <button
         (click)="cancel()"
         class="px-6 py-3 bg-surface-container text-on-surface-variant rounded-xl font-semibold hover:bg-surface-container-high transition-all">
-        Go Back
+        {{ 'action.back' | translate }}
       </button>
     </div>
 
@@ -66,7 +66,7 @@
       <!-- Module Select (only when moduleId missing from URL) -->
       <div *ngIf="!moduleId && modules.length > 0" class="space-y-2">
         <label class="block text-xs font-bold uppercase tracking-[0.1em] text-on-surface-variant">
-          Select Module <span class="text-error">*</span>
+          {{ 'feature.form.selectModule' | translate }} <span class="text-error">*</span>
         </label>
         <div class="relative">
           <select
@@ -74,7 +74,7 @@
             class="w-full bg-surface-container-low border-0 border-b-2 border-transparent
                    focus:border-primary focus:ring-0 transition-all px-4 py-4 rounded-t-lg
                    text-lg font-medium text-on-background appearance-none cursor-pointer outline-none">
-            <option value="">Select a module...</option>
+            <option value="">{{ 'feature.form.selectModulePh' | translate }}</option>
             <option *ngFor="let m of modules" [value]="m.id">{{ m.name }}</option>
           </select>
           <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-xl text-on-surface-variant pointer-events-none">expand_more</span>
@@ -84,53 +84,53 @@
       <!-- No modules found -->
       <div *ngIf="!moduleId && !loadingModules && modules.length === 0" class="py-6 px-4 text-center">
         <span class="material-symbols-outlined text-3xl text-on-surface-variant/40 block mb-2">folder_off</span>
-        <p class="text-sm text-on-surface-variant">No modules found in this project.</p>
-        <p class="text-xs text-on-surface-variant/60 mt-1">Create a module first, then come back to create a feature.</p>
+        <p class="text-sm text-on-surface-variant">{{ 'feature.form.noModules' | translate }}</p>
+        <p class="text-xs text-on-surface-variant/60 mt-1">{{ 'feature.form.noModulesHint' | translate }}</p>
       </div>
 
       <!-- Feature Name -->
       <div class="space-y-2">
         <label class="block text-xs font-bold uppercase tracking-[0.1em] text-on-surface-variant" for="feature_name">
-          Feature Name <span class="text-error">*</span>
+          {{ 'feature.form.featureName' | translate }} <span class="text-error">*</span>
         </label>
         <input
           id="feature_name"
           type="text"
           formControlName="name"
-          placeholder="e.g., User Authentication Flow"
+          [placeholder]="'feature.form.featureNamePh' | translate"
           [class.border-b-primary]="!f['name'].invalid || !f['name'].touched"
           [class.border-b-error]="f['name'].invalid && f['name'].touched"
           class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 transition-all px-4 py-4 rounded-t-lg text-lg font-medium placeholder:text-outline/50 text-on-background">
         <div *ngIf="f['name'].invalid && f['name'].touched" class="text-xs text-error mt-1 px-4">
-          <span *ngIf="f['name'].errors?.['required']">Feature name is required</span>
-          <span *ngIf="f['name'].errors?.['minlength']">Minimum 3 characters required</span>
-          <span *ngIf="f['name'].errors?.['maxlength']">Maximum 100 characters</span>
+          <span *ngIf="f['name'].errors?.['required']">{{ 'feature.form.nameRequired' | translate }}</span>
+          <span *ngIf="f['name'].errors?.['minlength']">{{ 'feature.form.nameMin' | translate }}</span>
+          <span *ngIf="f['name'].errors?.['maxlength']">{{ 'feature.form.nameMax' | translate }}</span>
         </div>
       </div>
 
       <!-- Description -->
       <div class="space-y-2">
         <label class="block text-xs font-bold uppercase tracking-[0.1em] text-on-surface-variant" for="description">
-          Description <span class="text-error">*</span>
+          {{ 'label.description' | translate }} <span class="text-error">*</span>
         </label>
         <textarea
           id="description"
           formControlName="description"
           rows="4"
-          placeholder="Briefly explain what this feature covers..."
+          [placeholder]="'feature.form.descPh' | translate"
           [class.border-b-error]="f['description'].invalid && f['description'].touched"
           class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 transition-all p-4 rounded-t-lg resize-none placeholder:text-outline/50 text-on-background">
         </textarea>
         <div *ngIf="f['description'].invalid && f['description'].touched" class="text-xs text-error mt-1 px-4">
-          <span *ngIf="f['description'].errors?.['required']">Description is required</span>
-          <span *ngIf="f['description'].errors?.['maxlength']">Maximum 500 characters</span>
+          <span *ngIf="f['description'].errors?.['required']">{{ 'feature.form.descRequired' | translate }}</span>
+          <span *ngIf="f['description'].errors?.['maxlength']">{{ 'feature.form.descMax' | translate }}</span>
         </div>
       </div>
 
       <!-- Display Order -->
       <div class="space-y-2">
         <label class="block text-xs font-bold uppercase tracking-[0.1em] text-on-surface-variant" for="displayOrder">
-          Display Order
+          {{ 'feature.form.displayOrder' | translate }}
         </label>
         <input
           id="displayOrder"
@@ -139,9 +139,9 @@
           min="0"
           placeholder="0"
           class="w-28 bg-transparent border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 py-3 font-medium text-on-background transition-all">
-        <p class="text-xs text-on-surface-variant mt-1">Controls the display order in the list</p>
+        <p class="text-xs text-on-surface-variant mt-1">{{ 'feature.form.displayOrderHint' | translate }}</p>
         <div *ngIf="f['displayOrder'].invalid && f['displayOrder'].touched" class="text-xs text-error mt-1">
-          <span *ngIf="f['displayOrder'].errors?.['min']">Must be 0 or greater</span>
+          <span *ngIf="f['displayOrder'].errors?.['min']">{{ 'validation.minZero' | translate }}</span>
         </div>
       </div>
 
@@ -153,8 +153,8 @@
               <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
             </div>
             <div>
-              <p class="text-sm font-semibold text-on-background">Auto-generate Gherkin?</p>
-              <p class="text-xs text-on-surface-variant">AI can draft test scenarios based on your description.</p>
+              <p class="text-sm font-semibold text-on-background">{{ 'feature.form.autoGherkin' | translate }}</p>
+              <p class="text-xs text-on-surface-variant">{{ 'feature.form.autoGherkinHint' | translate }}</p>
             </div>
           </div>
           <div class="flex items-center h-6 w-11 rounded-full bg-surface-container relative cursor-pointer flex-shrink-0">
@@ -170,14 +170,14 @@
           (click)="cancel()"
           [disabled]="isSubmitting"
           class="px-8 py-3 text-sm font-bold uppercase tracking-widest text-on-surface-variant hover:text-on-background transition-colors disabled:opacity-50">
-          Cancel
+          {{ 'action.cancel' | translate }}
         </button>
         <button
           type="submit"
           [disabled]="isSubmitting || featureForm.invalid || (!moduleId && !f['selectedModule'].value)"
           class="px-10 py-4 bg-primary text-on-primary rounded-xl font-bold text-sm uppercase tracking-widest shadow-[0_8px_20px_rgba(0,40,142,0.15)] hover:shadow-[0_12px_24px_rgba(0,40,142,0.25)] transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2">
           <span *ngIf="isSubmitting" class="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin"></span>
-          {{ isSubmitting ? 'Saving...' : (isEditMode ? 'Update Feature' : 'Save Feature') }}
+          {{ isSubmitting ? ('label.saving' | translate) : (isEditMode ? ('feature.form.update' | translate) : ('feature.form.save' | translate)) }}
         </button>
       </div>
 

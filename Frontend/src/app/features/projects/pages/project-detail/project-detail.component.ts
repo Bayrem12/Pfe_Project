@@ -17,11 +17,14 @@ import { TagService } from '../../../../core/services/tag.service';
 import { ProjectTag } from '../../../../core/models/tag.model';
 import { TagCreateModalComponent } from '../../tag-create-modal/tag-create-modal.component';
 import { CreatedFeaturePayload, FeatureCreateModalComponent } from '../../feature-create-modal/feature-create-modal.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { ConfirmService } from '../../../../core/services/confirm.service';
+import { TranslationService } from '../../../../core/services/translation.service';
 
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, ModuleCreateComponent, TagCreateModalComponent, FeatureCreateModalComponent],
+  imports: [CommonModule, RouterModule, ModuleCreateComponent, TagCreateModalComponent, FeatureCreateModalComponent, TranslatePipe],
   templateUrl: './project-detail.component.html',
   styleUrl: './project-detail.component.scss'
 })
@@ -89,7 +92,9 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     private scenarioService: ScenarioService,
     private authService: AuthService,
     private breadcrumbService: BreadcrumbService,
-    private tagService: TagService
+    private tagService: TagService,
+    private confirmService: ConfirmService,
+    private translationService: TranslationService
   ) {}
 
   private initialized = false;
@@ -521,14 +526,20 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     node.expanded = !node.expanded;
   }
 
-  deleteModule(module: HierarchyModule, event?: Event): void {
+  async deleteModule(module: HierarchyModule, event?: Event): Promise<void> {
     event?.stopPropagation();
 
     if (this.isViewerOrManager || this.deletingModuleId || this.deletingFeatureId) {
       return;
     }
 
-    if (!confirm(`Delete module "${module.name}"?`)) {
+    const ok = await this.confirmService.open({
+      title: this.translationService.t('project.detail.confirmDeleteModule', module.name),
+      description: this.translationService.t('delete.dialog.defaultDesc'),
+      confirmLabel: this.translationService.t('action.delete'),
+      cancelLabel: this.translationService.t('action.cancel'),
+    });
+    if (!ok) {
       return;
     }
 
@@ -560,14 +571,20 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
       });
   }
 
-  deleteFeature(feature: HierarchyFeature, event?: Event): void {
+  async deleteFeature(feature: HierarchyFeature, event?: Event): Promise<void> {
     event?.stopPropagation();
 
     if (this.isViewerOrManager || this.deletingFeatureId || this.deletingModuleId) {
       return;
     }
 
-    if (!confirm(`Delete feature "${feature.name}"?`)) {
+    const ok = await this.confirmService.open({
+      title: this.translationService.t('project.detail.confirmDeleteFeature', feature.name),
+      description: this.translationService.t('delete.dialog.defaultDesc'),
+      confirmLabel: this.translationService.t('action.delete'),
+      cancelLabel: this.translationService.t('action.cancel'),
+    });
+    if (!ok) {
       return;
     }
 
@@ -616,29 +633,36 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     this.router.navigate(['/projects']);
   }
 
-  archiveProject(): void {
+  async archiveProject(): Promise<void> {
     if (!this.canManageProjects()) return;
     if (!this.project || this.isArchiving) return;
 
-    if (confirm('Are you sure you want to archive this project?')) {
-      this.isArchiving = true;
-      this.projectService.updateProject(this.project.id, {
-        projectId: this.project.id,
-        name: this.project.name,
-        description: this.project.description,
-        url: this.project.url,
-        isActive: false
-      }).subscribe({
-        next: () => {
-          if (this.project) this.project.isActive = false;
-          this.isArchiving = false;
-        },
-        error: (error) => {
-          console.error('Erreur lors de l\'archivage du projet:', error);
-          this.isArchiving = false;
-        }
-      });
-    }
+    const ok = await this.confirmService.open({
+      title: this.translationService.t('project.detail.confirmArchiveTitle'),
+      description: this.translationService.t('project.detail.confirmArchiveDesc'),
+      confirmLabel: this.translationService.t('project.detail.archive'),
+      cancelLabel: this.translationService.t('action.cancel'),
+      variant: 'primary',
+    });
+    if (!ok) return;
+
+    this.isArchiving = true;
+    this.projectService.updateProject(this.project.id, {
+      projectId: this.project.id,
+      name: this.project.name,
+      description: this.project.description,
+      url: this.project.url,
+      isActive: false
+    }).subscribe({
+      next: () => {
+        if (this.project) this.project.isActive = false;
+        this.isArchiving = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors de l\'archivage du projet:', error);
+        this.isArchiving = false;
+      }
+    });
   }
 
   setTab(tab: 'overview' | 'modules' | 'scenarios' | 'executions' | 'ai-insights'): void {

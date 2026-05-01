@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -12,6 +12,9 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { AuthService } from '../../core/services/auth.service';
+import { TranslationService } from '../../core/services/translation.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { AvatarService } from '../../core/services/avatar.service';
 import { ResponseHttp } from '../../core/models/response-http.model';
 import { ChangePasswordResponse } from '../../core/models/auth.model';
 
@@ -34,6 +37,8 @@ export interface ActivityItem {
   color: string;
 }
 
+type ProfileTab = 'overview' | 'security' | 'preferences';
+
 function newPasswordDifferentValidator(group: AbstractControl): ValidationErrors | null {
   const current = group.get('currentPassword')?.value;
   const next    = group.get('newPassword')?.value;
@@ -49,14 +54,18 @@ function confirmMatchValidator(group: AbstractControl): ValidationErrors | null 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
   templateUrl: './profile.component.html'
 })
 export class ProfileComponent implements OnInit, OnDestroy {
 
-  private authService = inject(AuthService);
-  private fb          = inject(FormBuilder);
-  private destroy$    = new Subject<void>();
+  private authService   = inject(AuthService);
+  private fb            = inject(FormBuilder);
+  private destroy$      = new Subject<void>();
+  translationService    = inject(TranslationService);
+  private avatarService = inject(AvatarService);
+
+  @ViewChild('avatarInput') avatarInput?: ElementRef<HTMLInputElement>;
 
   user: UserProfile | null = null;
   loadingUser  = true;
@@ -80,6 +89,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
   preferredTheme: 'light' | 'dark' = 'light';
   twoFactorEnabled = true;
 
+  activeTab: ProfileTab = 'overview';
+
+  avatarUrl: string | null = null;
+  avatarUploading = false;
+  avatarError: string | null = null;
+
   private readonly prefKey = 'profile_preferences';
 
   ngOnInit(): void {
@@ -87,11 +102,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.loadPreferences();
     this.loadCurrentUser();
     this.loadActivities();
+
+    this.avatarService.avatar$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(url => (this.avatarUrl = url));
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  selectTab(tab: ProfileTab): void {
+    this.activeTab = tab;
   }
 
   private buildForm(): void {
@@ -118,7 +141,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (tokenUser) => {
           if (!tokenUser) {
-            this.userError   = 'Vous n\'êtes pas connecté.';
+            this.userError   = this.translationService.t('profile.notLoggedIn');
             this.loadingUser = false;
             return;
           }
@@ -133,10 +156,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
             createdDate:  tokenUser.createdDate   || null,
             modifiedDate: tokenUser.modifiedDate  || null,
           };
+          this.avatarService.setUser(this.user.id);
           this.loadingUser = false;
         },
         error: () => {
-          this.userError   = 'Impossible de charger le profil.';
+          this.userError   = this.translationService.t('profile.loadError');
           this.loadingUser = false;
         }
       });
@@ -144,13 +168,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   private loadActivities(): void {
     this.loadingActivities = true;
-    // TODO: remplacer par votre vrai appel API, ex:
-    // this.activityService.getRecentActivities()
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe({
-    //     next: (data) => { this.activities = data; this.loadingActivities = false; },
-    //     error: ()   => { this.loadingActivities = false; }
-    //   });
     this.activities        = [];
     this.loadingActivities = false;
   }
@@ -216,6 +233,39 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ── Avatar upload ────────────────────────────────────────────────────
+  triggerAvatarPicker(): void {
+    this.avatarError = null;
+    this.avatarInput?.nativeElement?.click();
+  }
+
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.avatarError = null;
+    this.avatarUploading = true;
+
+    this.avatarService.readFile(file)
+      .then(dataUrl => {
+        this.avatarService.setAvatar(dataUrl);
+        this.avatarUploading = false;
+      })
+      .catch((err: { key?: string }) => {
+        this.avatarError = this.translationService.t(err?.key || 'profile.avatar.errorRead');
+        this.avatarUploading = false;
+      })
+      .finally(() => {
+        if (input) input.value = '';
+      });
+  }
+
+  removeAvatar(): void {
+    this.avatarService.clearAvatar();
+    this.avatarError = null;
+  }
+
   getPrimaryRole(): string {
     return this.user?.roles?.[0] || 'Viewer';
   }
@@ -243,7 +293,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         next: (res: ResponseHttp<ChangePasswordResponse>) => {
           this.submitting = false;
           if (res.status === 200) {
-            this.successMessage  = 'Mot de passe modifié avec succès.';
+            this.successMessage  = this.translationService.t('profile.passwordChanged');
             this.showPasswordForm = false;
             this.changePasswordForm.reset();
             if (res.resultat) {
@@ -254,12 +304,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
               };
             }
           } else {
-            this.errorMessage = res.fail_Messages ?? 'Une erreur est survenue.';
+            this.errorMessage = res.fail_Messages ?? this.translationService.t('profile.errorOccurred');
           }
         },
         error: (err: Error) => {
           this.submitting   = false;
-          this.errorMessage = err.message ?? 'Erreur serveur, veuillez réessayer.';
+          this.errorMessage = err.message ?? this.translationService.t('profile.serverError');
         }
       });
   }
@@ -289,7 +339,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   getPasswordStrengthLabel(pwd: string): string {
-    return ['', 'Faible', 'Moyen', 'Fort'][this.getPasswordStrength(pwd)];
+    const idx = this.getPasswordStrength(pwd);
+    const keys = ['', 'profile.password.weak', 'profile.password.medium', 'profile.password.strong'];
+    return idx === 0 ? '' : this.translationService.t(keys[idx]);
   }
 
   getStrengthColor(pwd: string): string {

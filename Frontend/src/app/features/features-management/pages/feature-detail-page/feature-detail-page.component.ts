@@ -7,11 +7,12 @@ import { FeatureDTO } from '../../../../core/models/feature.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-feature-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   templateUrl: './feature-detail-page.component.html',
   styleUrl: './feature-detail-page.component.scss'
 })

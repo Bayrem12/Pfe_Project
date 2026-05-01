@@ -6,7 +6,10 @@ import { filter, map, takeUntil } from 'rxjs/operators';
 import { SidebarService } from '../../../core/services/sidebar.service';
 import { BreadcrumbService, DynamicBreadcrumb } from '../../../core/services/breadcrumb.service';
 import { RunNotificationsService, RunNotification } from '../../../core/services/run-notifications.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { AvatarService } from '../../../core/services/avatar.service';
 import { combineLatest, Subject } from 'rxjs';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface Breadcrumb {
   label: string;
@@ -16,7 +19,7 @@ interface Breadcrumb {
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, TranslatePipe],
   templateUrl: './topbar.component.html',
   styleUrls: ['./topbar.component.scss']
 })
@@ -26,6 +29,8 @@ export class TopbarComponent implements OnInit, OnDestroy {
   private sidebarService = inject(SidebarService);
   private breadcrumbService = inject(BreadcrumbService);
   readonly runNotifications = inject(RunNotificationsService);
+  private authService = inject(AuthService);
+  private avatarService = inject(AvatarService);
   private host = inject(ElementRef<HTMLElement>);
   private destroy$ = new Subject<void>();
 
@@ -36,7 +41,8 @@ export class TopbarComponent implements OnInit, OnDestroy {
   dynamicCrumb: DynamicBreadcrumb | null = null;
   dynamicCrumbs: DynamicBreadcrumb[] = [];
   searchQuery = '';
-  userAvatar = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCkHPYrbvTwArRSsvW26Y_QypuMcjsvFywXIogZrfrJPtianHfKaAxXANggcjgvTyMlh_79vPyQ6ug_fpuTv3ccnkoAqHSJezH4_Zehb19gWapuKWPIIjh_rlyLv2oK65EAXlilx_pA0zkmpDeD28HwUkRiXwKQ6OpIp77D6LF1Txmqy_NF_AVR_9CQETxGWhp7b8VSDbQQ0TXsODhwSuS4SrKWy_2FAvKVFLosSwM4wZGlrSgGkgdYyZ777Come_6qII8_YTSAIbyL';
+  userAvatar: string | null = null;
+  userInitials = '?';
 
   ngOnInit(): void {
     const routeChange$ = this.router.events.pipe(
@@ -63,6 +69,25 @@ export class TopbarComponent implements OnInit, OnDestroy {
     this.runNotifications.runs$
       .pipe(takeUntil(this.destroy$))
       .subscribe(runs => (this.notifications = runs));
+
+    // Track current user (for initials) and their avatar.
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(u => {
+        if (u?.id) {
+          this.avatarService.setUser(u.id);
+          const f = (u.firstName || '').charAt(0);
+          const l = (u.lastName || '').charAt(0);
+          this.userInitials = ((f + l).toUpperCase()) || (u.email?.charAt(0).toUpperCase() ?? '?');
+        } else {
+          this.avatarService.setUser(null);
+          this.userInitials = '?';
+        }
+      });
+
+    this.avatarService.avatar$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(url => (this.userAvatar = url));
   }
 
   ngOnDestroy(): void {

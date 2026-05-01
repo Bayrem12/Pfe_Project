@@ -1,274 +1,500 @@
-<div *ngIf="loadingUser" class="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-slate-500">
-  <span class="material-symbols-outlined animate-spin text-3xl text-slate-400">progress_activity</span>
-  <p class="text-sm font-medium">Loading profile...</p>
+<!-- Loading -->
+<div *ngIf="loadingUser" class="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-slate-400">
+  <span class="material-symbols-outlined animate-spin text-4xl">progress_activity</span>
+  <p class="text-sm font-medium">{{ 'profile.loadingProfile' | translate }}</p>
 </div>
 
-<div *ngIf="!loadingUser && userError" class="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-red-600">
-  <span class="material-symbols-outlined text-3xl">error</span>
+<!-- Error -->
+<div *ngIf="!loadingUser && userError" class="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-red-500">
+  <span class="material-symbols-outlined text-4xl">error</span>
   <p class="text-sm font-semibold">{{ userError }}</p>
 </div>
 
-<main *ngIf="!loadingUser && !userError && user" class="mx-auto max-w-[1320px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-  <section class="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-    <div class="pointer-events-none absolute right-0 top-0 h-52 w-52 rounded-full bg-blue-100/40 blur-3xl"></div>
-    <div class="relative grid gap-6 xl:grid-cols-[1.7fr_1fr]">
-      <div class="space-y-5">
-        <div class="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-blue-700">
-          <span class="material-symbols-outlined !text-sm">shield_person</span>
-          Account Profile
-        </div>
+<!-- Profile -->
+<div *ngIf="!loadingUser && !userError && user" class="pb-12">
 
-        <div class="flex flex-wrap items-center gap-4">
-          <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-700 text-xl font-black text-white shadow-sm">{{ getInitials() }}</div>
-          <div class="min-w-0">
-            <h1 class="truncate text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">{{ user.fullName }}</h1>
-            <p class="mt-1 truncate text-sm text-slate-500 sm:text-base">{{ user.email }}</p>
-          </div>
-          <span class="inline-flex items-center rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]" [ngClass]="getRoleClass()">{{ getPrimaryRole() }}</span>
-        </div>
-
-        <div class="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
-          <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Status</p>
-            <p class="mt-1 text-sm font-semibold text-slate-800">{{ user.isActive ? 'Active' : 'Inactive' }}</p>
-          </div>
-          <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Member Since</p>
-            <p class="mt-1 text-sm font-semibold text-slate-800">{{ user.createdDate ? (user.createdDate | date:'dd/MM/yyyy') : '—' }}</p>
-          </div>
-          <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Last Updated</p>
-            <p class="mt-1 text-sm font-semibold text-slate-800">{{ user.modifiedDate ? (user.modifiedDate | date:'dd/MM/yyyy') : '—' }}</p>
-          </div>
-          <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">User ID</p>
-            <p class="mt-1 truncate text-sm font-semibold text-slate-800">{{ user.id }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-1">
-        <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center shadow-sm">
-          <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Total Runs</p>
-          <p class="mt-1 text-3xl font-black text-slate-900">1,429</p>
-        </article>
-        <article class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-center shadow-sm">
-          <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-700">Quality Score</p>
-          <p class="mt-1 text-3xl font-black text-emerald-700">98.2%</p>
-        </article>
-        <article class="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-center shadow-sm">
-          <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-700">Account State</p>
-          <p class="mt-1 text-3xl font-black text-blue-700">{{ user.isActive ? 'ON' : 'OFF' }}</p>
-        </article>
+  <!-- ── Hero / Cover banner ───────────────────────────────────────── -->
+  <div class="relative">
+    <div class="h-44 w-full bg-gradient-to-r from-primary via-blue-600 to-indigo-600 sm:h-56">
+      <div class="pointer-events-none absolute inset-0 opacity-20"
+           style="background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.4) 0, transparent 40%), radial-gradient(circle at 80% 60%, rgba(255,255,255,0.25) 0, transparent 35%);">
       </div>
     </div>
-  </section>
 
-  <section class="grid gap-6 xl:grid-cols-2">
-    <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <header class="mb-5 flex items-center justify-between">
-        <h2 class="text-lg font-bold text-slate-900">Personal Information</h2>
-        <span class="material-symbols-outlined text-slate-400">badge</span>
-      </header>
+    <div class="mx-auto -mt-16 max-w-6xl px-4 sm:px-6 lg:px-8 sm:-mt-20">
+      <div class="rounded-3xl border border-slate-200 bg-white px-5 py-5 shadow-sm sm:px-8 sm:py-6">
+        <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:gap-7">
 
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-          <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Full Name</p>
-          <p class="mt-1 text-sm font-semibold text-slate-900">{{ user.fullName }}</p>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-          <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Email</p>
-          <p class="mt-1 break-all text-sm font-semibold text-slate-900">{{ user.email }}</p>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-          <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">First Name</p>
-          <p class="mt-1 text-sm font-semibold text-slate-900">{{ user.firstName || '—' }}</p>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-          <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Last Name</p>
-          <p class="mt-1 text-sm font-semibold text-slate-900">{{ user.lastName || '—' }}</p>
-        </div>
-      </div>
-    </article>
+          <!-- Avatar with upload -->
+          <div class="relative -mt-16 flex-shrink-0 self-center sm:self-end">
+            <div class="h-28 w-28 overflow-hidden rounded-2xl border-4 border-white bg-primary shadow-xl shadow-primary/20 sm:h-32 sm:w-32">
+              <img *ngIf="avatarUrl" [src]="avatarUrl" alt="avatar"
+                   class="h-full w-full object-cover" />
+              <div *ngIf="!avatarUrl"
+                   class="flex h-full w-full items-center justify-center text-4xl font-black text-white">
+                {{ getInitials() }}
+              </div>
+            </div>
 
-    <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <header class="mb-5 flex items-center justify-between">
-        <h2 class="text-lg font-bold text-slate-900">Preferences</h2>
-        <span class="material-symbols-outlined text-slate-400">tune</span>
-      </header>
+            <!-- Edit avatar button -->
+            <button type="button"
+                    (click)="triggerAvatarPicker()"
+                    [disabled]="avatarUploading"
+                    [title]="'profile.avatar.change' | translate"
+                    class="absolute -bottom-1 -right-1 inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-slate-900 text-white shadow-md transition hover:bg-slate-700 disabled:opacity-60">
+              <span class="material-symbols-outlined text-[18px]">{{ avatarUploading ? 'progress_activity' : 'photo_camera' }}</span>
+            </button>
 
-      <div class="space-y-4">
-        <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
-          <div>
-            <h4 class="text-sm font-semibold text-slate-900">Auto-healing tests</h4>
-            <p class="mt-0.5 text-xs text-slate-500">Automatically retry unstable executions.</p>
+            <input #avatarInput type="file"
+                   accept="image/*"
+                   class="hidden"
+                   (change)="onAvatarSelected($event)" />
           </div>
-          <button
-            type="button"
-            class="relative h-7 w-12 rounded-full transition-colors"
-            [ngClass]="autoHealingEnabled ? 'bg-blue-600' : 'bg-slate-300'"
-            (click)="toggleAutoHealing()">
-            <span
-              class="absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all"
-              [ngClass]="autoHealingEnabled ? 'left-6' : 'left-1'"></span>
+
+          <!-- Identity -->
+          <div class="min-w-0 flex-1 text-center sm:text-left">
+            <div class="flex flex-col items-center gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <h1 class="truncate text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">{{ user.fullName }}</h1>
+              <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider"
+                    [ngClass]="getRoleClass()">
+                <span class="material-symbols-outlined !text-sm">shield_person</span>
+                {{ getPrimaryRole() }}
+              </span>
+              <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold"
+                    [ngClass]="user.isActive
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : 'bg-slate-100 text-slate-500 border border-slate-200'">
+                <span class="h-1.5 w-1.5 rounded-full"
+                      [ngClass]="user.isActive ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+                {{ user.isActive ? ('profile.active' | translate) : ('profile.inactive' | translate) }}
+              </span>
+            </div>
+            <p class="mt-1 flex items-center justify-center gap-1.5 text-sm text-slate-500 sm:justify-start">
+              <span class="material-symbols-outlined !text-base text-slate-400">mail</span>
+              <span class="truncate">{{ user.email }}</span>
+            </p>
+            <p *ngIf="user.createdDate"
+               class="mt-1 flex items-center justify-center gap-1.5 text-xs text-slate-400 sm:justify-start">
+              <span class="material-symbols-outlined !text-base">calendar_today</span>
+              {{ 'profile.memberSince' | translate }} {{ user.createdDate | date:'longDate' }}
+            </p>
+
+            <!-- Avatar inline actions -->
+            <div class="mt-3 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+              <button type="button"
+                      (click)="triggerAvatarPicker()"
+                      [disabled]="avatarUploading"
+                      class="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-primary/40 hover:text-primary disabled:opacity-60">
+                <span class="material-symbols-outlined !text-[16px]">upload</span>
+                {{ 'profile.avatar.upload' | translate }}
+              </button>
+              <button *ngIf="avatarUrl" type="button"
+                      (click)="removeAvatar()"
+                      class="inline-flex h-9 items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3 text-xs font-bold text-red-600 transition hover:bg-red-100">
+                <span class="material-symbols-outlined !text-[16px]">delete</span>
+                {{ 'profile.avatar.remove' | translate }}
+              </button>
+              <span class="text-[11px] text-slate-400">{{ 'profile.avatar.hint' | translate }}</span>
+            </div>
+            <p *ngIf="avatarError" class="mt-2 text-xs font-semibold text-red-500">{{ avatarError }}</p>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="mt-6 flex flex-wrap items-center gap-1 border-t border-slate-100 pt-3 sm:gap-2">
+          <button type="button" (click)="selectTab('overview')"
+                  [class]="activeTab === 'overview'
+                    ? 'inline-flex items-center gap-1.5 rounded-xl bg-primary/10 px-3 py-2 text-xs font-bold text-primary'
+                    : 'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 hover:text-slate-800'">
+            <span class="material-symbols-outlined !text-[16px]">person</span>
+            {{ 'profile.tab.overview' | translate }}
           </button>
-        </div>
-
-        <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
-          <div>
-            <h4 class="text-sm font-semibold text-slate-900">Email notifications</h4>
-            <p class="mt-0.5 text-xs text-slate-500">Get updates for failed runs and role changes.</p>
-          </div>
-          <button
-            type="button"
-            class="relative h-7 w-12 rounded-full transition-colors"
-            [ngClass]="emailNotificationsEnabled ? 'bg-blue-600' : 'bg-slate-300'"
-            (click)="toggleEmailNotifications()">
-            <span
-              class="absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all"
-              [ngClass]="emailNotificationsEnabled ? 'left-6' : 'left-1'"></span>
+          <button type="button" (click)="selectTab('security')"
+                  [class]="activeTab === 'security'
+                    ? 'inline-flex items-center gap-1.5 rounded-xl bg-primary/10 px-3 py-2 text-xs font-bold text-primary'
+                    : 'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 hover:text-slate-800'">
+            <span class="material-symbols-outlined !text-[16px]">lock</span>
+            {{ 'profile.tab.security' | translate }}
+          </button>
+          <button type="button" (click)="selectTab('preferences')"
+                  [class]="activeTab === 'preferences'
+                    ? 'inline-flex items-center gap-1.5 rounded-xl bg-primary/10 px-3 py-2 text-xs font-bold text-primary'
+                    : 'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 hover:text-slate-800'">
+            <span class="material-symbols-outlined !text-[16px]">tune</span>
+            {{ 'profile.tab.preferences' | translate }}
           </button>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div class="mt-5 border-t border-slate-200 pt-5">
-        <p class="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Theme</p>
-        <div class="grid grid-cols-2 gap-2">
+  <!-- ── Body ─────────────────────────────────────────────────────── -->
+  <div class="mx-auto mt-6 max-w-6xl px-4 sm:px-6 lg:px-8">
+
+    <!-- ============= OVERVIEW ============= -->
+    <ng-container *ngIf="activeTab === 'overview'">
+      <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
+
+        <!-- Account info -->
+        <section class="lg:col-span-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <header class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-slate-400 text-lg">badge</span>
+              <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700">
+                {{ 'profile.accountInfo' | translate }}
+              </h2>
+            </div>
+          </header>
+          <div class="grid grid-cols-1 divide-y divide-slate-100 sm:grid-cols-2 sm:divide-y-0 sm:divide-x">
+            <div class="px-5 py-4">
+              <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                {{ 'profile.firstName' | translate }}
+              </p>
+              <p class="mt-1 text-sm font-semibold text-slate-900">{{ user.firstName || '—' }}</p>
+            </div>
+            <div class="px-5 py-4">
+              <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                {{ 'profile.lastName' | translate }}
+              </p>
+              <p class="mt-1 text-sm font-semibold text-slate-900">{{ user.lastName || '—' }}</p>
+            </div>
+            <div class="px-5 py-4 sm:col-span-2 sm:border-t sm:border-slate-100">
+              <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                {{ 'profile.email' | translate }}
+              </p>
+              <p class="mt-1 break-all text-sm font-semibold text-slate-900">{{ user.email }}</p>
+            </div>
+            <div class="px-5 py-4 sm:border-t sm:border-slate-100">
+              <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                {{ 'profile.role' | translate }}
+              </p>
+              <p class="mt-1">
+                <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider"
+                      [ngClass]="getRoleClass()">{{ getPrimaryRole() }}</span>
+              </p>
+            </div>
+            <div class="px-5 py-4 sm:border-t sm:border-slate-100">
+              <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                {{ 'profile.status' | translate }}
+              </p>
+              <p class="mt-1">
+                <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold"
+                      [ngClass]="user.isActive
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : 'bg-slate-100 text-slate-500 border border-slate-200'">
+                  <span class="h-1.5 w-1.5 rounded-full"
+                        [ngClass]="user.isActive ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+                  {{ user.isActive ? ('profile.active' | translate) : ('profile.inactive' | translate) }}
+                </span>
+              </p>
+            </div>
+            <div *ngIf="user.createdDate" class="px-5 py-4 sm:col-span-2 sm:border-t sm:border-slate-100">
+              <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                {{ 'profile.memberSince' | translate }}
+              </p>
+              <p class="mt-1 text-sm text-slate-600">{{ user.createdDate | date:'longDate' }}</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Side: language + quick stats -->
+        <aside class="space-y-5">
+          <!-- Language switcher -->
+          <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <header class="flex items-center gap-2 border-b border-slate-100 px-5 py-4">
+              <span class="material-symbols-outlined text-slate-400 text-lg">language</span>
+              <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700">
+                {{ 'profile.language' | translate }}
+              </h2>
+            </header>
+            <div class="px-5 py-4">
+              <div class="flex w-full overflow-hidden rounded-xl border border-slate-200">
+                <button type="button"
+                        class="flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-sm font-semibold transition"
+                        [ngClass]="translationService.current === 'en'
+                          ? 'bg-primary text-white'
+                          : 'bg-white text-slate-600 hover:bg-slate-50'"
+                        (click)="translationService.setLanguage('en')">
+                  🇬🇧 English
+                </button>
+                <button type="button"
+                        class="flex flex-1 items-center justify-center gap-1.5 border-l border-slate-200 px-3 py-2 text-sm font-semibold transition"
+                        [ngClass]="translationService.current === 'fr'
+                          ? 'bg-primary text-white'
+                          : 'bg-white text-slate-600 hover:bg-slate-50'"
+                        (click)="translationService.setLanguage('fr')">
+                  🇫🇷 Français
+                </button>
+              </div>
+              <p class="mt-2 text-[11px] text-slate-400">{{ 'profile.languageHint' | translate }}</p>
+            </div>
+          </section>
+
+          <!-- Quick info -->
+          <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <header class="flex items-center gap-2 border-b border-slate-100 px-5 py-4">
+              <span class="material-symbols-outlined text-slate-400 text-lg">verified_user</span>
+              <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700">
+                {{ 'profile.atAGlance' | translate }}
+              </h2>
+            </header>
+            <div class="grid grid-cols-2">
+              <div class="px-5 py-4">
+                <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                  {{ 'profile.role' | translate }}
+                </p>
+                <p class="mt-1 text-sm font-semibold text-slate-900">{{ getPrimaryRole() }}</p>
+              </div>
+              <div class="border-l border-slate-100 px-5 py-4">
+                <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                  {{ 'profile.twoFactor' | translate }}
+                </p>
+                <p class="mt-1 text-sm font-semibold"
+                   [class]="twoFactorEnabled ? 'text-emerald-600' : 'text-slate-500'">
+                  {{ twoFactorEnabled ? ('label.enabled' | translate) : ('label.disabled' | translate) }}
+                </p>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </ng-container>
+
+    <!-- ============= SECURITY ============= -->
+    <ng-container *ngIf="activeTab === 'security'">
+      <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-slate-400 text-lg">lock</span>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700">
+              {{ 'profile.security' | translate }}
+            </h2>
+          </div>
           <button
             type="button"
-            class="inline-flex h-10 items-center justify-center rounded-xl border text-sm font-semibold transition"
-            [ngClass]="preferredTheme === 'light' ? 'border-blue-700 bg-blue-700 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100'"
-            (click)="setTheme('light')">
-            Light
+            class="inline-flex items-center gap-1.5 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
+            (click)="showPasswordForm = !showPasswordForm">
+            <span class="material-symbols-outlined text-base">{{ showPasswordForm ? 'close' : 'key' }}</span>
+            {{ showPasswordForm ? ('action.cancel' | translate) : ('profile.changePassword' | translate) }}
           </button>
-          <button
-            type="button"
-            class="inline-flex h-10 items-center justify-center rounded-xl border text-sm font-semibold transition"
-            [ngClass]="preferredTheme === 'dark' ? 'border-blue-700 bg-blue-700 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100'"
-            (click)="setTheme('dark')">
-            Dark
+        </header>
+
+        <div *ngIf="successMessage" class="mx-5 mt-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+          <span class="material-symbols-outlined text-base">check_circle</span>
+          {{ successMessage }}
+        </div>
+        <div *ngIf="errorMessage" class="mx-5 mt-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+          <span class="material-symbols-outlined text-base">error_outline</span>
+          {{ errorMessage }}
+        </div>
+
+        <form
+          *ngIf="showPasswordForm"
+          [formGroup]="changePasswordForm"
+          (ngSubmit)="onSubmit()"
+          novalidate
+          autocomplete="off"
+          class="grid gap-3 px-5 py-5">
+
+          <div class="rounded-xl border px-4 py-1"
+               [ngClass]="f['currentPassword'].invalid && f['currentPassword'].touched ? 'border-red-300 bg-red-50' : 'border-slate-200 bg-slate-50'">
+            <div class="flex h-11 items-center">
+              <input [type]="showCurrent ? 'text' : 'password'" formControlName="currentPassword"
+                     [placeholder]="'profile.currentPassword' | translate"
+                     class="h-full w-full border-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400" />
+              <button type="button"
+                      class="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:text-slate-700"
+                      (click)="toggleVisibility('current')">
+                <span class="material-symbols-outlined text-base">{{ showCurrent ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="rounded-xl border px-4 py-1"
+               [ngClass]="f['newPassword'].invalid && f['newPassword'].touched ? 'border-red-300 bg-red-50' : 'border-slate-200 bg-slate-50'">
+            <div class="flex h-11 items-center">
+              <input [type]="showNew ? 'text' : 'password'" formControlName="newPassword"
+                     [placeholder]="'profile.newPassword' | translate"
+                     class="h-full w-full border-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400" />
+              <button type="button"
+                      class="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:text-slate-700"
+                      (click)="toggleVisibility('new')">
+                <span class="material-symbols-outlined text-base">{{ showNew ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="f['newPassword'].value" class="flex items-center gap-3 px-1">
+            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200">
+              <div class="h-full rounded-full transition-all duration-300"
+                   [ngClass]="[getStrengthColor(f['newPassword'].value), getStrengthWidth(f['newPassword'].value)]"></div>
+            </div>
+            <span class="w-12 text-right text-xs font-semibold"
+                  [ngClass]="getStrengthTextColor(f['newPassword'].value)">
+              {{ getPasswordStrengthLabel(f['newPassword'].value) }}
+            </span>
+          </div>
+
+          <div class="rounded-xl border px-4 py-1"
+               [ngClass]="(f['confirmPassword'].invalid || changePasswordForm.errors?.['mismatch']) && f['confirmPassword'].touched ? 'border-red-300 bg-red-50' : 'border-slate-200 bg-slate-50'">
+            <div class="flex h-11 items-center">
+              <input [type]="showConfirm ? 'text' : 'password'" formControlName="confirmPassword"
+                     [placeholder]="'profile.confirmPassword' | translate"
+                     class="h-full w-full border-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400" />
+              <button type="button"
+                      class="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:text-slate-700"
+                      (click)="toggleVisibility('confirm')">
+                <span class="material-symbols-outlined text-base">{{ showConfirm ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="changePasswordForm.errors?.['mismatch'] && f['confirmPassword'].touched" class="px-1 text-xs text-red-500">
+            {{ 'profile.passwordMismatch' | translate }}
+          </div>
+          <div *ngIf="changePasswordForm.errors?.['sameAsCurrent'] && f['newPassword'].touched" class="px-1 text-xs text-red-500">
+            {{ 'profile.passwordSameAsCurrent' | translate }}
+          </div>
+
+          <button type="submit" [disabled]="changePasswordForm.invalid || submitting"
+                  class="mt-2 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-white shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50">
+            <span *ngIf="submitting" class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
+            {{ submitting ? ('profile.saving' | translate) : ('profile.savePassword' | translate) }}
+          </button>
+        </form>
+
+        <div *ngIf="!showPasswordForm" class="px-5 py-5 text-sm text-slate-500">
+          {{ 'profile.passwordSecure' | translate }}
+        </div>
+      </section>
+
+      <!-- Two-factor row -->
+      <section class="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between gap-4 px-5 py-4">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-slate-400 text-lg">verified_user</span>
+            <div>
+              <p class="text-sm font-bold text-slate-700">{{ 'profile.twoFactor' | translate }}</p>
+              <p class="text-xs text-slate-400">{{ 'profile.twoFactorHint' | translate }}</p>
+            </div>
+          </div>
+          <button type="button"
+                  (click)="toggleTwoFactor()"
+                  class="relative inline-flex h-6 w-11 items-center rounded-full transition"
+                  [class]="twoFactorEnabled ? 'bg-primary' : 'bg-slate-300'">
+            <span class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition"
+                  [class]="twoFactorEnabled ? 'translate-x-5' : 'translate-x-1'"></span>
           </button>
         </div>
-      </div>
-    </article>
-  </section>
+      </section>
+    </ng-container>
 
-  <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-    <header class="mb-5 flex items-center justify-between">
-      <h2 class="text-lg font-bold text-slate-900">Security</h2>
-      <span class="material-symbols-outlined text-slate-400">shield</span>
-    </header>
+    <!-- ============= PREFERENCES ============= -->
+    <ng-container *ngIf="activeTab === 'preferences'">
+      <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
 
-    <div *ngIf="successMessage" class="mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
-      <span class="material-symbols-outlined !text-base">check_circle</span>
-      {{ successMessage }}
-    </div>
+        <!-- Language -->
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <header class="flex items-center gap-2 border-b border-slate-100 px-5 py-4">
+            <span class="material-symbols-outlined text-slate-400 text-lg">language</span>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700">
+              {{ 'profile.language' | translate }}
+            </h2>
+          </header>
+          <div class="px-5 py-4">
+            <div class="flex w-full overflow-hidden rounded-xl border border-slate-200">
+              <button type="button"
+                      class="flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-sm font-semibold transition"
+                      [ngClass]="translationService.current === 'en'
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-slate-600 hover:bg-slate-50'"
+                      (click)="translationService.setLanguage('en')">
+                🇬🇧 English
+              </button>
+              <button type="button"
+                      class="flex flex-1 items-center justify-center gap-1.5 border-l border-slate-200 px-3 py-2 text-sm font-semibold transition"
+                      [ngClass]="translationService.current === 'fr'
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-slate-600 hover:bg-slate-50'"
+                      (click)="translationService.setLanguage('fr')">
+                🇫🇷 Français
+              </button>
+            </div>
+          </div>
+        </section>
 
-    <div *ngIf="errorMessage" class="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
-      <span class="material-symbols-outlined !text-base">error</span>
-      {{ errorMessage }}
-    </div>
-
-    <div class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <h4 class="text-sm font-semibold text-slate-900">2FA Authentication</h4>
-        <p class="mt-0.5 text-xs text-slate-500">{{ twoFactorEnabled ? 'Enabled via authenticator app.' : 'Disabled.' }}</p>
-      </div>
-      <button
-        type="button"
-        class="inline-flex h-9 items-center justify-center rounded-lg border px-4 text-sm font-semibold transition"
-        [ngClass]="twoFactorEnabled ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'"
-        (click)="toggleTwoFactor()">
-        {{ twoFactorEnabled ? 'Disable' : 'Enable' }}
-      </button>
-    </div>
-
-    <div class="mt-5 border-t border-slate-200 pt-5">
-      <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h4 class="text-sm font-semibold text-slate-900">Password Management</h4>
-          <p class="mt-0.5 text-xs text-slate-500">Update your password and keep your account secure.</p>
-        </div>
-        <button
-          type="button"
-          class="inline-flex h-10 items-center justify-center rounded-xl bg-blue-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
-          (click)="showPasswordForm = !showPasswordForm">
-          {{ showPasswordForm ? 'Cancel' : 'Change Password' }}
-        </button>
-      </div>
-
-      <form
-        *ngIf="showPasswordForm"
-        [formGroup]="changePasswordForm"
-        (ngSubmit)="onSubmit()"
-        novalidate
-        autocomplete="off"
-        class="grid gap-3">
-
-        <div class="rounded-xl border bg-slate-50 px-3" [ngClass]="f['currentPassword'].invalid && f['currentPassword'].touched ? 'border-red-300 bg-red-50' : 'border-slate-200'">
-          <div class="flex h-11 items-center">
-            <input
-              [type]="showCurrent ? 'text' : 'password'"
-              formControlName="currentPassword"
-              placeholder="Current password"
-              class="h-full w-full border-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400" />
-            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100" (click)="toggleVisibility('current')">
-              <span class="material-symbols-outlined !text-base">{{ showCurrent ? 'visibility_off' : 'visibility' }}</span>
+        <!-- Theme -->
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <header class="flex items-center gap-2 border-b border-slate-100 px-5 py-4">
+            <span class="material-symbols-outlined text-slate-400 text-lg">palette</span>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700">
+              {{ 'profile.theme' | translate }}
+            </h2>
+          </header>
+          <div class="grid grid-cols-2 gap-3 px-5 py-4">
+            <button type="button" (click)="setTheme('light')"
+                    [class]="preferredTheme === 'light'
+                      ? 'flex items-center gap-2 rounded-xl border-2 border-primary bg-primary/5 px-4 py-3 text-sm font-bold text-primary'
+                      : 'flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 hover:border-slate-300'">
+              <span class="material-symbols-outlined">light_mode</span>
+              {{ 'profile.themeLight' | translate }}
+            </button>
+            <button type="button" (click)="setTheme('dark')"
+                    [class]="preferredTheme === 'dark'
+                      ? 'flex items-center gap-2 rounded-xl border-2 border-primary bg-primary/5 px-4 py-3 text-sm font-bold text-primary'
+                      : 'flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 hover:border-slate-300'">
+              <span class="material-symbols-outlined">dark_mode</span>
+              {{ 'profile.themeDark' | translate }}
             </button>
           </div>
-        </div>
+        </section>
 
-        <div class="rounded-xl border bg-slate-50 px-3" [ngClass]="f['newPassword'].invalid && f['newPassword'].touched ? 'border-red-300 bg-red-50' : 'border-slate-200'">
-          <div class="flex h-11 items-center">
-            <input
-              [type]="showNew ? 'text' : 'password'"
-              formControlName="newPassword"
-              placeholder="New password"
-              class="h-full w-full border-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400" />
-            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100" (click)="toggleVisibility('new')">
-              <span class="material-symbols-outlined !text-base">{{ showNew ? 'visibility_off' : 'visibility' }}</span>
+        <!-- Notifications -->
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <header class="flex items-center gap-2 border-b border-slate-100 px-5 py-4">
+            <span class="material-symbols-outlined text-slate-400 text-lg">notifications</span>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700">
+              {{ 'profile.notifications' | translate }}
+            </h2>
+          </header>
+          <div class="flex items-center justify-between gap-3 px-5 py-4">
+            <div>
+              <p class="text-sm font-semibold text-slate-700">{{ 'profile.emailNotifications' | translate }}</p>
+              <p class="text-xs text-slate-400">{{ 'profile.emailNotificationsHint' | translate }}</p>
+            </div>
+            <button type="button"
+                    (click)="toggleEmailNotifications()"
+                    class="relative inline-flex h-6 w-11 items-center rounded-full transition"
+                    [class]="emailNotificationsEnabled ? 'bg-primary' : 'bg-slate-300'">
+              <span class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition"
+                    [class]="emailNotificationsEnabled ? 'translate-x-5' : 'translate-x-1'"></span>
             </button>
           </div>
-        </div>
+        </section>
 
-        <div *ngIf="f['newPassword'].value" class="flex items-center gap-3">
-          <div class="h-2 flex-1 overflow-hidden rounded-full bg-slate-200">
-            <div class="h-full transition-all duration-200" [ngClass]="[getStrengthColor(f['newPassword'].value), getStrengthWidth(f['newPassword'].value)]"></div>
-          </div>
-          <span class="text-xs font-semibold" [ngClass]="getStrengthTextColor(f['newPassword'].value)">{{ getPasswordStrengthLabel(f['newPassword'].value) }}</span>
-        </div>
-
-        <div class="rounded-xl border bg-slate-50 px-3" [ngClass]="f['confirmPassword'].invalid && f['confirmPassword'].touched ? 'border-red-300 bg-red-50' : 'border-slate-200'">
-          <div class="flex h-11 items-center">
-            <input
-              [type]="showConfirm ? 'text' : 'password'"
-              formControlName="confirmPassword"
-              placeholder="Confirm new password"
-              class="h-full w-full border-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400" />
-            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100" (click)="toggleVisibility('confirm')">
-              <span class="material-symbols-outlined !text-base">{{ showConfirm ? 'visibility_off' : 'visibility' }}</span>
+        <!-- Auto-healing -->
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <header class="flex items-center gap-2 border-b border-slate-100 px-5 py-4">
+            <span class="material-symbols-outlined text-slate-400 text-lg">healing</span>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700">
+              {{ 'profile.autoHealing' | translate }}
+            </h2>
+          </header>
+          <div class="flex items-center justify-between gap-3 px-5 py-4">
+            <div>
+              <p class="text-sm font-semibold text-slate-700">{{ 'profile.autoHealingTitle' | translate }}</p>
+              <p class="text-xs text-slate-400">{{ 'profile.autoHealingHint' | translate }}</p>
+            </div>
+            <button type="button"
+                    (click)="toggleAutoHealing()"
+                    class="relative inline-flex h-6 w-11 items-center rounded-full transition"
+                    [class]="autoHealingEnabled ? 'bg-primary' : 'bg-slate-300'">
+              <span class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition"
+                    [class]="autoHealingEnabled ? 'translate-x-5' : 'translate-x-1'"></span>
             </button>
           </div>
-        </div>
-
-        <p *ngIf="changePasswordForm.hasError('sameAsCurrent') && f['newPassword'].touched" class="text-xs font-semibold text-red-600">
-          New password must be different from current password.
-        </p>
-        <p *ngIf="changePasswordForm.hasError('mismatch') && f['confirmPassword'].touched" class="text-xs font-semibold text-red-600">
-          Password confirmation does not match.
-        </p>
-
-        <button
-          type="submit"
-          [disabled]="changePasswordForm.invalid || submitting"
-          class="mt-1 inline-flex h-11 items-center justify-center rounded-xl bg-blue-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60">
-          <span *ngIf="!submitting">Save Password</span>
-          <span *ngIf="submitting" class="inline-flex items-center gap-2">
-            <span class="material-symbols-outlined animate-spin !text-base">progress_activity</span>
-            Saving...
-          </span>
-        </button>
-      </form>
-    </div>
-  </article>
-</main>
+        </section>
+      </div>
+    </ng-container>
+  </div>
+</div>

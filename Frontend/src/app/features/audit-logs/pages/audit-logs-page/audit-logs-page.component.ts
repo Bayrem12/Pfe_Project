@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { Observable, Subject, forkJoin, of } from 'rxjs';
 import { catchError, map, switchMap, takeUntil } from 'rxjs/operators';
 import { DashboardService } from '../../../dashboard/services/dashboard.service';
@@ -38,7 +39,7 @@ const PROJECT_ROLE_NUMBER_TO_NAME: Record<string, string> = {
 @Component({
   selector: 'app-audit-logs-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './audit-logs-page.component.html'
 })
 export class AuditLogsPageComponent implements OnInit, OnDestroy {

@@ -37,7 +37,7 @@ namespace Application.Features.ScenariosFeature.Queries
                         .Include(s => s.Feature)
                             .ThenInclude(f => f.Module)
                         .Include(s => s.Steps)
-                        .Include(s => s.ScenarioTags)
+                        .Include(s => s.ScenarioTags.Where(st => !st.IsDeleted))
                             .ThenInclude(st => st.Tag)
                         .Include(s => s.TestResults)
                         .Where(s => !s.IsDeleted);

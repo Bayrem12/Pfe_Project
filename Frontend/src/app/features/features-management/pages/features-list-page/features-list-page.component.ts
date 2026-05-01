@@ -1,6 +1,6 @@
-// src/app/features/features-management/pages/features-list-page/features-list-page.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FeatureService } from '../../../../core/services/feature.service';
 import { ModuleService } from '../../../../core/services/module.service';
@@ -9,11 +9,12 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { FeatureListDTO } from '../../../../core/models/feature.model';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ConfirmDeleteDialogComponent } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 @Component({
   selector: 'app-features-list-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [TranslatePipe, CommonModule, RouterModule, ConfirmDeleteDialogComponent],
   templateUrl: './features-list-page.component.html',
   styleUrl: './features-list-page.component.scss'
 })
@@ -26,6 +27,7 @@ export class FeaturesListPageComponent implements OnInit, OnDestroy {
   isLoading = false;
   error = '';
   deletingId: string | null = null;
+  featureToDelete: FeatureListDTO | null = null;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -37,7 +39,7 @@ export class FeaturesListPageComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Récupère projectId depuis query params ou parent route
+    // RÃ©cupÃ¨re projectId depuis query params ou parent route
     this.projectId =
       this.route.snapshot.queryParamMap.get('projectId') ||
       this.route.snapshot.paramMap.get('projectId') || '';
@@ -46,7 +48,7 @@ export class FeaturesListPageComponent implements OnInit, OnDestroy {
       this.projectId = this.route.parent.snapshot.paramMap.get('id') || '';
     }
 
-    // Pré-sélection module depuis query params (venant de feature-detail)
+    // PrÃ©-sÃ©lection module depuis query params (venant de feature-detail)
     const preModuleId = this.route.snapshot.queryParamMap.get('moduleId');
     const preModuleName = this.route.snapshot.queryParamMap.get('moduleName');
     if (preModuleId) {
@@ -77,7 +79,7 @@ export class FeaturesListPageComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.modules = res.resultat || [];
         if (this.modules.length > 0) {
-          // Garde la pré-sélection ou prend le premier
+          // Garde la prÃ©-sÃ©lection ou prend le premier
           if (!this.selectedModuleId || !this.modules.find(m => m.id === this.selectedModuleId)) {
             this.selectedModuleId = this.modules[0].id;
             this.selectedModuleName = this.modules[0].name;
@@ -132,16 +134,24 @@ export class FeaturesListPageComponent implements OnInit, OnDestroy {
 
   deleteFeature(id: string, event: Event): void {
     event.stopPropagation();
-    if (!confirm('Delete this feature and all its scenarios?')) return;
+    const feature = this.features.find(f => f.id === id) || null;
+    this.featureToDelete = feature;
+  }
+
+  confirmDeleteFeature(): void {
+    if (!this.featureToDelete) return;
+    const id = this.featureToDelete.id;
     this.deletingId = id;
     this.featureService.deleteFeature(id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.deletingId = null;
+        this.featureToDelete = null;
         this.loadFeatures();
       },
       error: () => {
         this.error = 'Failed to delete feature.';
         this.deletingId = null;
+        this.featureToDelete = null;
       }
     });
   }
