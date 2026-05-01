@@ -24,7 +24,7 @@ namespace Application.Features.AuthFeature.Commands
                     if (string.IsNullOrWhiteSpace(request.Token))
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Verification token is required.",
+                            FailMessages = "Verification token is required.",
                             Status = StatusCodes.Status400BadRequest
                         };
 
@@ -33,14 +33,14 @@ namespace Application.Features.AuthFeature.Commands
                     if (user is null)
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Invalid verification link.",
+                            FailMessages = "Invalid verification link.",
                             Status = StatusCodes.Status400BadRequest
                         };
 
                     if (user.EmailVerificationTokenExpiry < DateTime.UtcNow)
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Verification link has expired. Please register again.",
+                            FailMessages = "Verification link has expired. Please register again.",
                             Status = StatusCodes.Status400BadRequest
                         };
 
@@ -61,7 +61,7 @@ namespace Application.Features.AuthFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = ex.Message,
+                        FailMessages = ex.Message,
                         Status = StatusCodes.Status500InternalServerError
                     };
                 }

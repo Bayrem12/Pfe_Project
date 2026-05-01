@@ -52,7 +52,7 @@ namespace Application.Features.ScenariosFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = "Feature not found",
+                        FailMessages = "Feature not found",
                         Status = StatusCodes.Status404NotFound
                     };
                 }
@@ -69,7 +69,7 @@ namespace Application.Features.ScenariosFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = "Access denied",
+                        FailMessages = "Access denied",
                         Status = StatusCodes.Status403Forbidden
                     };
                 }
@@ -79,7 +79,7 @@ namespace Application.Features.ScenariosFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = string.Join(", ", errors),
+                        FailMessages = string.Join(", ", errors),
                         Status = StatusCodes.Status400BadRequest
                     };
                 }

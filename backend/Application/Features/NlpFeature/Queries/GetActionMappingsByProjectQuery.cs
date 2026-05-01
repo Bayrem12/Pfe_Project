@@ -59,7 +59,7 @@ namespace Application.Features.NlpFeature.Queries
                 {
                     Status = StatusCodes.Status200OK,
                     Resultat = mappingDtos,
-                    Fail_Messages = null
+                    FailMessages = null
                 };
             }
             catch (Exception ex)
@@ -67,7 +67,7 @@ namespace Application.Features.NlpFeature.Queries
                 return new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = $"Error retrieving action mappings: {ex.Message}"
+                    FailMessages = $"Error retrieving action mappings: {ex.Message}"
                 };
             }
         }

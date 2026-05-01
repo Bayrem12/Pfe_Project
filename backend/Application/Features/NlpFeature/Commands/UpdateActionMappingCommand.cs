@@ -36,7 +36,7 @@ namespace Application.Features.NlpFeature.Commands
                     return new ResponseHttp
                     {
                         Status = StatusCodes.Status404NotFound,
-                        Fail_Messages = "Action mapping not found."
+                        FailMessages = "Action mapping not found."
                     };
                 }
 
@@ -45,7 +45,7 @@ namespace Application.Features.NlpFeature.Commands
                     return new ResponseHttp
                     {
                         Status = StatusCodes.Status400BadRequest,
-                        Fail_Messages = $"Invalid action type: '{request.ActionType}'. Valid values: {string.Join(", ", Enum.GetNames<UIActionType>())}"
+                        FailMessages = $"Invalid action type: '{request.ActionType}'. Valid values: {string.Join(", ", Enum.GetNames<UIActionType>())}"
                     };
                 }
 
@@ -81,7 +81,7 @@ namespace Application.Features.NlpFeature.Commands
             {
                 return new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = ex.Message,
                     Status = StatusCodes.Status400BadRequest
                 };
             }

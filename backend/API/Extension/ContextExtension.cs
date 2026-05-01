@@ -13,10 +13,16 @@ namespace API.Extension
 {
     public static class ContextExtension
     {
-        public static void ConfigureContext(this IServiceCollection services, IConfiguration configuration)
+        public static void ConfigureContext(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
-
-            services.AddDbContext<TestAutoumatisationContext>(options => options.UseNpgsql(GetConnectionInfo(configuration).ToString()).EnableSensitiveDataLogging());
+            services.AddDbContext<TestAutoumatisationContext>(options =>
+            {
+                options.UseNpgsql(GetConnectionInfo(configuration).ToString());
+                // ✅ Critique 4 — EnableSensitiveDataLogging uniquement en développement
+                // Évite d'exposer les valeurs SQL (mots de passe, PII) dans les logs de production
+                if (environment.IsDevelopment())
+                    options.EnableSensitiveDataLogging();
+            });
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             // Register Data Access Layer — forward interface to the same AddDbContext instance
             services.AddScoped<ITestTestAutoumatisationContext>(sp => sp.GetRequiredService<TestAutoumatisationContext>());

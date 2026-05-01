@@ -27,7 +27,7 @@ namespace Application.Features.TestFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = "No test found",
+                        FailMessages = "No test found",
                         Status = StatusCodes.Status400BadRequest,
                     };
                 }

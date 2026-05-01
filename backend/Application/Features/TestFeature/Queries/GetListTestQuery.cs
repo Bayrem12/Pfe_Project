@@ -21,7 +21,7 @@ namespace Application.Features.TestFeature.Queries
                 return new ResponseHttp
                 {
                     Status = 200,
-                    Fail_Messages = "None",
+                    FailMessages = "None",
                     Resultat = new
                     {
                         Tests = tests

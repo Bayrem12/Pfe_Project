@@ -475,17 +475,22 @@
               class="w-full border border-slate-200 rounded-xl bg-white pl-10 pr-3.5 py-2.5 text-sm text-slate-800 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all"
               placeholder="Search by name or email..."
               [(ngModel)]="memberSearchQuery"
+              (ngModelChange)="loadUsers()"
             />
           </div>
         </div>
 
         <!-- User list to select from -->
         <div class="max-h-[200px] overflow-y-auto border border-slate-100 rounded-xl custom-scrollbar">
-          <div *ngIf="getFilteredAvailableUsers().length === 0" class="text-center py-6 text-sm text-slate-400">
+          <div *ngIf="isSearchingUsers" class="text-center py-6 text-sm text-slate-400">
+            Searching...
+          </div>
+          <div *ngIf="!isSearchingUsers && getFilteredAvailableUsers().length === 0" class="text-center py-6 text-sm text-slate-400">
             {{ memberSearchQuery ? 'No users match your search' : 'No available users' }}
           </div>
           <div
             *ngFor="let user of getFilteredAvailableUsers()"
+            [hidden]="isSearchingUsers"
             class="user-picker-option flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50/50 cursor-pointer transition-all border-b border-slate-50 last:border-0"
             (click)="selectUserToAdd(user)"
             tabindex="0"

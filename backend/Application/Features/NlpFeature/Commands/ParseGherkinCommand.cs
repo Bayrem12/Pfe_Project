@@ -34,7 +34,7 @@ namespace Application.Features.NlpFeature.Commands
                         return Task.FromResult(new ResponseHttp
                         {
                             Status = StatusCodes.Status400BadRequest,
-                            Fail_Messages = "Gherkin content cannot be empty."
+                            FailMessages = "Gherkin content cannot be empty."
                         });
                     }
 
@@ -59,7 +59,7 @@ namespace Application.Features.NlpFeature.Commands
                 {
                     return Task.FromResult(new ResponseHttp
                     {
-                        Fail_Messages = ex.Message,
+                        FailMessages = ex.Message,
                         Status = StatusCodes.Status400BadRequest
                     });
                 }

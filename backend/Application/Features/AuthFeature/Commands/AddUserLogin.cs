@@ -33,14 +33,14 @@ namespace Application.Features.UserFeature.Commands
                     if (user == null)
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Email ou mot de passe invalide.",
+                            FailMessages = "Email ou mot de passe invalide.",
                             Status = StatusCodes.Status401Unauthorized
                         };
 
                     if (!user.IsActive)
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Please verify your email address before logging in. Check your inbox for the confirmation link.",
+                            FailMessages = "Please verify your email address before logging in. Check your inbox for the confirmation link.",
                             Status = StatusCodes.Status403Forbidden
                         };
 
@@ -48,14 +48,17 @@ namespace Application.Features.UserFeature.Commands
                     if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Email ou mot de passe invalide.",
+                            FailMessages = "Email ou mot de passe invalide.",
                             Status = StatusCodes.Status401Unauthorized
                         };
 
+                    // ✅ Critique 1 — Inclure le rôle dans le JWT pour éviter une requête DB par endpoint
+                    var roleName = user.UserRoles.FirstOrDefault()?.Role?.Name ?? "Viewer";
                     var claims = new[]
                     {
                         new Claim(ClaimTypes.Name, user.Email),
-                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                        new Claim(ClaimTypes.Role, roleName)
                     };
 
                     var key = new SymmetricSecurityKey(
@@ -78,12 +81,26 @@ namespace Application.Features.UserFeature.Commands
 
                     var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
+                    // ✅ Critique 2 — Génération du refresh token (rotation à chaque usage)
+                    var refreshToken = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
+                    var hashedRefresh = Convert.ToHexString(
+                        System.Security.Cryptography.SHA256.HashData(
+                            System.Text.Encoding.UTF8.GetBytes(refreshToken)));
+
+                    var refreshExpiryDays = int.TryParse(
+                        _configuration["Jwt:RefreshTokenExpirationDays"], out var days) ? days : 7;
+
+                    user.RefreshToken = hashedRefresh;
+                    user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(refreshExpiryDays);
+                    await _userRepository.UpdateAsync(user);
+
                     return new ResponseHttp
                     {
                         Resultat = new
                         {
                             user = UserDTO.FromEntity(user),
-                            token = tokenString
+                            token = tokenString,
+                            refreshToken = refreshToken
                         },
                         Status = StatusCodes.Status200OK
                     };
@@ -92,7 +109,7 @@ namespace Application.Features.UserFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = ex.Message,
+                        FailMessages = ex.Message,
                         Status = StatusCodes.Status400BadRequest
                     };
                 }

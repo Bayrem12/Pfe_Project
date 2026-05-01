@@ -13,6 +13,5 @@ namespace Domain.Entities.TestData
 
         // Navigation
         public Project Project { get; set; } = null!;
-        public ICollection<EnvironmentVariable> Variables { get; set; } = new List<EnvironmentVariable>();
     }
 }

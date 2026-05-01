@@ -30,7 +30,7 @@ namespace Application.Features.NlpFeature.Commands
                     return new ResponseHttp
                     {
                         Status = StatusCodes.Status404NotFound,
-                        Fail_Messages = "Action mapping not found."
+                        FailMessages = "Action mapping not found."
                     };
                 }
 
@@ -59,7 +59,7 @@ namespace Application.Features.NlpFeature.Commands
             {
                 return new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = ex.Message,
                     Status = StatusCodes.Status400BadRequest
                 };
             }

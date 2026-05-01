@@ -32,7 +32,7 @@ namespace Application.Features.TestFeature.Queries
                         return new ResponseHttp()
                         {
                             Status = 404,
-                            Fail_Messages = "Test not found !"
+                            FailMessages = "Test not found !"
                         };
 
                     return new ResponseHttp()
@@ -46,7 +46,7 @@ namespace Application.Features.TestFeature.Queries
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = ex.Message,
+                        FailMessages = ex.Message,
                         Status = StatusCodes.Status400BadRequest,
                     };
 

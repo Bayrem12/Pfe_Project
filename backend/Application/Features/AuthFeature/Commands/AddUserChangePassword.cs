@@ -29,7 +29,7 @@ namespace Application.Features.UserFeature.Commands
                     if (user == null)
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Utilisateur introuvable.",
+                            FailMessages = "Utilisateur introuvable.",
                             Status = StatusCodes.Status404NotFound
                         };
 
@@ -37,7 +37,7 @@ namespace Application.Features.UserFeature.Commands
                     if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
                         return new ResponseHttp
                         {
-                            Fail_Messages = "Mot de passe courant invalide.",
+                            FailMessages = "Mot de passe courant invalide.",
                             Status = StatusCodes.Status401Unauthorized
                         };
 
@@ -55,7 +55,7 @@ namespace Application.Features.UserFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = ex.Message,
+                        FailMessages = ex.Message,
                         Status = StatusCodes.Status400BadRequest
                     };
                 }

@@ -26,7 +26,7 @@ namespace Application.Features.FeatureFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = "Feature not found",
+                        FailMessages = "Feature not found",
                         Status = StatusCodes.Status404NotFound
                     };
                 }
@@ -44,7 +44,7 @@ namespace Application.Features.FeatureFeature.Commands
             {
                 return new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = ex.Message,
                     Status = StatusCodes.Status400BadRequest
                 };
             }

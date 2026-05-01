@@ -329,20 +329,36 @@ class VisionService:
 
         Strategie :
         - Garde TOUS les resultats YOLO (confiance visuelle)
+        - Pour chaque element DOM qui chevauche un element YOLO (IoU >= seuil),
+          enrichit le texte/label de l'element YOLO avec les donnees semantiques
+          du DOM (id, name, aria-label, placeholder) — bien plus fiables que
+          l'OCR sur un champ vide dont le placeholder est en gris.
         - Ajoute les elements DOM dont l'IoU avec tout element YOLO < seuil
           (= elements que YOLO a rates, rattrapes par le DOM)
-        - Les elements DOM qui chevauchent un resultat YOLO sont ignores
-          (YOLO est suffisant et plus precis visuellement)
         """
         merged = list(yolo)
 
         for dom_elem in dom:
             db = dom_elem.bounding_box
-            covered = any(
-                self._iou(db, ye.bounding_box) >= iou_threshold
-                for ye in yolo
-            )
-            if not covered:
+            best_yolo_elem = None
+            best_iou = 0.0
+            for ye in yolo:
+                iou = self._iou(db, ye.bounding_box)
+                if iou > best_iou:
+                    best_iou = iou
+                    best_yolo_elem = ye
+
+            if best_iou >= iou_threshold and best_yolo_elem is not None:
+                # Enrich the overlapping YOLO element with DOM's semantic text.
+                # DOM reads id/name/aria-label/placeholder directly from the browser —
+                # far more reliable than OCR on empty or placeholder-only input fields.
+                dom_text = dom_elem.texte_ocr or dom_elem.label or ""
+                if dom_text and not best_yolo_elem.texte_ocr:
+                    best_yolo_elem.texte_ocr = dom_text
+                if dom_text and not best_yolo_elem.label:
+                    best_yolo_elem.label = dom_text
+            else:
+                # DOM element not covered by any YOLO box → add as supplementary detection
                 merged.append(dom_elem)
 
         # Re-index IDs

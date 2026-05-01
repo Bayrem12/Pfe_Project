@@ -36,7 +36,7 @@ namespace Application.Features.TestFeature.Commands
                     return new ResponseHttp
                     {
                         Resultat = this._mapper.Map<TestDTO>(test),
-                        Fail_Messages = "Customer with this Id not found.",
+                        FailMessages = "Customer with this Id not found.",
                         Status = StatusCodes.Status400BadRequest,
                     };
                 }

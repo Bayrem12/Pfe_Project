@@ -10,12 +10,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
+using Asp.Versioning;
 namespace API.Controllers
 {
     /// <summary>
     /// Gestion des tags d'un projet
     /// </summary>
     [Route("api/[controller]")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     public class TagsController : ControllerBase
@@ -23,12 +25,14 @@ namespace API.Controllers
         private readonly IMediator _mediator;
         private readonly IProjectRepository _projectRepository;
         private readonly ITagsRepository _tagsRepository;
+        private readonly ILogger<TagsController> _logger;
 
-        public TagsController(IMediator mediator, IProjectRepository projectRepository, ITagsRepository tagsRepository)
+        public TagsController(IMediator mediator, IProjectRepository projectRepository, ITagsRepository tagsRepository, ILogger<TagsController> logger)
         {
             _mediator = mediator;
             _projectRepository = projectRepository;
             _tagsRepository = tagsRepository;
+            _logger = logger;
         }
 
         private async Task<bool> CurrentUserBelongsToProjectAsync(Guid projectId, CancellationToken cancellationToken)
@@ -58,7 +62,7 @@ namespace API.Controllers
             {
                 return StatusCode(StatusCodes.Status403Forbidden, new ResponseHttp
                 {
-                    Fail_Messages = "Access denied.",
+                    FailMessages = "Access denied.",
                     Status = StatusCodes.Status403Forbidden
                 });
             }
@@ -91,7 +95,7 @@ namespace API.Controllers
                 {
                     return StatusCode(StatusCodes.Status403Forbidden, new ResponseHttp
                     {
-                        Fail_Messages = "Access denied.",
+                        FailMessages = "Access denied.",
                         Status = StatusCodes.Status403Forbidden
                     });
                 }
@@ -111,7 +115,8 @@ namespace API.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new ResponseHttp { Fail_Messages = ex.Message, Status = 400 });
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest(new ResponseHttp { FailMessages = "An unexpected error occurred.", Status = 400 });
             }
         }
 
@@ -130,7 +135,7 @@ namespace API.Controllers
             {
                 return NotFound(new ResponseHttp
                 {
-                    Fail_Messages = "Tag not found.",
+                    FailMessages = "Tag not found.",
                     Status = StatusCodes.Status404NotFound
                 });
             }
@@ -139,7 +144,7 @@ namespace API.Controllers
             {
                 return StatusCode(StatusCodes.Status403Forbidden, new ResponseHttp
                 {
-                    Fail_Messages = "Access denied.",
+                    FailMessages = "Access denied.",
                     Status = StatusCodes.Status403Forbidden
                 });
             }
@@ -150,7 +155,7 @@ namespace API.Controllers
             {
                 return NotFound(new ResponseHttp
                 {
-                    Fail_Messages = "Tag not found.",
+                    FailMessages = "Tag not found.",
                     Status = StatusCodes.Status404NotFound
                 });
             }

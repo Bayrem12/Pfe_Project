@@ -18,7 +18,6 @@ namespace Domain.Entities.ProjectManagement
         public ICollection<Module> Modules { get; set; } = new List<Module>();
         public ICollection<Tag> Tags { get; set; } = new List<Tag>();
         public ICollection<TestSuite> TestSuites { get; set; } = new List<TestSuite>();
-        public ICollection<TestDataSet> TestDataSets { get; set; } = new List<TestDataSet>();
         public ICollection<TestData.Environment> Environments { get; set; } = new List<TestData.Environment>();
     }
 }

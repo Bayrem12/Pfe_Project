@@ -21,9 +21,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
+using Asp.Versioning;
 namespace API.Controllers
 {
     [Route("api/nlp")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     public class NlpController : ControllerBase
@@ -50,7 +52,7 @@ namespace API.Controllers
             return StatusCode(StatusCodes.Status403Forbidden, new ResponseHttp
             {
                 Status = StatusCodes.Status403Forbidden,
-                Fail_Messages = $"Viewer role is read-only and cannot {actionLabel} NLP mappings."
+                FailMessages = $"Viewer role is read-only and cannot {actionLabel} NLP mappings."
             });
         }
 
@@ -82,8 +84,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 _logger.LogError(ex, "Error analyzing scenario {ScenarioId}", scenarioId);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { Fail_Messages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { FailMessages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
             }
         }
 
@@ -110,8 +113,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 _logger.LogError(ex, "Error parsing Gherkin content");
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { Fail_Messages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { FailMessages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
             }
         }
 
@@ -158,8 +162,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 _logger.LogError(ex, "Error creating action mapping for project {ProjectId}", projectId);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { Fail_Messages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { FailMessages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
             }
         }
 
@@ -187,8 +192,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 _logger.LogError(ex, "Error getting action mappings for project {ProjectId}", projectId);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { Fail_Messages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { FailMessages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
             }
         }
 
@@ -228,8 +234,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 _logger.LogError(ex, "Error updating action mapping {MappingId}", mappingId);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { Fail_Messages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { FailMessages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
             }
         }
 
@@ -257,8 +264,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 _logger.LogError(ex, "Error deleting action mapping {MappingId}", mappingId);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { Fail_Messages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { FailMessages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
             }
         }
 
@@ -288,8 +296,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 _logger.LogError(ex, "Error toggling status for action mapping {MappingId}", mappingId);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { Fail_Messages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { FailMessages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
             }
         }
     }

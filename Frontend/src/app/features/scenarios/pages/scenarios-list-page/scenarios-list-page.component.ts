@@ -352,7 +352,7 @@ export class ScenariosListPageComponent implements OnInit, OnDestroy {
   // Bulk Actions
   bulkRun(): void {
     if (!this.canRunScenarioTests) {
-      this.error = 'Only Owner and Tester roles can run scenario tests.';
+      this.error = 'Only Admin and Tester roles can run scenario tests.';
       return;
     }
 
@@ -387,7 +387,7 @@ export class ScenariosListPageComponent implements OnInit, OnDestroy {
 
   navigateToCreate(): void {
     if (!this.canCreateScenario) {
-      this.error = 'Only Owner and Tester roles can create scenarios.';
+      this.error = 'Only Admin and Tester roles can create scenarios.';
       return;
     }
 
@@ -420,7 +420,7 @@ export class ScenariosListPageComponent implements OnInit, OnDestroy {
     event.stopPropagation();
 
     if (!this.canRunScenarioTests) {
-      this.error = 'Only Owner and Tester roles can run scenario tests.';
+      this.error = 'Only Admin and Tester roles can run scenario tests.';
       return;
     }
 

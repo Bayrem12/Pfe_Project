@@ -49,7 +49,7 @@ namespace Application.Behaviors
                 var response = new ResponseHttp
                 {
                     Status = StatusCodes.Status400BadRequest,
-                    Fail_Messages = message
+                    FailMessages = message
                 };
                 return (TResponse)(object)response;
             }

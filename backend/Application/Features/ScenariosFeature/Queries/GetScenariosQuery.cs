@@ -89,7 +89,7 @@ namespace Application.Features.ScenariosFeature.Queries
                     var innerMessage = ex.InnerException?.Message ?? ex.Message;
                     return new ResponseHttp
                     {
-                        Fail_Messages = innerMessage,
+                        FailMessages = innerMessage,
                         Status = StatusCodes.Status400BadRequest
                     };
                 }

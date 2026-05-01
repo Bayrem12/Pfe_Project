@@ -32,13 +32,13 @@ namespace Application.Features.TestFeature.Queries
                     {
                         Resultat = "Not Found",
                         Status = 404,
-                        Fail_Messages = "NoT Exist a Test with this Id"
+                        FailMessages = "NoT Exist a Test with this Id"
                     };
                 return new ResponseHttp()
                 {
                     Resultat = naviagtor,
                     Status = 200,
-                    Fail_Messages = "None"
+                    FailMessages = "None"
                 };
             }
         }

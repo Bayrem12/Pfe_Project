@@ -74,7 +74,7 @@ export class FeatureCreateModalComponent implements OnInit {
   }
 
   canCreate(): boolean {
-    return this.currentRole === 'owner' || this.currentRole === 'tester' || this.currentRole === 'admin';
+    return this.currentRole === 'admin' || this.currentRole === 'manager' || this.currentRole === 'tester';
   }
 
   close(): void {

@@ -206,11 +206,11 @@
               </td>
               <td class="px-6 py-4 text-center">
                 <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[11px] font-bold"
-                      [class.bg-primary]="(mapping.priority ?? 0) > 0"
-                      [class.text-white]="(mapping.priority ?? 0) > 0"
-                      [class.bg-slate-100]="(mapping.priority ?? 0) === 0"
-                      [class.text-slate-400]="(mapping.priority ?? 0) === 0"
-                      [title]="(mapping.priority ?? 0) > 0 ? 'High priority — checked first' : 'Default priority'">{{ mapping.priority ?? 0 }}</span>
+                      [class.bg-primary]="mapping.priority > 0"
+                      [class.text-white]="mapping.priority > 0"
+                      [class.bg-slate-100]="mapping.priority === 0"
+                      [class.text-slate-400]="mapping.priority === 0"
+                      [title]="mapping.priority > 0 ? 'High priority — checked first' : 'Default priority'">{{ mapping.priority }}</span>
               </td>
               <td class="px-6 py-4 text-center">
                 <button

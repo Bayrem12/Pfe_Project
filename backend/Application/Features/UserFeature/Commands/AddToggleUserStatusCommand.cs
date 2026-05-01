@@ -34,7 +34,7 @@ namespace Application.Features.UserFeature.Commands
                     {
                         return new ResponseHttp()
                         {
-                            Fail_Messages = "Utilisateur introuvable",
+                            FailMessages = "Utilisateur introuvable",
                             Status = StatusCodes.Status404NotFound
                         };
                     }
@@ -52,7 +52,7 @@ namespace Application.Features.UserFeature.Commands
                 {
                     return new ResponseHttp()
                     {
-                        Fail_Messages = ex.Message,
+                        FailMessages = ex.Message,
                         Status = StatusCodes.Status400BadRequest
                     };
                 }

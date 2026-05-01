@@ -33,7 +33,7 @@ namespace Application.Features.ProjectFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = "Project with this Id not found.",
+                        FailMessages = "Project with this Id not found.",
                         Status = StatusCodes.Status400BadRequest,
                     };
                 }

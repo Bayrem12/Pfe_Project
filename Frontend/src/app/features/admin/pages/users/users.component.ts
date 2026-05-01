@@ -49,7 +49,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     password: ''
   };
 
-  availableRoles = ['Owner', 'Manager', 'Tester', 'Viewer'];
+  availableRoles = ['Admin', 'Manager', 'Tester', 'Viewer'];
 
   Math = Math;
 
@@ -193,7 +193,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   getAvatarClass(roles: string[]): string {
     const role = roles[0];
     switch (role) {
-      case 'Owner':   return 'bg-blue-100 text-blue-800';
+      case 'Admin':   return 'bg-blue-100 text-blue-800';
       case 'Manager': return 'bg-purple-100 text-purple-800';
       case 'Tester':  return 'bg-green-100 text-green-800';
       case 'Viewer':  return 'bg-slate-100 text-slate-600';
@@ -204,7 +204,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   getRoleBadgeClass(roles: string[]): string {
     const role = roles[0];
     switch (role) {
-      case 'Owner':   return 'bg-blue-100 text-blue-800';
+      case 'Admin':   return 'bg-blue-100 text-blue-800';
       case 'Manager': return 'bg-purple-100 text-purple-800';
       case 'Tester':  return 'bg-green-100 text-green-800';
       default:        return 'bg-slate-100 text-slate-600';

@@ -2,7 +2,6 @@
 using Application.Interfaces;
 using Domain.Common;
 using Domain.Entities;
-using Domain.Entities.ComputerVision;
 using Domain.Entities.Execution;
 using Domain.Entities.Identity;
 using Domain.Entities.NLP;
@@ -38,17 +37,11 @@ namespace Persistance.Data
         }
 
         public DbSet<Test> Tests { get; set; }
-        /// <summary>
-        /// ComputerVision
-        /// </summary>
-        public DbSet<DetectionResult> DetectionResults { get; set; }
-        public DbSet<UIElementCache> UIElementcaches { get; set; }
-        public DbSet<UIPattern> UIPatterns { get; set; }
+        // ✅ Critique 7 — Entités Computer Vision supprimées (code mort, aucun controller ne les exposait)
         /// <summary>
         /// Execution
         /// </summary>
         public DbSet<ExecutionLog> ExecutionLogs { get; set; }
-        public DbSet<ExecutionSchedule> ExecutionSchedules { get; set; }
         public DbSet<Screenshot> Screenshots { get; set; }
         public DbSet<StepResult> StepResults { get; set; }
         public DbSet<TestExecution> TestExecutions { get; set; }
@@ -92,10 +85,6 @@ namespace Persistance.Data
         /// TestData
         /// </summary>
         public DbSet<Domain.Entities.TestData.Environment> Environments { get; set; }
-        public DbSet<EnvironmentVariable> EnvironmentVariables { get; set; }
-        //public DbSet<Result<T>> Results { get; set; }
-        public DbSet<TestDataEntry> TestDataEntries{ get; set; }
-        public DbSet<TestDataSet> TestDataSets { get; set; }
 
 
         /// <summary>

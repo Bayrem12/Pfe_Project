@@ -40,7 +40,7 @@ namespace Application.Common.Validator
             return new ResponseHttp
             {
                 Status = StatusCodes.Status400BadRequest,
-                Fail_Messages = failureMessage,
+                FailMessages = failureMessage,
             };
         }
     }

@@ -80,7 +80,7 @@ export class HelpPageComponent {
       title: 'Dashboard',
       summary: 'The control center with key metrics, alerts, and quick status visibility.',
       route: '/dashboard',
-      roles: 'Owner, Manager, Tester, Viewer',
+      roles: 'Admin, Manager, Tester, Viewer',
       howTo: [
         'Check top metrics first to understand overall quality and trend direction.',
         'Review recent events and failed activity before planning new runs.',
@@ -92,7 +92,7 @@ export class HelpPageComponent {
       title: 'Projects, Modules, and Features',
       summary: 'Define your product structure so tests map cleanly to real functional areas.',
       route: '/projects',
-      roles: 'Owner, Manager, Tester (Viewer has read-only access)',
+      roles: 'Admin, Manager, Tester (Viewer has read-only access)',
       howTo: [
         'Create or open a project first.',
         'Add modules, then attach features under each module.',
@@ -104,7 +104,7 @@ export class HelpPageComponent {
       title: 'Scenarios',
       summary: 'Create, edit, filter, and maintain BDD scenarios linked to features and modules.',
       route: '/scenarios',
-      roles: 'Owner and Tester can create and edit; Viewer is read-only',
+      roles: 'Admin and Tester can create and edit; Viewer is read-only',
       howTo: [
         'Use concise scenario titles and clean Given/When/Then structure.',
         'Add tags to support bulk filtering and targeted execution.',
@@ -116,7 +116,7 @@ export class HelpPageComponent {
       title: 'Test Suites',
       summary: 'Bundle scenarios into repeatable execution sets for regression, smoke, or release checks.',
       route: '/test-suites',
-      roles: 'Owner and Tester can modify suites; Viewer is read-only',
+      roles: 'Admin and Tester can modify suites; Viewer is read-only',
       howTo: [
         'Create suite with clear scope name (for example: Checkout Smoke).',
         'Drag or add scenarios in the desired execution order.',
@@ -140,7 +140,7 @@ export class HelpPageComponent {
       title: 'NLP Configuration',
       summary: 'Map natural language phrases to test actions and parse Gherkin text safely.',
       route: '/nlp/action-mappings',
-      roles: 'Owner, Manager, Tester can manage mappings; Viewer can parse text only',
+      roles: 'Admin, Manager, Tester can manage mappings; Viewer can parse text only',
       howTo: [
         'Add intent patterns that match team language consistently.',
         'Test parser output using realistic Gherkin examples.',
@@ -152,7 +152,7 @@ export class HelpPageComponent {
       title: 'Audit Logs',
       summary: 'Track who changed what and when for governance and debugging.',
       route: '/audit-logs',
-      roles: 'Owner, Manager, Tester (Viewer access is restricted)',
+      roles: 'Admin, Manager, Tester (Viewer access is restricted)',
       howTo: [
         'Filter by entity, user, and action to narrow investigations quickly.',
         'Expand rows to compare before/after values for exact change history.',
@@ -164,7 +164,7 @@ export class HelpPageComponent {
       title: 'Users and Roles',
       summary: 'Control workspace access and assign permissions based on responsibility.',
       route: '/users',
-      roles: 'Owner only for management actions',
+      roles: 'Admin only for management actions',
       howTo: [
         'Invite users with clear role assignment from the beginning.',
         'Review inactive accounts regularly and adjust status when needed.',
@@ -175,7 +175,7 @@ export class HelpPageComponent {
 
   readonly roleGuides: RoleGuide[] = [
     {
-      role: 'Owner',
+      role: 'Admin',
       accent: 'border-blue-200 bg-blue-50 text-blue-900',
       can: [
         'Manage users and role assignments',
@@ -194,8 +194,8 @@ export class HelpPageComponent {
         'Access audit logs based on current policy'
       ],
       cannot: [
-        'Manage users (Owner-only)',
-        'Perform Owner-only restricted operations'
+        'Manage users (Admin-only)',
+        'Perform Admin-only restricted operations'
       ]
     },
     {
@@ -209,7 +209,7 @@ export class HelpPageComponent {
       ],
       cannot: [
         'Manage user roles',
-        'Perform Owner-only administration actions'
+        'Perform Admin-only administration actions'
       ]
     },
     {
@@ -241,11 +241,11 @@ export class HelpPageComponent {
   readonly faqItems: FaqItem[] = [
     {
       question: 'Why are some buttons disabled for my account?',
-      answer: 'The platform enforces role-based permissions. If a button is disabled, your current role does not allow that action. Ask an Owner to adjust access if needed.'
+      answer: 'The platform enforces role-based permissions. If a button is disabled, your current role does not allow that action. Ask an Admin to adjust access if needed.'
     },
     {
       question: 'What is the best way to structure projects?',
-      answer: 'Use business domains for projects, functional areas for modules, and testable slices for features. This structure keeps scenario ownership clear and prevents duplication.'
+      answer: 'Use business domains for projects, functional areas for modules, and testable slices for features. This structure keeps scenario adminship clear and prevents duplication.'
     },
     {
       question: 'How do I reduce flaky tests?',
@@ -264,7 +264,7 @@ export class HelpPageComponent {
   readonly troubleshooting: TroubleshootItem[] = [
     {
       issue: 'I cannot access a specific page.',
-      solution: 'Confirm you are logged in and verify your role has access. If not, request access from an Owner.'
+      solution: 'Confirm you are logged in and verify your role has access. If not, request access from an Admin.'
     },
     {
       issue: 'Lists appear empty even though data exists.',

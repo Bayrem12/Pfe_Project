@@ -23,8 +23,8 @@
       <h3>{{ totalUsers }}</h3>
     </article>
     <article class="stat-card accent-owner">
-      <p>Owners</p>
-      <h3>{{ getRoleCount('Owner') }}</h3>
+      <p>Admins</p>
+      <h3>{{ getRoleCount('Admin') }}</h3>
     </article>
     <article class="stat-card accent-active">
       <p>Active Accounts</p>
@@ -50,7 +50,7 @@
 
         <select [(ngModel)]="selectedRole" (change)="onFilterChange()">
           <option value="">All roles</option>
-          <option value="Owner">Owner</option>
+          <option value="Admin">Admin</option>
           <option value="Manager">Manager</option>
           <option value="Tester">Tester</option>
           <option value="Viewer">Viewer</option>

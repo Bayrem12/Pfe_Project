@@ -57,7 +57,7 @@ namespace Application.Features.NlpFeature.Commands
                         return new ResponseHttp
                         {
                             Status = StatusCodes.Status400BadRequest,
-                            Fail_Messages = $"Invalid action type: '{request.ActionType}'. " +
+                            FailMessages = $"Invalid action type: '{request.ActionType}'. " +
                                 $"Valid values are: {string.Join(", ", Enum.GetNames<UIActionType>())}"
                         };
                     }
@@ -92,7 +92,7 @@ namespace Application.Features.NlpFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = ex.Message,
+                        FailMessages = ex.Message,
                         Status = StatusCodes.Status400BadRequest
                     };
                 }

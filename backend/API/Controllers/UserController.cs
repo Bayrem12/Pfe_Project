@@ -9,21 +9,25 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
+using Asp.Versioning;
 namespace API.Controllers
 {
     [Route("api/user")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IMediator mediator)
+        public UserController(IMediator mediator, ILogger<UserController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
-        private async Task<bool> CurrentUserIsOwnerAsync()
+        private async Task<bool> CurrentUserIsAdminAsync()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!Guid.TryParse(userIdClaim, out var userId))
@@ -32,7 +36,7 @@ namespace API.Controllers
             }
 
             var currentUser = await _mediator.Send(new GetUserByIdQuery(userId));
-            return currentUser?.Roles.Any(role => string.Equals(role, "Owner", StringComparison.OrdinalIgnoreCase)) == true;
+            return currentUser?.Roles.Any(role => string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) == true;
         }
 
         [HttpGet]
@@ -40,11 +44,11 @@ namespace API.Controllers
         {
             try
             {
-                if (!await CurrentUserIsOwnerAsync())
+                if (!await CurrentUserIsAdminAsync())
                 {
                     return StatusCode(StatusCodes.Status403Forbidden, new ResponseHttp
                     {
-                        Fail_Messages = "Access denied.",
+                        FailMessages = "Access denied.",
                         Status = StatusCodes.Status403Forbidden
                     });
                 }
@@ -54,9 +58,10 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return BadRequest(new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status400BadRequest
                 });
             }
@@ -71,7 +76,7 @@ namespace API.Controllers
                 if (result == null)
                     return NotFound(new ResponseHttp
                     {
-                        Fail_Messages = "Utilisateur introuvable",
+                        FailMessages = "Utilisateur introuvable",
                         Status = StatusCodes.Status404NotFound
                     });
 
@@ -83,20 +88,21 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return BadRequest(new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status400BadRequest
                 });
             }
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult> SearchUsers([FromQuery] string keyword)
+        public async Task<ActionResult> SearchUsers([FromQuery] string? keyword)
         {
             try
             {
-                var result = await _mediator.Send(new GetSearchUserQuery(keyword));
+                var result = await _mediator.Send(new GetSearchUserQuery(keyword ?? string.Empty));
                 return Ok(new ResponseHttp
                 {
                     Resultat = result,
@@ -105,9 +111,10 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return BadRequest(new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status400BadRequest
                 });
             }
@@ -118,11 +125,11 @@ namespace API.Controllers
         {
             try
             {
-                if (!await CurrentUserIsOwnerAsync())
+                if (!await CurrentUserIsAdminAsync())
                 {
                     return StatusCode(StatusCodes.Status403Forbidden, new ResponseHttp
                     {
-                        Fail_Messages = "Access denied.",
+                        FailMessages = "Access denied.",
                         Status = StatusCodes.Status403Forbidden
                     });
                 }
@@ -133,7 +140,7 @@ namespace API.Controllers
                 if (!validationResult.IsValid)
                     return BadRequest(new ResponseHttp
                     {
-                        Fail_Messages = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)),
+                        FailMessages = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)),
                         Status = StatusCodes.Status400BadRequest
                     });
 
@@ -143,9 +150,10 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return BadRequest(new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status400BadRequest
                 });
             }
@@ -162,7 +170,7 @@ namespace API.Controllers
                 if (!validationResult.IsValid)
                     return BadRequest(new ResponseHttp
                     {
-                        Fail_Messages = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)),
+                        FailMessages = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)),
                         Status = StatusCodes.Status400BadRequest
                     });
 
@@ -172,9 +180,10 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return BadRequest(new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status400BadRequest
                 });
             }
@@ -191,9 +200,10 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return BadRequest(new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status400BadRequest
                 });
             }
@@ -204,11 +214,11 @@ namespace API.Controllers
         {
             try
             {
-                if (!await CurrentUserIsOwnerAsync())
+                if (!await CurrentUserIsAdminAsync())
                 {
                     return StatusCode(StatusCodes.Status403Forbidden, new ResponseHttp
                     {
-                        Fail_Messages = "Access denied.",
+                        FailMessages = "Access denied.",
                         Status = StatusCodes.Status403Forbidden
                     });
                 }
@@ -218,9 +228,10 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return BadRequest(new ResponseHttp
                 {
-                    Fail_Messages = ex.Message,
+                    FailMessages = "An unexpected error occurred.",
                     Status = StatusCodes.Status400BadRequest
                 });
             }

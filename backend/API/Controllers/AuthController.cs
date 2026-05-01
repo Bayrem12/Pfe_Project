@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
+using Asp.Versioning;
 namespace API.Controllers
 {
     public record OAuthCallbackRequest(string Code, string RedirectUri);
@@ -14,15 +15,18 @@ namespace API.Controllers
     /// <summary>
     /// Gestion de l'authentification des utilisateurs
     /// </summary>
+    [ApiVersion("1.0")]
     [ApiController]
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IMediator mediator)
+        public AuthController(IMediator mediator, ILogger<AuthController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         /// <summary>
@@ -43,7 +47,7 @@ namespace API.Controllers
                     return StatusCode(StatusCodes.Status400BadRequest, new ResponseHttp
                     {
                         Status = StatusCodes.Status400BadRequest,
-                        Fail_Messages = string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage))
+                        FailMessages = string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage))
                     });
 
                 var result = await _mediator.Send(cmd);
@@ -51,10 +55,11 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }
@@ -80,7 +85,7 @@ namespace API.Controllers
                     return StatusCode(StatusCodes.Status400BadRequest, new ResponseHttp
                     {
                         Status = StatusCodes.Status400BadRequest,
-                        Fail_Messages = string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage))
+                        FailMessages = string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage))
                     });
 
                 var result = await _mediator.Send(cmd);
@@ -88,21 +93,23 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }
 
         /// <summary>
-        /// Rafraîchir le token d'authentification
-        /// ÉTAT : Non implémenté — retourne 501
+        /// Rafraîchir l'access token via un refresh token opaque.
+        /// ✅ Critique 2 — refresh token avec rotation implémenté.
         /// </summary>
         [HttpPost("refresh")]
-        [ProducesResponseType(typeof(ResponseHttp), StatusCodes.Status501NotImplemented)]
+        [ProducesResponseType(typeof(ResponseHttp), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseHttp), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ResponseHttp), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ResponseHttp>> Refresh(AddUserRefresh cmd)
         {
             try
@@ -114,7 +121,7 @@ namespace API.Controllers
                     return StatusCode(StatusCodes.Status400BadRequest, new ResponseHttp
                     {
                         Status = StatusCodes.Status400BadRequest,
-                        Fail_Messages = string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage))
+                        FailMessages = string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage))
                     });
 
                 var result = await _mediator.Send(cmd);
@@ -122,10 +129,11 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }
@@ -148,7 +156,7 @@ namespace API.Controllers
                     return StatusCode(StatusCodes.Status400BadRequest, new ResponseHttp
                     {
                         Status = StatusCodes.Status400BadRequest,
-                        Fail_Messages = string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage))
+                        FailMessages = string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage))
                     });
 
                 var result = await _mediator.Send(cmd);
@@ -156,10 +164,11 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }
@@ -182,7 +191,7 @@ namespace API.Controllers
                     return StatusCode(StatusCodes.Status400BadRequest, new ResponseHttp
                     {
                         Status = StatusCodes.Status400BadRequest,
-                        Fail_Messages = string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage))
+                        FailMessages = string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage))
                     });
 
                 var result = await _mediator.Send(cmd);
@@ -190,10 +199,11 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }
@@ -216,7 +226,7 @@ namespace API.Controllers
                     return StatusCode(StatusCodes.Status400BadRequest, new ResponseHttp
                     {
                         Status = StatusCodes.Status400BadRequest,
-                        Fail_Messages = string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage))
+                        FailMessages = string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage))
                     });
 
                 var result = await _mediator.Send(cmd);
@@ -224,10 +234,11 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }
@@ -250,10 +261,11 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }
@@ -274,10 +286,11 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }
@@ -300,10 +313,11 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing request.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
                     Status = StatusCodes.Status500InternalServerError,
-                    Fail_Messages = ex.Message
+                    FailMessages = "An unexpected error occurred.",
                 });
             }
         }

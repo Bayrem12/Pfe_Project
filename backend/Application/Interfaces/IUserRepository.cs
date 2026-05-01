@@ -69,5 +69,11 @@ namespace Application.Interfaces.Identity
         /// Récupère un utilisateur par son token de vérification d'email
         /// </summary>
         Task<User?> GetByVerificationTokenAsync(string token);
+
+        /// <summary>
+        /// Récupère un utilisateur par son refresh token haché.
+        /// ✅ Critique 2 — Support du refresh token avec rotation.
+        /// </summary>
+        Task<User?> GetByRefreshTokenAsync(string hashedRefreshToken);
     }
 }

@@ -4,18 +4,22 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Asp.Versioning;
 namespace API.Controllers
 {
     [Route("api/testSuites")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     public class TestSuitesController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<TestSuitesController> _logger;
 
-        public TestSuitesController(IMediator mediator)
+        public TestSuitesController(IMediator mediator, ILogger<TestSuitesController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         /// <summary>

@@ -365,3 +365,5 @@ FodyWeavers.xsd
 /src/.idea/
 
 .env
+# Local development secrets — use dotnet user-secrets instead
+appsettings.Development.json

@@ -12,23 +12,27 @@ using Microsoft.EntityFrameworkCore;
 using Persistance.Data;
 using System.Security.Claims;
 
+using Asp.Versioning;
 namespace API.Controllers
 {
     /// <summary>
     /// Gestion des projets et des membres des projets
     /// </summary>
     [Route("api/projet")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     public class ProjectsController : ControllerBase
     {
         private readonly IMediator _mediator;
         private readonly TestAutoumatisationContext _dbContext;
+        private readonly ILogger<ProjectsController> _logger;
 
-        public ProjectsController(IMediator mediator, TestAutoumatisationContext dbContext)
+        public ProjectsController(IMediator mediator, TestAutoumatisationContext dbContext, ILogger<ProjectsController> logger)
         {
             _mediator = mediator;
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         private Guid CurrentUserId => Guid.TryParse(
@@ -58,94 +62,74 @@ namespace API.Controllers
         {
             var role = await GetCurrentGlobalRoleAsync();
 
-            if (role == "owner")
+            if (role == "admin")
             {
                 return true;
             }
 
-            var isMember = await _dbContext.ProjectMembers
+            // Manager, Tester, Viewer: only member projects
+            return await _dbContext.ProjectMembers
                 .AsNoTracking()
                 .AnyAsync(m => !m.IsDeleted && m.ProjectId == projectId && m.UserId == CurrentUserId);
-
-            if (role == "tester")
-            {
-                var userIdString = CurrentUserId.ToString();
-                var isCreator = await _dbContext.Projects
-                    .AsNoTracking()
-                    .AnyAsync(p => !p.IsDeleted && p.Id == projectId &&
-                                   (p.UserId == CurrentUserId || p.CreatedById == userIdString));
-
-                return isMember || isCreator;
-            }
-
-            // Viewer / Manager -> lecture membre uniquement
-            return isMember;
         }
 
         private async Task<bool> CanWriteProjectAsync(Guid? projectId = null)
         {
             var role = await GetCurrentGlobalRoleAsync();
 
-            if (role == "owner")
+            if (role == "admin")
             {
                 return true;
             }
 
-            // Manager et Viewer : jamais d'écriture
-            if (role == "manager" || role == "viewer")
-            {
-                return false;
-            }
-
-            // Tester
-            if (role == "tester")
+            if (role == "manager")
             {
                 if (!projectId.HasValue)
                 {
-                    // création autorisée pour tester
+                    // Manager can create new projects
                     return true;
                 }
 
-                var userIdString = CurrentUserId.ToString();
-
-                var isCreator = await _dbContext.Projects
-                    .AsNoTracking()
-                    .AnyAsync(p => !p.IsDeleted && p.Id == projectId.Value &&
-                                   (p.UserId == CurrentUserId || p.CreatedById == userIdString));
-
-                var isMember = await _dbContext.ProjectMembers
+                // Manager can update/delete projects they are a member of
+                return await _dbContext.ProjectMembers
                     .AsNoTracking()
                     .AnyAsync(m => !m.IsDeleted && m.ProjectId == projectId.Value && m.UserId == CurrentUserId);
+            }
 
-                return isCreator || isMember;
+            // Tester and Viewer: cannot create or modify projects
+            return false;
+        }
+
+        // Admin and Manager (if member) can manage project members
+        private async Task<bool> CanManageMembersAsync(Guid projectId)
+        {
+            var role = await GetCurrentGlobalRoleAsync();
+
+            if (role == "admin")
+            {
+                return true;
+            }
+
+            if (role == "manager")
+            {
+                return await _dbContext.ProjectMembers
+                    .AsNoTracking()
+                    .AnyAsync(m => !m.IsDeleted && m.ProjectId == projectId && m.UserId == CurrentUserId);
             }
 
             return false;
         }
 
-        // Manager peut exécuter mais pas modifier la structure du projet
+        // Manager and Tester (if member) can run executions
         private async Task<bool> CanRunExecutionAsync(Guid projectId)
         {
             var role = await GetCurrentGlobalRoleAsync();
-            if (role == "owner") return true;
-            if (role == "tester")
+            if (role == "admin") return true;
+            if (role == "manager" || role == "tester")
             {
-                var userIdString = CurrentUserId.ToString();
-                var isCreator = await _dbContext.Projects
-                    .AsNoTracking()
-                    .AnyAsync(p => !p.IsDeleted && p.Id == projectId &&
-                                   (p.UserId == CurrentUserId || p.CreatedById == userIdString));
-                var isMember = await _dbContext.ProjectMembers
+                return await _dbContext.ProjectMembers
                     .AsNoTracking()
                     .AnyAsync(m => !m.IsDeleted && m.ProjectId == projectId && m.UserId == CurrentUserId);
-                return isCreator || isMember;
-            }
-            if (role == "manager")
-            {
-                var isMember = await _dbContext.ProjectMembers
-                    .AsNoTracking()
-                    .AnyAsync(m => !m.IsDeleted && m.ProjectId == projectId && m.UserId == CurrentUserId);
-                return isMember;
             }
             return false;
         }
@@ -179,7 +163,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
         }
 
@@ -209,7 +194,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
         }
 
@@ -235,13 +221,10 @@ namespace API.Controllers
                 }
 
                 var role = await GetCurrentGlobalRoleAsync();
-                if (role == "tester" && cmd.UserId != CurrentUserId)
-                {
-                    return StatusCode(StatusCodes.Status403Forbidden, "Tester can only create project for self.");
-                }
 
                 // Force creator to authenticated user for security and consistency.
-                cmd = cmd with { UserId = CurrentUserId };
+                // Also pass the global role so the handler knows not to add Admin as a project member.
+                cmd = cmd with { UserId = CurrentUserId, GlobalRole = role };
 
                 ResponseHttp result;
                 AddProjectCommandValidator validator = new();
@@ -258,7 +241,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
         }
 
@@ -304,7 +288,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
         }
 
@@ -334,7 +319,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
         }
 
@@ -368,7 +354,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
         }
 
@@ -389,7 +376,7 @@ namespace API.Controllers
         {
             try
             {
-                if (!await CanWriteProjectAsync(projectId))
+                if (!await CanManageMembersAsync(projectId))
                 {
                     return StatusCode(StatusCodes.Status403Forbidden, "You are not allowed to add members to this project.");
                 }
@@ -411,7 +398,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
         }
 
@@ -432,7 +420,7 @@ namespace API.Controllers
         {
             try
             {
-                if (!await CanWriteProjectAsync(projectId))
+                if (!await CanManageMembersAsync(projectId))
                 {
                     return StatusCode(StatusCodes.Status403Forbidden, "You are not allowed to remove members from this project.");
                 }
@@ -442,7 +430,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return BadRequest("An unexpected error occurred.");
             }
         }
 

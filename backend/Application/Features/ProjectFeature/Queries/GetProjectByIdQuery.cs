@@ -31,7 +31,7 @@ namespace Application.Features.ProjectFeature.Queries
                         return new ResponseHttp()
                         {
                             Status = StatusCodes.Status404NotFound,
-                            Fail_Messages = "Project not found!"
+                            FailMessages = "Project not found!"
                         };
                     }
 
@@ -45,7 +45,7 @@ namespace Application.Features.ProjectFeature.Queries
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = ex.Message,
+                        FailMessages = ex.Message,
                         Status = StatusCodes.Status400BadRequest,
                     };
                 }

@@ -46,7 +46,7 @@ namespace Application.Features.AuthFeature.Commands
                         return new ResponseHttp
                         {
                             Status = StatusCodes.Status400BadRequest,
-                            Fail_Messages = "Invalid GitHub token or email not accessible."
+                            FailMessages = "Invalid GitHub token or email not accessible."
                         };
 
                     var user = await _userRepository.GetByEmailAsync(oauthUser.Email);
@@ -64,10 +64,13 @@ namespace Application.Features.AuthFeature.Commands
                         await _userRepository.CreateWithDefaultRoleAsync(user);
                     }
 
+                    // ✅ Critique 1 — Inclure le rôle dans le JWT
+                    var roleName = user.UserRoles.FirstOrDefault()?.Role?.Name ?? "Viewer";
                     var claims = new[]
                     {
                         new Claim(ClaimTypes.Name,           user.Email),
-                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                        new Claim(ClaimTypes.Role,           roleName)
                     };
 
                     var key = new SymmetricSecurityKey(
@@ -103,7 +106,7 @@ namespace Application.Features.AuthFeature.Commands
                     return new ResponseHttp
                     {
                         Status = StatusCodes.Status500InternalServerError,
-                        Fail_Messages = ex.Message
+                        FailMessages = ex.Message
                     };
                 }
             }

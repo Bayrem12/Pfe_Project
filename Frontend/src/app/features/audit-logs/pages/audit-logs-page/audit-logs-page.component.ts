@@ -22,14 +22,14 @@ interface AuditLogViewModel extends AuditLogDto {
 type DateRangeFilter = '7d' | '30d' | '90d' | 'all';
 
 const ROLE_ID_TO_NAME: Record<string, string> = {
-  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa': 'Owner',
+  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa': 'Admin',
   'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb': 'Manager',
   'cccccccc-cccc-cccc-cccc-cccccccccccc': 'Tester',
   'dddddddd-dddd-dddd-dddd-dddddddddddd': 'Viewer'
 };
 
 const PROJECT_ROLE_NUMBER_TO_NAME: Record<string, string> = {
-  '0': 'Owner',
+  '0': 'Admin',
   '1': 'Manager',
   '2': 'Tester',
   '3': 'Viewer'

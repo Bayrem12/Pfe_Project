@@ -40,7 +40,7 @@ namespace Application.Features.ScenariosFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = string.Join(", ", errors),
+                        FailMessages = string.Join(", ", errors),
                         Status = StatusCodes.Status400BadRequest
                     };
                 }
@@ -51,7 +51,7 @@ namespace Application.Features.ScenariosFeature.Commands
                 {
                     return new ResponseHttp
                     {
-                        Fail_Messages = "No scenarios found in the provided Gherkin content.",
+                        FailMessages = "No scenarios found in the provided Gherkin content.",
                         Status = StatusCodes.Status400BadRequest
                     };
                 }
@@ -111,7 +111,7 @@ namespace Application.Features.ScenariosFeature.Commands
                 var innerMessage = ex.InnerException?.Message ?? ex.Message;
                 return new ResponseHttp
                 {
-                    Fail_Messages = innerMessage,
+                    FailMessages = innerMessage,
                     Status = StatusCodes.Status400BadRequest
                 };
             }
