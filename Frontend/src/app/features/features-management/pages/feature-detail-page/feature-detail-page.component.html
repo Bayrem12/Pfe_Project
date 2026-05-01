@@ -4,7 +4,7 @@
   <!-- Loading -->
   <div *ngIf="isLoading" class="flex flex-col items-center gap-4 py-32">
     <div class="w-10 h-10 border-[3px] border-surface-container border-t-primary rounded-full animate-spin"></div>
-    <span class="text-on-surface-variant text-sm font-medium">Loading feature...</span>
+    <span class="text-on-surface-variant text-sm font-medium">{{ 'feature.detail.loading' | translate }}</span>
   </div>
 
   <!-- Content -->
@@ -18,7 +18,7 @@
           (click)="navigateBack()"
           class="flex items-center gap-2 text-on-surface-variant hover:text-primary mb-6 transition-colors group">
           <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
-          <span class="text-sm font-semibold">Back to Features</span>
+          <span class="text-sm font-semibold">{{ 'feature.list.backToProject' | translate }}</span>
         </button>
 
         <div class="flex items-center gap-5 mb-3">
@@ -42,7 +42,7 @@
           (click)="navigateToEdit()"
           class="flex items-center gap-2 px-5 py-2.5 bg-surface-container-lowest border border-outline-variant text-on-surface rounded-xl font-semibold text-sm hover:bg-surface-container hover:border-outline transition-all">
           <span class="material-symbols-outlined text-lg">edit</span>
-          Edit
+          {{ 'action.edit' | translate }}
         </button>
 
         <!-- Delete flow -->
@@ -51,18 +51,18 @@
             (click)="confirmDelete()"
             class="flex items-center gap-2 px-5 py-2.5 bg-surface-container-lowest border border-error/30 text-error rounded-xl font-semibold text-sm hover:bg-error-container transition-all">
             <span class="material-symbols-outlined text-lg">delete</span>
-            Delete
+            {{ 'action.delete' | translate }}
           </button>
         </div>
 
         <div *ngIf="showDeleteConfirm" class="flex items-center gap-2 p-1 bg-error-container rounded-xl">
-          <span class="text-sm text-on-error-container font-semibold pl-3">Confirm?</span>
+          <span class="text-sm text-on-error-container font-semibold pl-3">{{ 'feature.detail.confirmDelete' | translate }}</span>
           <button
             (click)="deleteFeature()"
             [disabled]="isDeleting"
             class="px-4 py-2 bg-error text-on-error rounded-lg font-bold text-sm hover:bg-error/90 transition-all disabled:opacity-50 flex items-center gap-1.5">
             <span *ngIf="isDeleting" class="w-3.5 h-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin"></span>
-            {{ isDeleting ? 'Deleting...' : 'Yes, delete' }}
+            {{ isDeleting ? ('delete.dialog.deleting' | translate) : ('feature.detail.yesDelete' | translate) }}
           </button>
           <button
             (click)="cancelDelete()"
@@ -76,7 +76,7 @@
           (click)="navigateToCreateScenario()"
           class="flex items-center gap-2 px-8 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all hover:-translate-y-0.5 active:translate-y-0">
           <span class="material-symbols-outlined text-lg">add</span>
-          New Scenario
+          {{ 'feature.detail.newScenario' | translate }}
         </button>
       </div>
     </div>
@@ -91,7 +91,7 @@
             <span class="material-symbols-outlined text-2xl text-primary">description</span>
           </div>
           <div>
-            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Scenarios</p>
+            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{{ 'label.scenario' | translate }}s</p>
             <h3 class="text-3xl font-extrabold text-on-background">{{ feature.scenarioCount || 0 }}</h3>
           </div>
         </div>
@@ -110,7 +110,7 @@
             <span class="material-symbols-outlined text-2xl text-secondary">sort</span>
           </div>
           <div>
-            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Display Order</p>
+            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{{ 'feature.detail.displayOrder' | translate }}</p>
             <h3 class="text-3xl font-extrabold text-on-background">{{ feature.displayOrder }}</h3>
           </div>
         </div>
@@ -123,7 +123,7 @@
             <span class="material-symbols-outlined text-2xl text-tertiary">calendar_today</span>
           </div>
           <div>
-            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Created</p>
+            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{{ 'feature.detail.created' | translate }}</p>
             <h3 class="text-lg font-bold text-on-background">{{ feature.createdDate | date: 'MMM d, yyyy' }}</h3>
             <p *ngIf="feature.modifiedDate" class="text-xs text-on-surface-variant">
               Updated {{ feature.modifiedDate | date: 'MMM d, yyyy' }}
@@ -137,7 +137,7 @@
     <div class="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant shadow-sm mb-6">
       <h2 class="text-lg font-bold text-on-background mb-4 flex items-center gap-2">
         <span class="material-symbols-outlined text-xl text-on-surface-variant">info</span>
-        Description
+        {{ 'feature.detail.description' | translate }}
       </h2>
       <p class="text-on-surface-variant leading-relaxed">{{ feature.description }}</p>
     </div>
@@ -150,14 +150,14 @@
             <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
           </div>
           <div>
-            <p class="font-bold text-on-background">Ready to write scenarios?</p>
-            <p class="text-sm text-on-surface-variant">Create Gherkin test scenarios for this feature.</p>
+            <p class="font-bold text-on-background">{{ 'feature.detail.ready' | translate }}</p>
+            <p class="text-sm text-on-surface-variant">{{ 'feature.detail.readyHint' | translate }}</p>
           </div>
         </div>
         <button
           (click)="navigateToCreateScenario()"
           class="px-6 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all hover:-translate-y-0.5 whitespace-nowrap">
-          + New Scenario
+          + {{ 'feature.detail.newScenario' | translate }}
         </button>
       </div>
     </div>

@@ -1,4 +1,5 @@
 using Application.Setting;
+using Application.Interfaces;
 using Domain.Entities.Execution;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -15,10 +16,12 @@ namespace API.Controllers
     public class TestRunsController : ControllerBase
     {
         private readonly TestAutoumatisationContext _dbContext;
+        private readonly IIAAgentService _iaAgentService;
 
-        public TestRunsController(TestAutoumatisationContext dbContext)
+        public TestRunsController(TestAutoumatisationContext dbContext, IIAAgentService iaAgentService)
         {
             _dbContext = dbContext;
+            _iaAgentService = iaAgentService;
         }
 
         private Guid CurrentUserId => Guid.TryParse(
@@ -304,6 +307,74 @@ namespace API.Controllers
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
+        }
+
+        [HttpPost("{id:guid}/cancel")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> Cancel(Guid id)
+        {
+            var execution = await _dbContext.TestExecutions
+                .AsNoTracking()
+                .Where(e => !e.IsDeleted && e.Id == id)
+                .Include(e => e.Scenario!)
+                    .ThenInclude(s => s.Feature)
+                    .ThenInclude(f => f.Module)
+                .Include(e => e.TestSuite!)
+                .FirstOrDefaultAsync();
+
+            if (execution == null)
+            {
+                return NotFound(new ResponseHttp
+                {
+                    Fail_Messages = "Test run not found.",
+                    Status = StatusCodes.Status404NotFound
+                });
+            }
+
+            var roleName = await GetCurrentRoleNameAsync();
+            var memberProjectIds = await GetCurrentMemberProjectIdsAsync();
+            var executionProjectId = ResolveProjectId(execution);
+
+            var canAccess = string.Equals(roleName, "owner", StringComparison.OrdinalIgnoreCase)
+                            || execution.ExecutedById == CurrentUserId
+                            || (executionProjectId.HasValue && memberProjectIds.Contains(executionProjectId.Value));
+
+            if (!canAccess)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new ResponseHttp
+                {
+                    Fail_Messages = "Access denied for this test run.",
+                    Status = StatusCodes.Status403Forbidden
+                });
+            }
+
+            if (execution.Status != ExecutionStatus.Running && execution.Status != ExecutionStatus.Pending)
+            {
+                return BadRequest(new ResponseHttp
+                {
+                    Fail_Messages = "Only running or pending test runs can be cancelled.",
+                    Status = StatusCodes.Status400BadRequest
+                });
+            }
+
+            var cancelled = await _iaAgentService.CancelExecutionAsync(id);
+            if (!cancelled)
+            {
+                return BadRequest(new ResponseHttp
+                {
+                    Fail_Messages = "Unable to cancel this test run.",
+                    Status = StatusCodes.Status400BadRequest
+                });
+            }
+
+            return Ok(new ResponseHttp
+            {
+                Resultat = new { cancelled = true },
+                Status = StatusCodes.Status200OK
+            });
         }
 
         private static TimeSpan? ResolveDuration(TestExecution execution)

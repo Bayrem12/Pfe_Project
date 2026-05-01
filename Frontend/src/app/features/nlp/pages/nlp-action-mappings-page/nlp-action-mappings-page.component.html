@@ -7,15 +7,15 @@
           <span class="material-symbols-outlined text-white text-xl">psychology</span>
         </div>
         <div>
-          <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">NLP Configuration</h1>
-          <p class="text-sm text-slate-400">Define action mappings, parse Gherkin syntax, and analyze test steps</p>
+          <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">{{ 'nlp.title' | translate }}</h1>
+          <p class="text-sm text-slate-400">{{ 'nlp.subtitle' | translate }}</p>
         </div>
       </div>
     </div>
     <div class="flex items-center gap-3">
       <div *ngIf="isLoadingProjects" class="flex items-center gap-2 text-slate-400">
         <span class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
-        <span class="text-sm">Loading...</span>
+        <span class="text-sm">{{ 'label.loading' | translate }}</span>
       </div>
       <!-- Custom Project Dropdown -->
       <div *ngIf="!isLoadingProjects && projects.length > 0" class="relative">
@@ -26,9 +26,9 @@
             <span class="material-symbols-outlined text-lg">folder_open</span>
           </div>
           <div class="flex flex-col items-start">
-            <span class="text-[10px] font-bold tracking-widest text-slate-400 uppercase leading-none mb-0.5">Project</span>
+            <span class="text-[10px] font-bold tracking-widest text-slate-400 uppercase leading-none mb-0.5">{{ 'label.project' | translate }}</span>
             <span class="text-sm font-semibold" [class]="selectedProjectId ? 'text-slate-800' : 'text-slate-400'">
-              {{ selectedProjectId ? getSelectedProjectName() : 'Select project...' }}
+              {{ selectedProjectId ? getSelectedProjectName() : ('nlp.selectProject' | translate) }}
             </span>
           </div>
           <span class="material-symbols-outlined text-base text-slate-400 group-hover:text-primary transition-all duration-200 ml-2"
@@ -40,12 +40,12 @@
         <div *ngIf="projectDropdownOpen"
              class="absolute top-full right-0 mt-2 w-72 bg-white rounded-xl border border-slate-200 shadow-xl z-50 overflow-hidden">
           <div class="p-2">
-            <div class="px-3 py-2 text-[10px] font-bold tracking-widest text-slate-400 uppercase">Select a project</div>
+            <div class="px-3 py-2 text-[10px] font-bold tracking-widest text-slate-400 uppercase">{{ 'nlp.selectProjectPanel' | translate }}</div>
             <button *ngIf="selectedProjectId"
                     (click)="selectProject('')"
                     class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm text-slate-500 hover:bg-slate-50 transition-colors">
               <span class="material-symbols-outlined text-base text-slate-400">close</span>
-              <span class="font-medium">Clear selection</span>
+              <span class="font-medium">{{ 'action.clearSelection' | translate }}</span>
             </button>
             <button *ngFor="let project of projects"
                     (click)="selectProject(project.id)"
@@ -71,14 +71,14 @@
         [disabled]="!selectedProjectId || !canManageMappings"
         class="h-10 flex items-center gap-2 px-5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed">
         <span class="material-symbols-outlined text-lg">add</span>
-        Add Mapping
+        {{ 'nlp.addMapping' | translate }}
       </button>
     </div>
   </div>
 
   <div *ngIf="isViewerRole" class="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
     <span class="material-symbols-outlined text-base">visibility</span>
-    Viewer mode: NLP mappings are read-only. You can still parse Gherkin text from the parser tab.
+    {{ 'nlp.viewerMode' | translate }}
   </div>
 
   <!-- Error -->
@@ -99,7 +99,7 @@
           ? 'flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white font-semibold text-sm shadow-md shadow-primary/20 transition-all'
           : 'flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-medium text-sm transition-all'">
         <span class="material-symbols-outlined text-lg">psychology</span>
-        Mappings
+        {{ 'nlp.tab.mappings' | translate }}
         <span *ngIf="mappings.length > 0"
               class="ml-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold min-w-[20px] text-center"
               [class]="activeTab === 'mappings' ? 'bg-white/20' : 'bg-primary/10 text-primary'">
@@ -112,7 +112,7 @@
           ? 'flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white font-semibold text-sm shadow-md shadow-primary/20 transition-all'
           : 'flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-medium text-sm transition-all'">
         <span class="material-symbols-outlined text-lg">code</span>
-        Gherkin Parser
+        {{ 'nlp.tab.parser' | translate }}
         <span *ngIf="parsedSteps.length > 0"
               class="ml-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold min-w-[20px] text-center"
               [class]="activeTab === 'parser' ? 'bg-white/20' : 'bg-primary/10 text-primary'">
@@ -125,7 +125,7 @@
           ? 'flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white font-semibold text-sm shadow-md shadow-primary/20 transition-all'
           : 'flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-medium text-sm transition-all'">
         <span class="material-symbols-outlined text-lg">analytics</span>
-        NLP Analysis
+        {{ 'nlp.tab.analysis' | translate }}
         <span *ngIf="analysisResults.length > 0"
               class="ml-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold min-w-[20px] text-center"
               [class]="activeTab === 'analysis' ? 'bg-white/20' : 'bg-primary/10 text-primary'">
@@ -146,16 +146,16 @@
           </div>
           <span class="text-sm font-bold text-slate-700">{{ getSelectedProjectName() }}</span>
           <div class="h-4 w-px bg-slate-200"></div>
-          <span class="text-xs text-slate-400 font-medium">{{ getActiveMappingsCount() }} active &middot; {{ mappings.length }} total</span>
+          <span class="text-xs text-slate-400 font-medium">{{ getActiveMappingsCount() }} {{ 'nlp.active' | translate }} &middot; {{ mappings.length }} {{ 'nlp.total' | translate }}</span>
         </div>
-        <span *ngIf="isViewerRole" class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700 text-[10px] font-bold uppercase tracking-wider">Read only</span>
+        <span *ngIf="isViewerRole" class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700 text-[10px] font-bold uppercase tracking-wider">{{ 'nlp.readOnly' | translate }}</span>
       </div>
 
       <!-- Loading -->
       <div *ngIf="isLoading" class="flex items-center justify-center py-20">
         <div class="flex flex-col items-center gap-3">
           <div class="h-10 w-10 rounded-full border-[3px] border-slate-200 border-t-primary animate-spin"></div>
-          <span class="text-sm text-slate-400 font-medium">Loading mappings...</span>
+          <span class="text-sm text-slate-400 font-medium">{{ 'nlp.loadingMappings' | translate }}</span>
         </div>
       </div>
 
@@ -164,14 +164,14 @@
         <div class="mb-5 w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
           <span class="material-symbols-outlined text-3xl text-slate-300">psychology</span>
         </div>
-        <h3 class="text-lg font-bold text-slate-800 mb-1">No Action Mappings</h3>
-        <p class="text-sm text-slate-400 max-w-sm mb-6">Create your first mapping to define how Gherkin steps translate to UI actions.</p>
+        <h3 class="text-lg font-bold text-slate-800 mb-1">{{ 'nlp.noMappings' | translate }}</h3>
+        <p class="text-sm text-slate-400 max-w-sm mb-6">{{ 'nlp.noMappingsHint' | translate }}</p>
         <button
           (click)="openCreateModal()"
           [disabled]="!selectedProjectId || !canManageMappings"
           class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 transition-all shadow-md shadow-primary/20 disabled:opacity-50">
           <span class="material-symbols-outlined text-lg">add</span>
-          Create First Mapping
+          {{ 'nlp.createFirstMapping' | translate }}
         </button>
       </div>
 
@@ -180,13 +180,13 @@
         <table class="w-full text-left">
           <thead>
             <tr class="border-b border-slate-100">
-              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Intent Pattern</th>
-              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Action</th>
-              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Strategy</th>
-              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Selector</th>
-              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400 text-center">Priority</th>
-              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400 text-center">Status</th>
-              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400 text-right">Actions</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">{{ 'nlp.col.intentPattern' | translate }}</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">{{ 'nlp.col.action' | translate }}</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">{{ 'nlp.col.strategy' | translate }}</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">{{ 'nlp.col.selector' | translate }}</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400 text-center">{{ 'nlp.col.priority' | translate }}</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400 text-center">{{ 'nlp.col.status' | translate }}</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400 text-right">{{ 'nlp.col.actions' | translate }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
@@ -206,11 +206,11 @@
               </td>
               <td class="px-6 py-4 text-center">
                 <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[11px] font-bold"
-                      [class.bg-primary]="(mapping.priority ?? 0) > 0"
-                      [class.text-white]="(mapping.priority ?? 0) > 0"
-                      [class.bg-slate-100]="(mapping.priority ?? 0) === 0"
-                      [class.text-slate-400]="(mapping.priority ?? 0) === 0"
-                      [title]="(mapping.priority ?? 0) > 0 ? 'High priority — checked first' : 'Default priority'">{{ mapping.priority ?? 0 }}</span>
+                      [class.bg-primary]="mapping.priority > 0"
+                      [class.text-white]="mapping.priority > 0"
+                      [class.bg-slate-100]="mapping.priority === 0"
+                      [class.text-slate-400]="mapping.priority === 0"
+                      [title]="mapping.priority > 0 ? 'High priority — checked first' : 'Default priority'">{{ mapping.priority }}</span>
               </td>
               <td class="px-6 py-4 text-center">
                 <button
@@ -249,7 +249,7 @@
 
       <!-- Table Footer -->
       <div *ngIf="!isLoading && mappings.length > 0" class="px-6 py-3 border-t border-slate-100 bg-slate-50/30 text-xs text-slate-400 font-medium">
-        Showing {{ mappings.length }} mapping{{ mappings.length !== 1 ? 's' : '' }}
+        {{ 'nlp.showing' | translate }} {{ mappings.length }} {{ mappings.length !== 1 ? ('nlp.mappings' | translate) : ('nlp.mapping' | translate) }}
       </div>
     </div>
   </div>
@@ -262,7 +262,7 @@
         <div class="px-5 py-3.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <h3 class="font-bold text-sm text-slate-700 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-lg">edit_note</span>
-            Gherkin Input
+            {{ 'nlp.gherkinInput' | translate }}
           </h3>
           <div class="flex gap-1.5">
             <button (click)="loadSample('login')" class="px-2.5 py-1 text-[10px] font-bold text-primary bg-primary/10 rounded-lg hover:bg-primary/15 transition-colors">Login</button>
@@ -283,7 +283,7 @@
               class="flex-1 h-11 bg-primary text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-md shadow-primary/20 disabled:opacity-50 disabled:shadow-none">
               <span *ngIf="isParsing" class="material-symbols-outlined animate-spin text-lg">progress_activity</span>
               <span *ngIf="!isParsing" class="material-symbols-outlined text-lg">play_arrow</span>
-              {{ isParsing ? 'Parsing...' : 'Parse Gherkin' }}
+              {{ isParsing ? ('nlp.parsing' | translate) : ('nlp.parseGherkin' | translate) }}
             </button>
             <button (click)="clearParser()"
                     class="h-11 px-4 bg-slate-100 text-slate-500 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors flex items-center justify-center"
@@ -299,7 +299,7 @@
         <div class="px-5 py-3.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <h3 class="font-bold text-sm text-slate-700 flex items-center gap-2">
             <span class="material-symbols-outlined text-emerald-500 text-lg">checklist</span>
-            Parsed Steps
+            {{ 'nlp.parsedSteps' | translate }}
             <span *ngIf="parsedSteps.length > 0" class="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold">{{ parsedSteps.length }}</span>
           </h3>
           <button
@@ -307,7 +307,7 @@
             (click)="analyzeSteps()"
             class="h-8 px-3.5 bg-primary text-white rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-primary/90 transition-all shadow-sm">
             <span class="material-symbols-outlined text-sm">analytics</span>
-            Analyze with NLP
+            {{ 'nlp.analyzeWithNlp' | translate }}
           </button>
         </div>
         <div class="p-4 flex-1 max-h-[480px] overflow-y-auto">
@@ -320,7 +320,7 @@
           <!-- Empty -->
           <div *ngIf="!parseError && parsedSteps.length === 0" class="flex flex-col items-center justify-center py-16 text-slate-300">
             <span class="material-symbols-outlined text-5xl mb-3">code_blocks</span>
-            <p class="text-sm text-slate-400 font-medium">Parsed steps will appear here</p>
+            <p class="text-sm text-slate-400 font-medium">{{ 'nlp.parsedStepsHint' | translate }}</p>
           </div>
 
           <!-- Steps -->
@@ -351,7 +351,7 @@
           <span class="material-symbols-outlined text-primary text-xl">format_list_numbered</span>
         </div>
         <div>
-          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Steps</p>
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ 'nlp.stat.totalSteps' | translate }}</p>
           <h4 class="text-2xl font-extrabold text-slate-800">{{ analysisResults.length }}</h4>
         </div>
       </div>
@@ -360,7 +360,7 @@
           <span class="material-symbols-outlined text-emerald-600 text-xl">speed</span>
         </div>
         <div>
-          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Avg Confidence</p>
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ 'nlp.stat.avgConfidence' | translate }}</p>
           <h4 class="text-2xl font-extrabold text-slate-800">{{ getAverageConfidence() }}</h4>
         </div>
       </div>
@@ -369,7 +369,7 @@
           <span class="material-symbols-outlined text-purple-600 text-xl">category</span>
         </div>
         <div>
-          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Intent Types</p>
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ 'nlp.stat.intentTypes' | translate }}</p>
           <h4 class="text-2xl font-extrabold text-slate-800">{{ (getIntentCounts() | keyvalue).length }}</h4>
         </div>
       </div>
@@ -380,12 +380,12 @@
       <div class="px-6 py-3.5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
         <h3 class="font-bold text-sm text-slate-700 flex items-center gap-2">
           <span class="material-symbols-outlined text-primary text-lg">analytics</span>
-          Analysis Results
+          {{ 'nlp.analysisResults' | translate }}
         </h3>
         <button *ngIf="analysisResults.length > 0" (click)="exportAnalysis()"
                 class="h-8 px-3 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-1.5">
           <span class="material-symbols-outlined text-sm">download</span>
-          Export JSON
+          {{ 'nlp.exportJson' | translate }}
         </button>
       </div>
 
@@ -394,12 +394,12 @@
         <div class="mb-5 w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
           <span class="material-symbols-outlined text-3xl text-slate-300">analytics</span>
         </div>
-        <h3 class="text-lg font-bold text-slate-800 mb-1">No Analysis Results</h3>
-        <p class="text-sm text-slate-400 max-w-sm mb-6">Parse Gherkin steps first, then click "Analyze with NLP".</p>
+        <h3 class="text-lg font-bold text-slate-800 mb-1">{{ 'nlp.noAnalysis' | translate }}</h3>
+        <p class="text-sm text-slate-400 max-w-sm mb-6">{{ 'nlp.noAnalysisHint' | translate }}</p>
         <button (click)="setActiveTab('parser')"
                 class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 transition-all shadow-md shadow-primary/20">
           <span class="material-symbols-outlined text-lg">code</span>
-          Go to Parser
+          {{ 'nlp.goToParser' | translate }}
         </button>
       </div>
 
@@ -407,7 +407,7 @@
       <div *ngIf="isAnalyzing" class="flex items-center justify-center py-20">
         <div class="flex flex-col items-center gap-3">
           <div class="h-10 w-10 rounded-full border-[3px] border-slate-200 border-t-primary animate-spin"></div>
-          <span class="text-sm text-slate-400 font-medium">Analyzing steps with NLP...</span>
+          <span class="text-sm text-slate-400 font-medium">{{ 'nlp.analyzingSteps' | translate }}</span>
         </div>
       </div>
 
@@ -417,11 +417,11 @@
           <thead>
             <tr class="border-b border-slate-100">
               <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">#</th>
-              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Step Text</th>
-              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Intent</th>
-              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Confidence</th>
-              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Parameters</th>
-              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">Suggested Action</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">{{ 'nlp.col.stepText' | translate }}</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">{{ 'nlp.col.intent' | translate }}</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">{{ 'nlp.col.confidence' | translate }}</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">{{ 'nlp.col.parameters' | translate }}</th>
+              <th class="px-6 py-3 text-[10px] font-bold tracking-widest uppercase text-slate-400">{{ 'nlp.col.suggestedAction' | translate }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
@@ -452,7 +452,7 @@
                 <div *ngIf="result.parameters && result.parameters.length > 0" class="flex flex-wrap gap-1">
                   <span *ngFor="let param of result.parameters" class="px-2 py-0.5 bg-purple-50 text-purple-700 rounded-md text-[10px] font-mono border border-purple-100">{{ param.value }}</span>
                 </div>
-                <span *ngIf="!result.parameters || result.parameters.length === 0" class="text-slate-300 text-xs italic">None</span>
+                <span *ngIf="!result.parameters || result.parameters.length === 0" class="text-slate-300 text-xs italic">{{ 'label.none' | translate }}</span>
               </td>
               <td class="px-6 py-3.5">
                 <code class="px-2.5 py-1 bg-slate-50 text-slate-600 rounded-lg text-xs font-mono border border-slate-100">{{ result.suggestedAction }}</code>
@@ -467,7 +467,7 @@
     <div *ngIf="analysisResults.length > 0" class="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-5">
       <h3 class="font-bold text-sm text-slate-700 mb-4 flex items-center gap-2">
         <span class="material-symbols-outlined text-lg text-primary">pie_chart</span>
-        Intent Distribution
+        {{ 'nlp.intentDistribution' | translate }}
       </h3>
       <div class="flex flex-wrap gap-2">
         <div *ngFor="let intent of getIntentCounts() | keyvalue"
@@ -493,8 +493,8 @@
             <span class="material-symbols-outlined text-primary text-lg">{{ editingMapping ? 'edit' : 'add_circle' }}</span>
           </div>
           <div>
-            <h2 class="text-lg font-bold text-slate-900">{{ editingMapping ? 'Edit Mapping' : 'New Mapping' }}</h2>
-            <p class="text-xs text-slate-400 mt-0.5">{{ editingMapping ? 'Update the mapping configuration' : 'Define a new NLP action mapping' }}</p>
+            <h2 class="text-lg font-bold text-slate-900">{{ editingMapping ? ('nlp.modal.editTitle' | translate) : ('nlp.modal.newTitle' | translate) }}</h2>
+            <p class="text-xs text-slate-400 mt-0.5">{{ editingMapping ? ('nlp.modal.editHint' | translate) : ('nlp.modal.newHint' | translate) }}</p>
           </div>
         </div>
         <button (click)="closeModal()" class="p-1.5 text-slate-400 hover:bg-slate-200 rounded-lg transition-colors" type="button">
@@ -507,7 +507,7 @@
     <form [formGroup]="mappingForm" (ngSubmit)="saveMapping()" class="px-7 py-5">
       <div class="space-y-4">
         <div>
-          <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">Intent Pattern *</label>
+          <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ 'nlp.modal.intentLabel' | translate }} *</label>
           <input formControlName="intentPattern" type="text" placeholder="e.g., click on {button}"
                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-mono text-slate-800 placeholder:text-slate-300 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"/>
           <p class="mt-1 text-[11px] text-slate-400">Use <code class="bg-slate-100 px-1 rounded font-mono text-[10px]">{{ '{' }}variable{{ '}' }}</code> for dynamic values</p>
@@ -515,14 +515,14 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">Action Type *</label>
+            <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ 'nlp.modal.actionLabel' | translate }} *</label>
             <select formControlName="actionType"
                     class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer">
               <option *ngFor="let type of actionTypes" [value]="type.value">{{ type.label }}</option>
             </select>
           </div>
           <div>
-            <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">Strategy *</label>
+            <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ 'nlp.modal.strategyLabel' | translate }} *</label>
             <select formControlName="selectorStrategy"
                     class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer">
               <option *ngFor="let strategy of selectorStrategies" [value]="strategy.value">{{ strategy.label }}</option>
@@ -531,19 +531,19 @@
         </div>
 
         <div>
-          <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">Selector Value *</label>
+          <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ 'nlp.modal.selectorLabel' | translate }} *</label>
           <input formControlName="selectorValue" type="text" placeholder="e.g., #loginBtn, .submit-button"
                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-mono text-slate-800 placeholder:text-slate-300 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"/>
         </div>
 
         <div>
-          <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">Description *</label>
+          <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ 'nlp.modal.descLabel' | translate }} *</label>
           <textarea formControlName="description" rows="2" placeholder="Describe what this mapping does..."
                     class="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-300 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"></textarea>
         </div>
 
         <div>
-          <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">Priority</label>
+          <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ 'nlp.modal.priorityLabel' | translate }}</label>
           <div class="flex items-center gap-3">
             <input formControlName="priority" type="number" min="0" max="100" placeholder="0"
                    class="w-24 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-300 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"/>
@@ -558,13 +558,24 @@
 
       <div class="mt-5 flex items-center justify-end gap-2.5 border-t border-slate-100 pt-4">
         <button (click)="closeModal()" type="button"
-                class="h-10 px-5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+                class="h-10 px-5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">{{ 'action.cancel' | translate }}</button>
         <button type="submit" [disabled]="mappingForm.invalid || !canManageMappings"
                 class="h-10 flex items-center gap-2 px-5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 transition-all shadow-md shadow-primary/20 disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed">
           <span class="material-symbols-outlined text-lg">{{ editingMapping ? 'save' : 'add' }}</span>
-          {{ editingMapping ? 'Update' : 'Create' }} Mapping
+          {{ editingMapping ? ('nlp.modal.update' | translate) : ('nlp.modal.create' | translate) }}
         </button>
       </div>
     </form>
   </div>
 </div>
+
+<app-confirm-delete-dialog
+  [visible]="!!mappingToDelete"
+  [title]="'Delete mapping &quot;' + (mappingToDelete?.intentPattern || '') + '&quot;?'"
+  description="nlp.delete.desc"
+  confirmLabel="nlp.delete.label"
+  cancelLabel="action.cancel"
+  [loading]="deletingMapping"
+  (confirmed)="confirmDeleteMapping()"
+  (cancelled)="mappingToDelete = null"
+></app-confirm-delete-dialog>

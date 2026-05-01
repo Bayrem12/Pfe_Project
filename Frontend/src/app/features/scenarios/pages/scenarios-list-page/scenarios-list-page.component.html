@@ -1,17 +1,17 @@
 <!-- src/app/features/scenarios/pages/scenarios-list-page/scenarios-list-page.component.html -->
-<div class="p-8 w-full space-y-8">
+<div class="px-6 py-8 w-full space-y-8">
 
   <!-- ===== PROJECT PICKER (shown when no project selected) ===== -->
   <ng-container *ngIf="showProjectPicker">
     <div>
-      <h1 class="text-4xl font-extrabold tracking-tighter text-on-surface mb-2">Scenarios</h1>
-      <p class="text-on-surface-variant max-w-2xl">Select a project to view and manage its scenarios.</p>
+      <h1 class="text-4xl font-extrabold tracking-tighter text-on-surface mb-2">{{ 'scenario.list.title' | translate }}</h1>
+      <p class="text-on-surface-variant max-w-2xl">{{ 'scenario.list.selectProject' | translate }}</p>
     </div>
 
     <!-- Loading Projects -->
     <div *ngIf="loadingProjects" class="flex flex-col items-center gap-4 py-32">
       <div class="w-10 h-10 border-[3px] border-surface-container border-t-primary rounded-full animate-spin"></div>
-      <span class="text-on-surface-variant text-sm font-medium">Loading projects...</span>
+      <span class="text-on-surface-variant text-sm font-medium">{{ 'scenario.list.loadingProjects' | translate }}</span>
     </div>
 
     <!-- No Projects -->
@@ -19,12 +19,12 @@
       <div class="w-20 h-20 rounded-2xl bg-surface-container flex items-center justify-center mx-auto mb-6">
         <span class="material-symbols-outlined text-4xl text-on-surface-variant">folder_off</span>
       </div>
-      <h3 class="text-xl font-bold text-on-background mb-2">No projects found</h3>
-      <p class="text-on-surface-variant text-sm mb-6">Create a project first to start building scenarios.</p>
+      <h3 class="text-xl font-bold text-on-background mb-2">{{ 'scenario.list.noProjects' | translate }}</h3>
+      <p class="text-on-surface-variant text-sm mb-6">{{ 'scenario.list.noProjectsHint' | translate }}</p>
       <button
         routerLink="/projects"
         class="px-8 py-3 bg-primary text-white rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
-        Go to Projects
+        {{ 'scenario.list.goToProjects' | translate }}
       </button>
     </div>
 
@@ -62,8 +62,8 @@
   <!-- Page Header -->
   <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
     <div>
-      <h1 class="text-4xl font-extrabold tracking-tighter text-on-surface mb-2">Scenarios</h1>
-      <p class="text-on-surface-variant max-w-2xl">Manage your behavioral test definitions. Link user stories directly to automated execution scripts with Gherkin-powered logic.</p>
+      <h1 class="text-4xl font-extrabold tracking-tighter text-on-surface mb-2">{{ 'scenario.list.title' | translate }}</h1>
+      <p class="text-on-surface-variant max-w-2xl">{{ 'scenario.list.subtitle' | translate }}</p>
     </div>
     <div class="flex items-center gap-3">
       
@@ -72,7 +72,7 @@
         [disabled]="!canCreateScenario"
         class="flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-xl font-bold hover:shadow-xl hover:shadow-primary/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:active:scale-100">
         <span class="material-symbols-outlined">add</span>
-        Create Scenario
+        {{ 'scenario.list.createScenario' | translate }}
       </button>
     </div>
   </div>
@@ -85,7 +85,7 @@
         type="text"
         [(ngModel)]="searchTerm"
         (ngModelChange)="onSearchChange()"
-        placeholder="Search by name, feature, or tags..."
+        [placeholder]="'scenario.list.searchPh' | translate"
         class="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border-none rounded-xl shadow-sm focus:ring-2 focus:ring-primary/20 transition-all text-sm" />
     </div>
     <div class="lg:col-span-2">
@@ -93,7 +93,7 @@
         [(ngModel)]="selectedModule"
         (ngModelChange)="onModuleChange()"
         class="w-full py-3 px-4 bg-surface-container-lowest border-none rounded-xl shadow-sm focus:ring-2 focus:ring-primary/20 text-sm text-on-surface-variant appearance-none cursor-pointer">
-        <option value="">Module: All</option>
+        <option value="">{{ 'scenario.list.allModules' | translate }}</option>
         <option *ngFor="let mod of uniqueModules" [value]="mod">{{ mod }}</option>
       </select>
     </div>
@@ -114,7 +114,7 @@
     *ngIf="selectedIds.size > 0"
     class="flex items-center justify-between bg-primary-container/10 px-6 py-3 rounded-2xl border border-primary-container/20">
     <div class="flex items-center gap-4">
-      <span class="text-sm font-semibold text-primary">{{ selectedIds.size }} scenarios selected</span>
+      <span class="text-sm font-semibold text-primary">{{ selectedIds.size }} {{ 'scenario.list.selected' | translate }}</span>
       <div class="h-4 w-[1px] bg-primary/20"></div>
       <div class="flex items-center gap-2">
         <button
@@ -122,20 +122,20 @@
           [disabled]="!canRunScenarioTests"
           class="flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary">
           <span class="material-symbols-outlined text-sm">play_arrow</span>
-          Run Selected
+          {{ 'scenario.list.runSelected' | translate }}
         </button>
         <button
           (click)="bulkAddTags()"
           [disabled]="isViewerRole"
           class="flex items-center gap-1.5 px-4 py-2 bg-surface-container-lowest text-on-surface rounded-lg text-xs font-semibold border border-slate-200 hover:bg-surface-container-high transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-surface-container-lowest">
           <span class="material-symbols-outlined text-sm">label</span>
-          Add Tags
+          {{ 'scenario.list.addTags' | translate }}
         </button>
         <button
           (click)="bulkExport()"
           class="flex items-center gap-1.5 px-4 py-2 bg-surface-container-lowest text-on-surface rounded-lg text-xs font-semibold border border-slate-200 hover:bg-surface-container-high transition-colors">
           <span class="material-symbols-outlined text-sm">ios_share</span>
-          Export
+          {{ 'action.export' | translate }}
         </button>
       </div>
     </div>
@@ -144,14 +144,14 @@
       [disabled]="isViewerRole"
       class="flex items-center gap-1.5 px-3 py-1.5 text-error font-bold text-xs hover:bg-error/5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent">
       <span class="material-symbols-outlined text-sm">delete</span>
-      Delete
+      {{ 'action.delete' | translate }}
     </button>
   </div>
 
   <!-- Loading -->
   <div *ngIf="loading" class="flex flex-col items-center gap-4 py-32">
     <div class="w-10 h-10 border-[3px] border-surface-container border-t-primary rounded-full animate-spin"></div>
-    <span class="text-on-surface-variant text-sm font-medium">Loading scenarios...</span>
+    <span class="text-on-surface-variant text-sm font-medium">{{ 'scenario.list.loading' | translate }}</span>
   </div>
 
   <!-- Error -->
@@ -168,19 +168,19 @@
       <span class="material-symbols-outlined text-4xl text-on-surface-variant">description</span>
     </div>
     <h3 class="text-xl font-bold text-on-background mb-2">
-      {{ (searchTerm || selectedStatus || selectedModule || selectedTagFilters.length > 0) ? 'No matching scenarios' : 'No scenarios yet' }}
+      {{ (searchTerm || selectedStatus || selectedModule || selectedTagFilters.length > 0) ? ('scenario.list.noMatch' | translate) : ('scenario.list.noScenarios' | translate) }}
     </h3>
     <p class="text-on-surface-variant text-sm mb-6">
       {{ searchTerm || selectedStatus || selectedModule || selectedTagFilters.length > 0
-        ? 'Try adjusting your search or filters.'
-        : 'Create your first Gherkin scenario to start automating.' }}
+        ? ('scenario.list.noMatchHint' | translate)
+        : ('scenario.list.noScenariosHint' | translate) }}
     </p>
     <button
       *ngIf="!searchTerm && !selectedStatus && !selectedModule && selectedTagFilters.length === 0"
       (click)="navigateToCreate()"
       [disabled]="!canCreateScenario"
       class="px-8 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary">
-      + Create First Scenario
+      {{ 'scenario.list.createFirst' | translate }}
     </button>
   </div>
 
@@ -199,13 +199,13 @@
               (change)="toggleSelectAll()"
               class="rounded border-outline-variant text-primary focus:ring-primary/20" />
           </th>
-          <th class="px-6 py-5">Scenario Details</th>
-          <th class="px-6 py-5">Module / Feature</th>
-          <th class="px-6 py-5">Tags</th>
-          <th class="px-6 py-5 text-center">Steps</th>
-          <th class="px-6 py-5">Health</th>
-          <th class="px-6 py-5">Status</th>
-          <th class="px-6 py-5 text-right">Actions</th>
+          <th class="px-6 py-5">{{ 'scenario.list.colDetails' | translate }}</th>
+          <th class="px-6 py-5">{{ 'scenario.list.colModule' | translate }}</th>
+          <th class="px-6 py-5">{{ 'label.tags' | translate }}</th>
+          <th class="px-6 py-5 text-center">{{ 'label.steps' | translate }}</th>
+          <th class="px-6 py-5">{{ 'label.health' | translate }}</th>
+          <th class="px-6 py-5">{{ 'label.status' | translate }}</th>
+          <th class="px-6 py-5 text-right">{{ 'label.actions' | translate }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-50">
@@ -227,7 +227,7 @@
           <td class="px-6 py-6">
             <div class="flex flex-col">
               <span class="font-bold text-slate-900 group-hover:text-primary transition-colors">{{ scenario.title }}</span>
-              <span class="text-xs text-slate-400 mt-1 line-clamp-1">{{ scenario.description || 'No description' }}</span>
+              <span class="text-xs text-slate-400 mt-1 line-clamp-1">{{ scenario.description || ('label.noDescription' | translate) }}</span>
             </div>
           </td>
 
@@ -242,9 +242,9 @@
           <!-- Tags -->
           <td class="px-6 py-6">
             <div class="flex flex-wrap gap-1.5">
-              <ng-container *ngIf="scenario.tags && scenario.tags.length > 0">
-                <span *ngFor="let tag of scenario.tags | slice:0:2" class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold">{{ tag }}</span>
-                <span *ngIf="scenario.tags.length > 2" class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full text-[10px] font-bold">+{{ scenario.tags.length - 2 }}</span>
+              <ng-container *ngIf="getDisplayTags(scenario.tags).length > 0">
+                <span *ngFor="let tag of getDisplayTags(scenario.tags) | slice:0:2" class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold">{{ tag }}</span>
+                <span *ngIf="getDisplayTags(scenario.tags).length > 2" class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full text-[10px] font-bold">+{{ getDisplayTags(scenario.tags).length - 2 }}</span>
               </ng-container>
             </div>
           </td>
@@ -259,11 +259,11 @@
             <div class="flex flex-col">
               <span *ngIf="scenario.lastTestStatus" [class]="'inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold w-fit ' + getTestStatusColor(scenario.lastTestStatus)">
                 <span class="material-symbols-outlined text-xs" [style.fontVariationSettings]="'\'FILL\' 1'">{{ scenario.lastTestStatus === 'Passed' ? 'check_circle' : 'cancel' }}</span>
-                {{ scenario.lastTestStatus === 'Passed' ? 'PASSED' : 'FAILED' }}
+                {{ getTestStatusLabel(scenario.lastTestStatus) }}
               </span>
               <span *ngIf="!scenario.lastTestStatus" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold w-fit bg-slate-100 text-slate-500">
                 <span class="material-symbols-outlined text-xs">hourglass_empty</span>
-                NOT TESTED
+                {{ 'label.notTested' | translate }}
               </span>
               <span class="text-[10px] text-slate-400 mt-1">v{{ scenario.currentVersion }}</span>
             </div>
@@ -284,21 +284,21 @@
                 (click)="navigateToEdit(scenario.id, $event)"
                 [disabled]="isViewerRole"
                 class="w-9 h-9 flex items-center justify-center bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary/10 disabled:hover:text-primary"
-                title="Edit">
+                [title]="'scenario.list.action.edit' | translate">
                 <span class="material-symbols-outlined text-[18px]">edit</span>
               </button>
               <button
                 (click)="runScenario(scenario, $event)"
                 [disabled]="!canRunScenarioTests"
                 class="w-9 h-9 flex items-center justify-center bg-tertiary-fixed/30 text-on-tertiary-fixed-variant hover:bg-tertiary-fixed hover:text-on-tertiary-fixed-variant rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-tertiary-fixed/30"
-                title="Run">
+                [title]="'scenario.list.action.run' | translate">
                 <span class="material-symbols-outlined text-[18px]">play_arrow</span>
               </button>
               <button
                 (click)="deleteScenario(scenario, $event)"
                 [disabled]="isViewerRole"
                 class="w-9 h-9 flex items-center justify-center bg-error-container/50 text-error hover:bg-error hover:text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-error-container/50 disabled:hover:text-error"
-                title="Delete">
+                [title]="'scenario.list.action.delete' | translate">
                 <span class="material-symbols-outlined text-[18px]">delete</span>
               </button>
             </div>
@@ -311,11 +311,11 @@
     <div class="px-8 py-6 bg-surface-container-lowest flex flex-col sm:flex-row items-center justify-between border-t border-slate-50 gap-4">
       <div class="flex items-center gap-6">
         <span class="text-sm text-on-surface-variant">
-          Showing <span class="font-bold text-slate-900">{{ paginationStart }}-{{ paginationEnd }}</span>
-          of <span class="font-bold text-slate-900">{{ filteredScenarios.length }}</span> results
+          {{ 'label.showing' | translate }} <span class="font-bold text-slate-900">{{ paginationStart }}-{{ paginationEnd }}</span>
+          {{ 'label.of' | translate }} <span class="font-bold text-slate-900">{{ filteredScenarios.length }}</span> {{ 'label.results' | translate }}
         </span>
         <div class="flex items-center gap-2">
-          <span class="text-sm text-on-surface-variant">Rows per page:</span>
+          <span class="text-sm text-on-surface-variant">{{ 'label.rowsPerPage' | translate }}</span>
           <select
             [(ngModel)]="rowsPerPage"
             (ngModelChange)="onRowsPerPageChange()"
@@ -367,20 +367,20 @@
     </div>
     <div>
       <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
-        AI Coverage Insight
-        <span class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold rounded-full">PREMIUM</span>
+        {{ 'scenario.list.aiInsight.title' | translate }}
+        <span class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold rounded-full">{{ 'scenario.list.aiInsight.premium' | translate }}</span>
       </h3>
       <p class="text-on-surface-variant mt-1 text-sm leading-relaxed max-w-3xl">
-        Analyze your scenario coverage to detect potential edge cases missing from your test suite. AI-powered suggestions can help improve test coverage.
+        {{ 'scenario.list.aiInsight.description' | translate }}
       </p>
       <div class="flex gap-4 mt-4">
         <button class="px-4 py-2 bg-secondary text-on-secondary rounded-lg text-xs font-bold hover:shadow-lg hover:shadow-secondary/30 transition-all">
-          Review Suggested Scenarios
+          {{ 'scenario.list.aiInsight.review' | translate }}
         </button>
         <button
           (click)="showAiInsight = false"
           class="px-4 py-2 text-slate-500 hover:text-slate-900 text-xs font-bold transition-colors">
-          Dismiss
+          {{ 'action.dismiss' | translate }}
         </button>
       </div>
     </div>

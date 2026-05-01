@@ -18,6 +18,8 @@ import { ResponseHttp } from '../../../../core/models/response-http.model';
 import { ModuleCreateComponent } from '../../../projects/module-create/module-create.component';
 import { CreatedFeaturePayload, FeatureCreateModalComponent } from '../../../projects/feature-create-modal/feature-create-modal.component';
 import { TagCreateModalComponent } from '../../../projects/tag-create-modal/tag-create-modal.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../core/services/translation.service';
 
 interface DropdownItem {
   id: string;
@@ -36,7 +38,7 @@ interface DataTableRow {
 @Component({
   selector: 'app-scenario-editor-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, ModuleCreateComponent, FeatureCreateModalComponent, TagCreateModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, ModuleCreateComponent, FeatureCreateModalComponent, TagCreateModalComponent, TranslatePipe],
   templateUrl: './scenario-editor-page.component.html'
 })
 export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
@@ -114,6 +116,59 @@ export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
     return this.authService.isProjectReadOnly();
   }
 
+  private t(key: string, ...args: string[]): string {
+    return this.translationService.t(key, ...args);
+  }
+
+  private normalizeTag(tag: string): string {
+    return (tag || '').replace(/^@/, '').trim();
+  }
+
+  private dedupeTags(tags: string[]): string[] {
+    const seen = new Set<string>();
+    const result: string[] = [];
+
+    for (const rawTag of tags) {
+      const normalized = this.normalizeTag(rawTag);
+      const key = normalized.toLowerCase();
+
+      if (!normalized || seen.has(key)) {
+        continue;
+      }
+
+      seen.add(key);
+      result.push(normalized);
+    }
+
+    return result;
+  }
+
+  private dedupeProjectTags(tags: ProjectTag[]): ProjectTag[] {
+    const seen = new Set<string>();
+
+    return [...tags]
+      .filter(tag => {
+        const key = this.normalizeTag(tag.name).toLowerCase();
+        if (!key || seen.has(key)) {
+          return false;
+        }
+
+        seen.add(key);
+        return true;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  private hasTag(tagName: string): boolean {
+    const normalized = this.normalizeTag(tagName).toLowerCase();
+    return this.tags.some(tag => tag.toLowerCase() === normalized);
+  }
+
+  private mapServerScenarioError(message: unknown, fallbackKey: string): string {
+    const text = String(message ?? '').trim();
+    return text || this.t(fallbackKey);
+  }
+
   constructor(
     private fb: FormBuilder,
     private scenarioService: ScenarioService,
@@ -123,12 +178,13 @@ export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private breadcrumbService: BreadcrumbService,
     private tagService: TagService,
+    private translationService: TranslationService,
     private router: Router,
     private route: ActivatedRoute
   ) {
     this.scenarioForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
-      description: ['']
+      description: ['', [Validators.required]]
     });
   }
 
@@ -258,7 +314,7 @@ export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
     this.validationErrors = [];
 
     if (!this.projectId) {
-      this.validationErrors = ['Project context is missing. Open scenario creation from a project first.'];
+      this.validationErrors = [this.t('scenario.editor.error.projectContextMissing')];
       return;
     }
 
@@ -278,7 +334,7 @@ export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
     this.validationErrors = [];
 
     if (!this.projectId) {
-      this.validationErrors = ['Project context is missing. Open scenario creation from a project first.'];
+      this.validationErrors = [this.t('scenario.editor.error.projectContextMissing')];
       return;
     }
 
@@ -309,7 +365,7 @@ export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
 
   openCreateTagModal(): void {
     if (!this.projectId) {
-      this.validationErrors = ['Project context is missing. Open scenario creation from a project first.'];
+      this.validationErrors = [this.t('scenario.editor.error.projectContextMissing')];
       return;
     }
     this.showCreateTagModal = true;
@@ -318,12 +374,8 @@ export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
   onTagCreated(tag: ProjectTag | null): void {
     this.showCreateTagModal = false;
     if (!tag) return;
-    this.projectTags = [...this.projectTags, tag].sort((a, b) => a.name.localeCompare(b.name));
-    // Auto-select the newly created tag
-    const normalized = tag.name.replace(/^@/, '');
-    if (!this.tags.includes(normalized)) {
-      this.tags.push(normalized);
-    }
+    this.projectTags = this.dedupeProjectTags([...this.projectTags, tag]);
+    this.tags = this.dedupeTags([...this.tags, tag.name]);
   }
 
   onTagCreateCancelled(): void {
@@ -401,7 +453,7 @@ export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
     this.loadingProjectTags = true;
     this.tagService.getProjectTags(projectId).subscribe({
       next: (res) => {
-        this.projectTags = (res?.resultat ?? []).sort((a, b) => a.name.localeCompare(b.name));
+        this.projectTags = this.dedupeProjectTags(res?.resultat ?? []);
         this.loadingProjectTags = false;
       },
       error: () => { this.loadingProjectTags = false; }
@@ -409,26 +461,29 @@ export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
   }
 
   isProjectTagSelected(tagName: string): boolean {
-    const normalized = tagName.replace(/^@/, '');
-    return this.tags.includes(normalized);
+    return this.hasTag(tagName);
+  }
+
+  isInProjectTags(tagName: string): boolean {
+    const normalized = tagName.replace(/^@/, '').toLowerCase();
+    return this.projectTags.some(pt => pt.name.replace(/^@/, '').toLowerCase() === normalized);
   }
 
   toggleProjectTag(tagName: string): void {
-    const normalized = tagName.replace(/^@/, '');
-    const idx = this.tags.indexOf(normalized);
-    if (idx === -1) {
-      this.tags.push(normalized);
+    const normalized = this.normalizeTag(tagName);
+    if (!this.hasTag(normalized)) {
+      this.tags = this.dedupeTags([...this.tags, normalized]);
     } else {
-      this.tags.splice(idx, 1);
+      this.tags = this.tags.filter(tag => tag.toLowerCase() !== normalized.toLowerCase());
     }
   }
 
   // ===================== TAGS =====================
 
   addTag(): void {
-    const tag = this.newTagInput.trim().replace(/^@/, '');
-    if (tag && !this.tags.includes(tag)) {
-      this.tags.push(tag);
+    const tag = this.normalizeTag(this.newTagInput);
+    if (tag && !this.hasTag(tag)) {
+      this.tags = this.dedupeTags([...this.tags, tag]);
       this.newTagInput = '';
     }
   }
@@ -530,7 +585,7 @@ export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
 
         // Parse tags (strip @ prefix used in Gherkin – stored without @ in UI)
         if (s.tags && s.tags.length > 0) {
-          this.tags = s.tags.map((t: string) => t.replace(/^@/, ''));
+          this.tags = this.dedupeTags(s.tags.map((t: string) => this.normalizeTag(t)));
         }
 
         // Parse steps from backend
@@ -576,26 +631,48 @@ export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
 
   onSubmit(asDraft: boolean = false): void {
     if (!this.isEditMode && !this.canCreateScenario) {
-      this.validationErrors = ['Only Owner and Tester roles can create scenarios.'];
+      this.validationErrors = [this.t('scenario.editor.error.createRole')];
       return;
     }
 
     if (this.isEditMode && this.isViewerRole) {
-      this.validationErrors = ['Viewer role is read-only and cannot update scenarios.'];
+      this.validationErrors = [this.t('scenario.editor.error.updateReadonly')];
       return;
     }
 
     if (!this.featureId && !this.isEditMode) {
-      this.validationErrors = ['Feature is required'];
+      this.validationErrors = [this.t('scenario.editor.error.featureRequired')];
       return;
     }
 
     if (!this.scenarioForm.valid) {
       if (this.scenarioForm.get('title')?.hasError('minlength')) {
-        this.validationErrors = ['Title must be at least 3 characters.'];
+        this.validationErrors = [this.t('scenario.editor.titleMin')];
       } else {
-        this.validationErrors = ['Title is required'];
+        this.validationErrors = [this.t('scenario.editor.error.titleRequired')];
       }
+      return;
+    }
+
+    // Validate description
+    const descriptionValue = (this.scenarioForm.value.description || '').trim();
+    if (!descriptionValue) {
+      this.validationErrors = [this.t('scenario.editor.error.descriptionRequired')];
+      return;
+    }
+
+    // Validate steps
+    if (this.steps.length === 0) {
+      this.validationErrors = [this.t('scenario.editor.error.stepsRequired')];
+      return;
+    }
+
+    const emptySteps = this.steps
+      .map((s, i) => ({ ...s, index: i + 1 }))
+      .filter(s => !s.text || !s.text.trim());
+
+    if (emptySteps.length > 0) {
+      this.validationErrors = emptySteps.map(s => this.t('scenario.editor.error.stepEmpty', String(s.index), s.keyword));
       return;
     }
 
@@ -622,7 +699,7 @@ export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.isSubmitting = false;
-          this.validationErrors = [err?.error?.fail_Messages || err?.message || 'Failed to update scenario'];
+          this.validationErrors = [this.mapServerScenarioError(err?.error?.fail_Messages || err?.message, 'scenario.editor.error.updateFailed')];
         }
       });
     } else {
@@ -634,7 +711,7 @@ export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.isSubmitting = false;
-          this.validationErrors = [err?.error?.fail_Messages || err?.message || 'Failed to create scenario'];
+          this.validationErrors = [this.mapServerScenarioError(err?.error?.fail_Messages || err?.message, 'scenario.editor.error.createFailed')];
         }
       });
     }

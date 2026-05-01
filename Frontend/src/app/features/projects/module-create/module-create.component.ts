@@ -4,11 +4,12 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ModuleService } from '../../../core/services/module.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-module-create',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe],
   templateUrl: './module-create.component.html',
   styleUrl: './module-create.component.scss'
 })

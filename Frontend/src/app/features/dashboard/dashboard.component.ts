@@ -12,6 +12,7 @@ import { AiAlertsPanelComponent } from './components/ai-alerts-panel/ai-alerts-p
 import { PassRateTrendChartComponent } from './components/pass-rate-trend-chart/pass-rate-trend-chart.component';
 import { ProjectComparisonChartComponent, ProjectComparisonData } from './components/project-comparison-chart/project-comparison-chart.component';
 import { WeeklyActivityChartComponent } from './components/weekly-activity-chart/weekly-activity-chart.component';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,7 +26,8 @@ import { WeeklyActivityChartComponent } from './components/weekly-activity-chart
     AiAlertsPanelComponent,
     PassRateTrendChartComponent,
     ProjectComparisonChartComponent,
-    WeeklyActivityChartComponent
+    WeeklyActivityChartComponent,
+    TranslatePipe
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'

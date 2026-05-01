@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Subject, takeUntil } from 'rxjs';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TestSuiteService } from '../../services/test-suite.service';
 import { ScenarioService } from '../../services/scenario.service';
 import { TestSuiteWithCasesDto, TestSuiteScenarioDto, ScenarioDto, ScenarioStatus } from '../../models/test-suite.model';
@@ -14,7 +15,7 @@ import { RunNotificationsService } from '../../../../core/services/run-notificat
 @Component({
   selector: 'app-test-suite-builder-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [CommonModule, FormsModule, DragDropModule, TranslatePipe],
   templateUrl: './test-suite-builder-page.component.html',
   styleUrls: ['./test-suite-builder-page.component.scss']
 })

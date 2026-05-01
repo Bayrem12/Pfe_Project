@@ -108,9 +108,15 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Create([FromBody] AddTestSuiteCommand command)
         {
-            // ValidationBehavior in the MediatR pipeline handles input validation
-            var testSuiteId = await _mediator.Send(command);
-            return Created($"api/TestSuites/{testSuiteId}", testSuiteId);
+            try
+            {
+                var testSuiteId = await _mediator.Send(command);
+                return Created($"api/TestSuites/{testSuiteId}", testSuiteId);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { fail_Messages = "Test suite already exists." });
+            }
         }
 
         /// <summary>

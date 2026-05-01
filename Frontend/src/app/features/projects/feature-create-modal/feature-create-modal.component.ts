@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { FeatureService } from '../../../core/services/feature.service';
@@ -17,7 +18,7 @@ export interface CreatedFeaturePayload {
 @Component({
   selector: 'app-feature-create-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
   templateUrl: './feature-create-modal.component.html'
 })
 export class FeatureCreateModalComponent implements OnInit {

@@ -172,18 +172,38 @@ $secondary: #712ae2;
       }
       
       // User avatar
+      .user-avatar-btn {
+        background: transparent;
+        border: none;
+        padding: 0;
+        line-height: 0;
+        cursor: pointer;
+      }
+
       .user-avatar {
         width: 36px;
         height: 36px;
         border-radius: 50%;
         border: 1px solid #e2e8f0;
-        padding: 2px;
+        object-fit: cover;
+        background-color: #fff;
         cursor: pointer;
         transition: all 0.2s;
-        
+
         &:hover {
           box-shadow: 0 0 0 2px rgba($primary, 0.2);
         }
+      }
+
+      .user-avatar-fallback {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 13px;
+        color: #fff;
+        background: $primary;
+        border-color: $primary;
       }
     }
   }

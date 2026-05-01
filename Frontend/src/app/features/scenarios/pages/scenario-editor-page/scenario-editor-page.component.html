@@ -1,19 +1,19 @@
 <!-- ═══════════════════════════════════════════
      SCENARIO EDITOR
 ═══════════════════════════════════════════ -->
-<div class="flex-1 p-8 pb-32">
+<div class="flex-1 px-6 py-8 pb-32">
 
   <!-- Header -->
   <div class="flex items-center justify-between mb-10">
     <div>
       <h2 class="text-4xl font-extrabold tracking-tight text-on-surface">
-        {{ isEditMode ? 'Edit Scenario' : 'Create Scenario' }}
+        {{ isEditMode ? ('scenario.editor.titleEdit' | translate) : ('scenario.editor.titleCreate' | translate) }}
       </h2>
     </div>
     <div class="flex items-center gap-3">
       <span *ngIf="autoSaving" class="flex items-center gap-1.5 px-3 py-1 bg-surface-container rounded-full text-xs font-bold text-primary tracking-wider uppercase">
         <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-        Auto-saving
+        {{ 'scenario.editor.autoSaving' | translate }}
       </span>
     </div>
   </div>
@@ -34,35 +34,35 @@
       <section class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_12px_40px_rgba(0,40,142,0.04)] border border-outline-variant/10">
         <div class="flex items-center gap-2 mb-6">
           <span class="material-symbols-outlined text-primary">info</span>
-          <h3 class="text-lg font-semibold text-on-surface">Basic Information</h3>
+          <h3 class="text-lg font-semibold text-on-surface">{{ 'scenario.editor.basicInfo' | translate }}</h3>
         </div>
 
         <form [formGroup]="scenarioForm" class="grid grid-cols-2 gap-6">
           <!-- Title -->
           <div class="col-span-2">
-            <label class="block text-xs font-bold text-outline uppercase tracking-widest mb-2">Scenario Title</label>
+            <label class="block text-xs font-bold text-outline uppercase tracking-widest mb-2">{{ 'scenario.editor.titleLabel' | translate }}</label>
             <input
               formControlName="title"
               type="text"
-              placeholder="Enter scenario name..."
+              [placeholder]="'scenario.editor.titlePh' | translate"
               class="w-full bg-transparent border-0 border-b-2 border-surface-container-high focus:ring-0 focus:border-primary px-0 py-2 text-xl font-medium placeholder-outline-variant transition-colors" />
-            <p *ngIf="scenarioForm.get('title')?.touched && scenarioForm.get('title')?.hasError('minlength')" class="mt-1 text-xs text-error">Title must be at least 3 characters.</p>
+            <p *ngIf="scenarioForm.get('title')?.touched && scenarioForm.get('title')?.hasError('minlength')" class="mt-1 text-xs text-error">{{ 'scenario.editor.titleMin' | translate }}</p>
           </div>
 
           <!-- Description -->
           <div class="col-span-2">
-            <label class="block text-xs font-bold text-outline uppercase tracking-widest mb-2">Description</label>
+            <label class="block text-xs font-bold text-outline uppercase tracking-widest mb-2">{{ 'scenario.editor.descLabel' | translate }}</label>
             <textarea
               formControlName="description"
               rows="3"
-              placeholder="Describe what this scenario tests..."
+              [placeholder]="'scenario.editor.descPh' | translate"
               class="w-full bg-surface-container-low border-0 rounded-lg focus:ring-2 focus:ring-primary/20 text-sm py-2.5 px-3 resize-none placeholder-outline-variant transition-colors"></textarea>
           </div>
 
           <!-- Module -->
           <div class="col-span-1">
             <div class="mb-2 flex items-center justify-between gap-2">
-              <label class="block text-xs font-bold text-outline uppercase tracking-widest">Module</label>
+              <label class="block text-xs font-bold text-outline uppercase tracking-widest">{{ 'label.module' | translate }}</label>
               <button
                 type="button"
                 (click)="openCreateModuleModal()"
@@ -76,7 +76,7 @@
               [ngModelOptions]="{standalone: true}"
               (ngModelChange)="onModuleChange($event)"
               class="w-full bg-surface-container-low border-0 rounded-lg focus:ring-2 focus:ring-primary/20 text-sm py-2.5">
-              <option value="">Select module...</option>
+              <option value="">{{ 'scenario.editor.selectModule' | translate }}</option>
               <option *ngFor="let m of modules" [value]="m.id">{{ m.name }}</option>
             </select>
           </div>
@@ -85,7 +85,7 @@
           <!-- Feature -->
           <div class="col-span-1">
             <div class="mb-2 flex items-center justify-between gap-2">
-              <label class="block text-xs font-bold text-outline uppercase tracking-widest">Feature</label>
+              <label class="block text-xs font-bold text-outline uppercase tracking-widest">{{ 'label.feature' | translate }}</label>
               <button
                 type="button"
                 (click)="openCreateFeatureModal()"
@@ -99,26 +99,26 @@
               [ngModelOptions]="{standalone: true}"
               (ngModelChange)="onFeatureChange($event)"
               class="w-full bg-surface-container-low border-0 rounded-lg focus:ring-2 focus:ring-primary/20 text-sm py-2.5">
-              <option value="">Select feature...</option>
+              <option value="">{{ 'scenario.editor.selectFeature' | translate }}</option>
               <option *ngFor="let f of features" [value]="f.id">{{ f.name }}</option>
             </select>
           </div>
 
           <!-- Status -->
           <div class="col-span-1">
-            <label class="block text-xs font-bold text-outline uppercase tracking-widest mb-2">Status</label>
+            <label class="block text-xs font-bold text-outline uppercase tracking-widest mb-2">{{ 'label.status' | translate }}</label>
             <div class="flex p-1 bg-surface-container-low rounded-lg w-fit">
               <button
                 type="button"
                 (click)="activeStatus = true"
                 [class]="activeStatus ? 'px-4 py-1.5 rounded-md text-xs font-bold bg-white shadow-sm text-primary' : 'px-4 py-1.5 rounded-md text-xs font-bold text-outline hover:text-on-surface'">
-                Active
+                {{ 'label.active' | translate }}
               </button>
               <button
                 type="button"
                 (click)="activeStatus = false"
                 [class]="!activeStatus ? 'px-4 py-1.5 rounded-md text-xs font-bold bg-white shadow-sm text-primary' : 'px-4 py-1.5 rounded-md text-xs font-bold text-outline hover:text-on-surface'">
-                Draft
+                {{ 'label.draft' | translate }}
               </button>
             </div>
           </div>
@@ -126,7 +126,7 @@
           <!-- Tags -->
           <div class="col-span-2">
             <div class="mb-2 flex items-center justify-between gap-2">
-              <label class="block text-xs font-bold text-outline uppercase tracking-widest">Tags</label>
+              <label class="block text-xs font-bold text-outline uppercase tracking-widest">{{ 'label.tags' | translate }}</label>
               <button
                 type="button"
                 (click)="openCreateTagModal()"
@@ -138,7 +138,7 @@
 
             <!-- Project tags as selectable pills -->
             <div *ngIf="projectTags.length > 0" class="mb-3">
-              <p class="text-[10px] text-outline uppercase tracking-widest mb-2">Select from project tags:</p>
+              <p class="text-[10px] text-outline uppercase tracking-widest mb-2">{{ 'scenario.editor.selectProjectTags' | translate }}</p>
               <div class="flex flex-wrap gap-2">
                 <button
                   *ngFor="let pt of projectTags"
@@ -155,19 +155,21 @@
               </div>
             </div>
 
-            <!-- Custom tags + input -->
+            <!-- Custom tags + input (only tags not already shown in project pills above) -->
             <div class="flex flex-wrap gap-2 p-3 bg-surface-container-low rounded-lg min-h-[44px]">
-              <span
-                *ngFor="let tag of tags; let i = index"
-                class="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs font-bold rounded">
-                {{ tag }}
-                <button (click)="removeTag(i)" class="material-symbols-outlined text-[14px] hover:text-error">close</button>
-              </span>
+              <ng-container *ngFor="let tag of tags; let i = index">
+                <span
+                  *ngIf="!isInProjectTags(tag)"
+                  class="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs font-bold rounded">
+                  {{ tag }}
+                  <button (click)="removeTag(i)" class="material-symbols-outlined text-[14px] hover:text-error">close</button>
+                </span>
+              </ng-container>
               <input
                 [(ngModel)]="newTagInput"
                 [ngModelOptions]="{standalone: true}"
                 (keydown)="onTagKeyPress($event)"
-                placeholder="Type custom tag + Enter"
+                [placeholder]="'scenario.editor.tagPh' | translate"
                 class="bg-transparent border-none text-xs focus:ring-0 outline-none flex-1 min-w-[80px] p-0" />
             </div>
           </div>
@@ -179,13 +181,13 @@
         <div class="flex items-center justify-between mb-8">
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">edit_note</span>
-            <h3 class="text-lg font-semibold text-on-surface">Step Definition</h3>
+            <h3 class="text-lg font-semibold text-on-surface">{{ 'scenario.editor.stepDef' | translate }}</h3>
           </div>
           <button
             (click)="addStep()"
             class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-full text-sm font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
             <span class="material-symbols-outlined">add</span>
-            Add Step
+            {{ 'scenario.editor.addStep' | translate }}
           </button>
         </div>
 
@@ -213,7 +215,7 @@
                 [ngModelOptions]="{standalone: true}"
                 (keydown)="onStepKeyPress($event, i)"
                 type="text"
-                [placeholder]="'Enter step description...'"
+                [placeholder]="'scenario.editor.stepPh' | translate"
                 class="step-text-input w-full bg-transparent border-0 border-b border-transparent focus:border-primary focus:ring-0 p-1 text-sm text-on-surface-variant font-medium" />
             </div>
             <!-- Delete Button -->
@@ -239,7 +241,7 @@
           class="flex items-center justify-between w-full">
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">table_chart</span>
-            <h3 class="text-lg font-semibold text-on-surface">Data Table / Examples</h3>
+          <h3 class="text-lg font-semibold text-on-surface">{{ 'scenario.editor.dataTable' | translate }}</h3>
           </div>
           <span class="material-symbols-outlined text-outline transition-transform" [class.rotate-180]="showDataTable">expand_more</span>
         </button>
@@ -293,7 +295,7 @@
     <div class="col-span-12 xl:col-span-5 relative">
       <div class="sticky top-24 space-y-6">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-xs font-bold text-outline uppercase tracking-widest">Live Gherkin Preview</h3>
+          <h3 class="text-xs font-bold text-outline uppercase tracking-widest">{{ 'scenario.editor.preview' | translate }}</h3>
           <button
             (click)="copyGherkin()"
             class="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary-container transition-colors">
@@ -356,7 +358,7 @@
     <button
       (click)="cancel()"
       class="px-6 py-2.5 text-sm font-bold text-slate-500 hover:text-on-surface transition-colors">
-      Cancel
+      {{ 'action.cancel' | translate }}
     </button>
     <button
       (click)="onSubmit(false)"
@@ -364,11 +366,11 @@
       class="flex items-center gap-2 px-8 py-2.5 bg-primary text-on-primary rounded-full text-sm font-bold shadow-xl shadow-primary/20 hover:scale-[1.05] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
       <ng-container *ngIf="!isSubmitting">
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">save</span>
-        Save Scenario
+        {{ 'scenario.editor.save' | translate }}
       </ng-container>
       <ng-container *ngIf="isSubmitting">
         <span class="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>
-        Saving...
+        {{ 'scenario.editor.saving' | translate }}
       </ng-container>
     </button>
   </div>
