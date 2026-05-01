@@ -1,10 +1,12 @@
-import { Component, OnInit, inject, HostListener } from '@angular/core';
+﻿import { Component, OnInit, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NlpService } from '../../services/nlp.service';
 import { ProjectService } from '../../../../core/services/project.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Project } from '../../../../core/models/project.model';
+import { ConfirmDeleteDialogComponent } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { 
   ActionMapping, 
   CreateActionMappingRequest,
@@ -28,7 +30,7 @@ type TabType = 'mappings' | 'parser' | 'analysis';
 @Component({
   selector: 'app-nlp-action-mappings-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, ReactiveFormsModule, ConfirmDeleteDialogComponent],
   templateUrl: './nlp-action-mappings-page.component.html',
   styleUrl: './nlp-action-mappings-page.component.scss'
 })
@@ -46,6 +48,8 @@ export class NlpActionMappingsPageComponent implements OnInit {
   errorMessage = '';
   activeTab: TabType = 'mappings';
   projectDropdownOpen = false;
+  mappingToDelete: ActionMapping | null = null;
+  deletingMapping = false;
 
   @HostListener('document:click')
   onDocumentClick(): void {
@@ -280,16 +284,23 @@ export class NlpActionMappingsPageComponent implements OnInit {
 
   deleteMapping(mapping: ActionMapping): void {
     if (this.denyMappingWriteAction('delete')) return;
+    this.mappingToDelete = mapping;
+  }
 
-    if (!confirm(`Delete mapping "${mapping.intentPattern}"?`)) return;
-
-    this.nlpService.deleteActionMapping(mapping.id).subscribe({
+  confirmDeleteMapping(): void {
+    if (!this.mappingToDelete) return;
+    this.deletingMapping = true;
+    this.nlpService.deleteActionMapping(this.mappingToDelete.id).subscribe({
       next: () => {
-        this.mappings = this.mappings.filter(m => m.id !== mapping.id);
+        this.mappings = this.mappings.filter(m => m.id !== this.mappingToDelete!.id);
+        this.mappingToDelete = null;
+        this.deletingMapping = false;
       },
       error: (error) => {
         console.error('Error deleting mapping:', error);
         this.errorMessage = 'Failed to delete mapping. Please try again.';
+        this.mappingToDelete = null;
+        this.deletingMapping = false;
       }
     });
   }
@@ -481,3 +492,5 @@ export class NlpActionMappingsPageComponent implements OnInit {
     URL.revokeObjectURL(url);
   }
 }
+
+

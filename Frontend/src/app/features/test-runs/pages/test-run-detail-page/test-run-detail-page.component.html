@@ -6,19 +6,19 @@
       <button type="button" (click)="goBack()"
               class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50">
         <span class="material-symbols-outlined text-base">arrow_back</span>
-        Back to Test Runs
+        {{ 'testRun.detail.back' | translate }}
       </button>
       <a *ngIf="run?.reportUrl" [href]="run!.reportUrl" target="_blank" rel="noopener"
          class="inline-flex items-center gap-2 rounded-xl border border-secondary/30 bg-secondary/5 px-4 py-2 text-sm font-bold text-secondary transition hover:bg-secondary/10">
         <span class="material-symbols-outlined text-base">open_in_new</span>
-        Open Full Report
+        {{ 'testRun.detail.openReport' | translate }}
       </a>
     </div>
 
     <!-- ── Loading / error states ─────────────────────────────────────── -->
     <div *ngIf="loading" class="rounded-2xl border border-slate-200 bg-white px-4 py-20 text-center text-slate-500 sm:px-6">
       <span class="material-symbols-outlined mb-3 block animate-spin text-slate-400">progress_activity</span>
-      <p class="text-sm font-medium">Loading test run details…</p>
+      <p class="text-sm font-medium">{{ 'testRun.detail.loading' | translate }}</p>
     </div>
 
     <div *ngIf="!loading && errorMessage"
@@ -46,11 +46,11 @@
                 <span *ngIf="isAiRun(run)"
                       class="inline-flex items-center gap-1 rounded-full bg-secondary/10 border border-secondary/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-secondary">
                   <span class="material-symbols-outlined !text-sm" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
-                  AI Agent
+                  {{ 'testRun.detail.aiAgent' | translate }}
                 </span>
                 <span class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
                   <span class="material-symbols-outlined !text-sm">{{ run.isHeadless ? 'visibility_off' : 'visibility' }}</span>
-                  {{ run.isHeadless ? 'Headless' : 'Headed' }}
+                  {{ run.isHeadless ? ('testRun.detail.headless' | translate) : ('testRun.detail.headed' | translate) }}
                 </span>
               </div>
 
@@ -77,19 +77,19 @@
           <!-- Compact KPI block -->
           <div class="grid grid-cols-4 gap-2 lg:gap-3 lg:min-w-[460px]">
             <article class="rounded-xl bg-white px-3 py-3 text-center shadow-sm ring-1 ring-slate-200">
-              <p class="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Total</p>
+              <p class="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">{{ 'label.total' | translate }}</p>
               <p class="mt-0.5 text-2xl font-black text-slate-900">{{ run.totalTests }}</p>
             </article>
             <article class="rounded-xl bg-white px-3 py-3 text-center shadow-sm ring-1 ring-emerald-200">
-              <p class="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-600">Passed</p>
+              <p class="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-600">{{ 'label.passed' | translate }}</p>
               <p class="mt-0.5 text-2xl font-black text-emerald-700">{{ run.passedTests }}</p>
             </article>
             <article class="rounded-xl bg-white px-3 py-3 text-center shadow-sm ring-1 ring-rose-200">
-              <p class="text-[10px] font-black uppercase tracking-[0.14em] text-rose-600">Failed</p>
+              <p class="text-[10px] font-black uppercase tracking-[0.14em] text-rose-600">{{ 'label.failed' | translate }}</p>
               <p class="mt-0.5 text-2xl font-black text-rose-700">{{ run.failedTests }}</p>
             </article>
             <article class="rounded-xl bg-white px-3 py-3 text-center shadow-sm ring-1 ring-slate-200">
-              <p class="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Pass Rate</p>
+              <p class="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">{{ 'testRun.detail.passRate' | translate }}</p>
               <p class="mt-0.5 text-2xl font-black" [class]="getPassRateClass(run.passRate)">{{ run.passRate | number:'1.0-1' }}%</p>
             </article>
           </div>
@@ -112,14 +112,14 @@
                   ? 'inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white'
                   : 'inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-slate-500 transition hover:bg-slate-50 hover:text-slate-700'">
           <span class="material-symbols-outlined !text-base">dashboard</span>
-          Overview
+          {{ 'testRun.detail.tab.overview' | translate }}
         </button>
         <button type="button" (click)="activeTab = 'scenarios'"
                 [class]="activeTab === 'scenarios'
                   ? 'inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white'
                   : 'inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-slate-500 transition hover:bg-slate-50 hover:text-slate-700'">
           <span class="material-symbols-outlined !text-base">checklist</span>
-          Scenarios
+          {{ 'testRun.detail.tab.scenarios' | translate }}
           <span class="rounded-full bg-slate-200 px-1.5 py-0.5 text-[10px] font-bold text-slate-700">{{ run.testResults.length }}</span>
         </button>
       </nav>
@@ -134,47 +134,47 @@
           <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
             <h2 class="mb-5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
               <span class="material-symbols-outlined !text-base">settings</span>
-              Run Configuration
+              {{ 'testRun.detail.runConfig' | translate }}
             </h2>
             <dl class="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3">
               <div>
-                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Environment</dt>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{{ 'label.environment' | translate }}</dt>
                 <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.environment || '—' }}</dd>
               </div>
               <div>
-                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Browser</dt>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{{ 'testRun.detail.browser' | translate }}</dt>
                 <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.browserType || 'Chromium' }}</dd>
               </div>
               <div>
-                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Mode</dt>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{{ 'testRun.detail.mode' | translate }}</dt>
                 <dd class="mt-1 flex items-center gap-1.5 text-sm font-semibold text-slate-800">
                   <span class="material-symbols-outlined !text-base text-slate-400">{{ run.isHeadless ? 'visibility_off' : 'visibility' }}</span>
-                  {{ run.isHeadless ? 'Headless' : 'Headed' }}
+                  {{ run.isHeadless ? ('testRun.detail.headless' | translate) : ('testRun.detail.headed' | translate) }}
                 </dd>
               </div>
               <div>
-                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Executed By</dt>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{{ 'testRun.detail.executedBy' | translate }}</dt>
                 <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.executedBy || '—' }}</dd>
               </div>
               <div>
-                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Started At</dt>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{{ 'testRun.detail.startedAt' | translate }}</dt>
                 <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.startedAt | date:'MMM d, y · HH:mm' }}</dd>
               </div>
               <div>
-                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Total Duration</dt>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{{ 'testRun.detail.totalDuration' | translate }}</dt>
                 <dd class="mt-1 text-sm font-semibold text-slate-800">{{ formatDuration(run.durationSeconds) }}</dd>
               </div>
               <div *ngIf="run.scenarioName">
-                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Scenario</dt>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{{ 'label.scenario' | translate }}</dt>
                 <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.scenarioName }}</dd>
               </div>
               <div *ngIf="run.testSuiteName">
-                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Test Suite</dt>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{{ 'testRun.detail.testSuite' | translate }}</dt>
                 <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.testSuiteName }}</dd>
               </div>
               <div>
-                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Skipped</dt>
-                <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.skippedTests }} scenario(s)</dd>
+                <dt class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{{ 'testRun.detail.skipped' | translate }}</dt>
+                <dd class="mt-1 text-sm font-semibold text-slate-800">{{ run.skippedTests }} {{ 'testRun.detail.scenarios' | translate }}</dd>
               </div>
             </dl>
           </section>
@@ -187,32 +187,32 @@
                 <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
               </span>
               <div>
-                <p class="text-sm font-black text-slate-900">AI Execution Report</p>
-                <p class="text-xs text-slate-500">Full step-by-step analysis</p>
+                <p class="text-sm font-black text-slate-900">{{ 'testRun.detail.aiReport' | translate }}</p>
+                <p class="text-xs text-slate-500">{{ 'testRun.detail.aiReportSub' | translate }}</p>
               </div>
             </div>
             <p class="text-xs leading-5 text-slate-500">
-              The AI agent generated a detailed HTML report with screenshots, selector debug info, and assertion traces for this run.
+              {{ 'testRun.detail.aiReportDesc' | translate }}
             </p>
             <div class="flex flex-wrap items-center gap-2">
               <a *ngIf="primaryReportUrl" [href]="primaryReportUrl" target="_blank" rel="noopener"
                  class="inline-flex items-center gap-2 rounded-xl bg-secondary px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:opacity-90 active:scale-[0.98]">
                 <span class="material-symbols-outlined text-base">open_in_new</span>
-                Open AI Report
+                {{ 'testRun.detail.openAiReport' | translate }}
               </a>
               <a *ngIf="technicalTraceUrl" [href]="technicalTraceUrl" target="_blank" rel="noopener"
                  class="inline-flex items-center gap-2 rounded-xl border border-violet-300 bg-gradient-to-br from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:opacity-90 active:scale-[0.98]"
-                 title="Vision-aware diagnostic page: per-step YOLO + DOM detections, similarity scores, and annotated screenshots">
+                 [title]="'testRun.detail.techTraceTitle' | translate">
                 <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">visibility</span>
-                Technical Trace
+                {{ 'testRun.detail.technicalTrace' | translate }}
                 <span class="ml-1 rounded-md bg-white/20 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em]">Pro</span>
               </a>
             </div>
             <p *ngIf="technicalTraceUrl" class="-mt-1 text-[11px] leading-5 text-violet-700/80">
-              <span class="font-bold">Technical Trace</span> reveals what YOLO and the DOM each detected, similarity scores per candidate, and the chosen winner — with side-by-side annotated screenshots.
+              <span [innerHTML]="'testRun.detail.techTraceDesc' | translate"></span>
             </p>
             <div *ngIf="run.reports && run.reports.length > 2" class="w-full border-t border-secondary/10 pt-3">
-              <p class="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Per-scenario</p>
+              <p class="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{{ 'testRun.detail.perScenario' | translate }}</p>
               <div class="flex flex-wrap gap-1.5">
                 <a *ngFor="let r of run.reports; let i = index" [href]="r.url" target="_blank" rel="noopener"
                    class="inline-flex items-center gap-1 rounded-lg border border-secondary/20 bg-white px-2.5 py-1 text-xs font-semibold text-secondary transition hover:bg-secondary/5">
@@ -227,8 +227,8 @@
           <section *ngIf="!run.reportUrl"
                    class="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center shadow-sm">
             <span class="material-symbols-outlined text-4xl text-slate-300">description_off</span>
-            <p class="text-sm font-semibold text-slate-500">No AI report generated</p>
-            <p class="text-xs text-slate-400">This run was executed without the AI agent.</p>
+            <p class="text-sm font-semibold text-slate-500">{{ 'testRun.detail.noReport' | translate }}</p>
+            <p class="text-xs text-slate-400">{{ 'testRun.detail.noReportHint' | translate }}</p>
           </section>
         </div>
 
@@ -237,7 +237,7 @@
           <div class="border-b border-slate-100 px-6 py-4">
             <h2 class="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
               <span class="material-symbols-outlined !text-base">bar_chart</span>
-              Scenario Performance
+              {{ 'testRun.detail.scenarioPerf' | translate }}
             </h2>
           </div>
           <div class="divide-y divide-slate-100">
@@ -258,7 +258,7 @@
               <div class="flex shrink-0 items-center gap-3 text-xs">
                 <span class="font-semibold text-emerald-600">✓ {{ getPassedStepCount(result) }}</span>
                 <span *ngIf="getFailedStepCount(result)" class="font-semibold text-rose-500">✗ {{ getFailedStepCount(result) }}</span>
-                <span class="font-semibold text-slate-400">{{ result.stepResults.length }} steps</span>
+                <span class="font-semibold text-slate-400">{{ result.stepResults.length }} {{ 'label.steps' | translate }}</span>
               </div>
             </div>
           </div>
@@ -269,7 +269,7 @@
           <div class="border-b border-rose-100 px-6 py-4">
             <h2 class="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-rose-600">
               <span class="material-symbols-outlined !text-base">bug_report</span>
-              Failure Analysis — {{ failedStepsFlat.length }} Failed Step{{ failedStepsFlat.length !== 1 ? 's' : '' }}
+              {{ 'testRun.detail.failureAnalysis' | translate }} — {{ failedStepsFlat.length }} {{ failedStepsFlat.length !== 1 ? ('testRun.detail.failedSteps' | translate) : ('testRun.detail.failedStep' | translate) }}
             </h2>
           </div>
           <div class="divide-y divide-rose-100/70">
@@ -280,7 +280,7 @@
                  class="mt-2 whitespace-pre-wrap rounded-lg border border-rose-200 bg-white px-3 py-2 font-mono text-xs text-rose-700">{{ step.errorMessage }}</p>
               <div *ngIf="step.selectorUsed || step.actionPerformed" class="mt-2 flex flex-wrap gap-2 text-xs">
                 <span *ngIf="step.actionPerformed" class="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-500">
-                  Action: <strong>{{ step.actionPerformed }}</strong>
+                  {{ 'testRun.detail.action' | translate }}: <strong>{{ step.actionPerformed }}</strong>
                 </span>
                 <span *ngIf="step.selectorUsed" class="rounded-md border border-slate-200 bg-white px-2 py-1 font-mono text-slate-500">{{ step.selectorUsed }}</span>
               </div>
@@ -294,7 +294,7 @@
       <ng-container *ngIf="activeTab === 'scenarios'">
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div *ngIf="!run.testResults.length" class="px-5 py-12 text-center text-sm text-slate-500 sm:px-6">
-            No scenario-level results available for this run.
+            {{ 'testRun.detail.noResults' | translate }}
           </div>
 
           <div *ngFor="let result of run.testResults; trackBy: trackByResultId"
@@ -305,7 +305,7 @@
               <span [class]="getStatusClass(result.status)">{{ result.status }}</span>
               <div class="min-w-0 flex-1">
                 <p class="truncate text-sm font-bold text-slate-900 sm:text-[15px]">{{ result.scenarioName }}</p>
-                <p class="mt-1 text-xs text-slate-500">Duration: {{ formatDuration(result.durationSeconds) }}</p>
+                <p class="mt-1 text-xs text-slate-500">{{ 'testRun.detail.duration' | translate }}: {{ formatDuration(result.durationSeconds) }}</p>
               </div>
               <span class="material-symbols-outlined text-slate-500 transition">{{ isExpanded(result.id) ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</span>
             </button>
@@ -329,7 +329,7 @@
                   <p *ngIf="step.errorMessage" class="mt-2 text-xs font-semibold text-red-600">{{ step.errorMessage }}</p>
 
                   <div class="mt-3 grid grid-cols-1 gap-2 text-xs text-slate-500 sm:grid-cols-2">
-                    <p class="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2">Action: <span class="font-semibold text-slate-700">{{ step.actionPerformed || '—' }}</span></p>
+                    <p class="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2">{{ 'testRun.detail.action' | translate }}: <span class="font-semibold text-slate-700">{{ step.actionPerformed || '—' }}</span></p>
                     <p *ngIf="step.selectorUsed" class="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 font-mono">{{ step.selectorUsed }}</p>
                   </div>
 
@@ -353,7 +353,7 @@
               </div>
 
               <ng-template #noSteps>
-                <p class="text-sm italic text-slate-400">No step-level results available.</p>
+                <p class="text-sm italic text-slate-400">{{ 'testRun.detail.noSteps' | translate }}</p>
               </ng-template>
             </div>
           </div>

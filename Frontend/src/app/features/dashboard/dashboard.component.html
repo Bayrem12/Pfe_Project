@@ -1,4 +1,4 @@
-<div class="p-10 space-y-10">
+<div class="px-6 py-8 space-y-8">
   <!-- Loading State -->
   <div *ngIf="isLoading" class="flex items-center justify-center py-20">
     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -27,7 +27,7 @@
           <span class="material-symbols-outlined text-sm" [class.animate-spin]="isLiveMode">
             {{ isLiveMode ? 'sync' : 'sync_disabled' }}
           </span>
-          <span>{{ isLiveMode ? 'Live' : 'Manual' }}</span>
+          <span>{{ isLiveMode ? ('dashboard.live' | translate) : ('dashboard.manual' | translate) }}</span>
         </button>
         
         <!-- Manual Refresh -->
@@ -36,12 +36,12 @@
           [disabled]="isRefreshing"
           class="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
           <span class="material-symbols-outlined text-sm" [class.animate-spin]="isRefreshing">refresh</span>
-          <span>{{ isRefreshing ? 'Refreshing...' : 'Refresh' }}</span>
+          <span>{{ isRefreshing ? ('dashboard.refreshing' | translate) : ('dashboard.refresh' | translate) }}</span>
         </button>
         
         <!-- Refresh Interval -->
         <div class="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg">
-          <span class="text-xs text-gray-500">Auto:</span>
+          <span class="text-xs text-gray-500">{{ 'dashboard.auto' | translate }}</span>
           <select
             (change)="onRefreshIntervalChange($event)"
             [disabled]="!isLiveMode"
@@ -72,11 +72,11 @@
         <div class="bg-white rounded-2xl shadow-sm p-6">
           <div class="flex justify-between items-center mb-6">
             <div>
-              <h3 class="text-lg font-bold text-gray-800">Test Executions</h3>
-              <p class="text-sm text-gray-500">Performance over last 14 days</p>
+              <h3 class="text-lg font-bold text-gray-800">{{ 'dashboard.testExecutions' | translate }}</h3>
+              <p class="text-sm text-gray-500">{{ 'dashboard.performanceDays' | translate }}</p>
             </div>
             <div class="flex items-center gap-3">
-              <label class="text-xs font-semibold text-gray-500 uppercase">Project:</label>
+              <label class="text-xs font-semibold text-gray-500 uppercase">{{ 'dashboard.projectLabel' | translate }}</label>
               <select 
                 *ngIf="dashboardData?.availableProjects && (dashboardData.availableProjects?.length ?? 0) > 0"
                 #projectSelect
@@ -90,7 +90,7 @@
               </select>
               
               <div *ngIf="isLoadingTrends" class="flex items-center gap-2 text-gray-400">
-                <span class="text-xs">Loading...</span>
+                <span class="text-xs">{{ 'dashboard.loading' | translate }}</span>
               </div>
             </div>
           </div>
@@ -122,9 +122,9 @@
   <!-- Error State -->
   <div *ngIf="!isLoading && !dashboardData" class="text-center py-20">
     <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">error_outline</span>
-    <p class="text-slate-500 text-lg">Failed to load dashboard data</p>
+    <p class="text-slate-500 text-lg">{{ 'dashboard.error' | translate }}</p>
     <button (click)="loadDashboardData()" class="mt-4 px-6 py-2 bg-primary text-white rounded-full hover:bg-primary-container transition-colors">
-      Retry
+      {{ 'dashboard.retry' | translate }}
     </button>
   </div>
 </div>

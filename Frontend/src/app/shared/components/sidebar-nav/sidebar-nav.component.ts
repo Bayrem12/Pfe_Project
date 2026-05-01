@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { SidebarService } from '../../../core/services/sidebar.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { filter } from 'rxjs/operators';
 
 interface NavItem {
@@ -15,7 +16,7 @@ interface NavItem {
 @Component({
   selector: 'app-sidebar-nav',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   templateUrl: './sidebar-nav.component.html',
   styleUrls: ['./sidebar-nav.component.scss']
 })
@@ -27,20 +28,20 @@ export class SidebarNavComponent {
   currentRoute = '';
 
   private allNavItems: NavItem[] = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-    { label: 'Projects', icon: 'folder_open', route: '/projects' },
-    { label: 'Scenarios', icon: 'description', route: '/scenarios' },
-    { label: 'Test Suites', icon: 'content_copy', route: '/test-suites' },
-    { label: 'Test Runs', icon: 'play_circle', route: '/test-runs' },
-    { label: 'NLP Configuration', icon: 'auto_awesome', route: '/nlp/action-mappings' },
+    { label: 'nav.dashboard', icon: 'dashboard', route: '/dashboard' },
+    { label: 'nav.projects', icon: 'folder_open', route: '/projects' },
+    { label: 'nav.scenarios', icon: 'description', route: '/scenarios' },
+    { label: 'nav.testSuites', icon: 'content_copy', route: '/test-suites' },
+    { label: 'nav.testRuns', icon: 'play_circle', route: '/test-runs' },
+    { label: 'nav.nlp', icon: 'auto_awesome', route: '/nlp/action-mappings' },
     { label: 'Audit Logs', icon: 'history', route: '/audit-logs' },
   ];
 
   navItems: NavItem[] = [];
 
   private allBottomNavItems: NavItem[] = [
-    { label: 'Profile', icon: 'person', route: '/profile' },
-    { label: 'Users', icon: 'group', route: '/users' },
+    { label: 'nav.profile', icon: 'person', route: '/profile' },
+    { label: 'nav.admin', icon: 'group', route: '/users' },
   ];
 
   bottomNavItems: NavItem[] = [];

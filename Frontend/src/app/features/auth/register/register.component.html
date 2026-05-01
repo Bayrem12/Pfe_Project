@@ -186,8 +186,8 @@
     <div class="w-full max-w-sm">
 
       <div class="su-1 mb-7">
-        <h2 style="font-family:'Inter',sans-serif;font-size:2rem;font-weight:800;color:#0f172a;letter-spacing:-.03em;" class="mb-1">Create your account</h2>
-        <p class="text-slate-500 text-sm">Join the next generation of automated intelligence.</p>
+        <h2 style="font-family:'Inter',sans-serif;font-size:2rem;font-weight:800;color:#0f172a;letter-spacing:-.03em;" class="mb-1">{{ 'auth.register.title' | translate }}</h2>
+        <p class="text-slate-500 text-sm">{{ 'auth.register.subtitle' | translate }}</p>
       </div>
 
       <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
@@ -195,36 +195,60 @@
         <!-- First + Last name -->
         <div class="su-2 grid grid-cols-2 gap-3 mb-3">
           <div>
-            <input formControlName="firstName" class="input-field" type="text" placeholder="First name"
+            <input formControlName="firstName" class="input-field" type="text" [placeholder]="'auth.firstName.placeholder' | translate"
                    [class.has-error]="firstName?.invalid && firstName?.touched"/>
             @if (firstName?.touched && firstName?.hasError('required')) {
-              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">First name is required.</p>
+              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.firstName.required' | translate }}</p>
             }
             @if (firstName?.touched && firstName?.hasError('minlength')) {
-              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">First name must be at least 3 characters.</p>
+              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.firstName.minlength' | translate }}</p>
+            }
+            @if (firstName?.touched && firstName?.hasError('maxlength')) {
+              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.firstName.maxlength' | translate }}</p>
+            }
+            @if (firstName?.touched && firstName?.hasError('hasSpaces')) {
+              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.firstName.hasSpaces' | translate }}</p>
+            }
+            @if (firstName?.touched && firstName?.hasError('mustStartWithLetter')) {
+              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.firstName.mustStartWithLetter' | translate }}</p>
+            }
+            @if (firstName?.touched && firstName?.hasError('invalidChars')) {
+              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.firstName.invalidChars' | translate }}</p>
             }
           </div>
           <div>
-            <input formControlName="lastName" class="input-field" type="text" placeholder="Last name"
+            <input formControlName="lastName" class="input-field" type="text" [placeholder]="'auth.lastName.placeholder' | translate"
                    [class.has-error]="lastName?.invalid && lastName?.touched"/>
             @if (lastName?.touched && lastName?.hasError('required')) {
-              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">Last name is required.</p>
+              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.lastName.required' | translate }}</p>
             }
             @if (lastName?.touched && lastName?.hasError('minlength')) {
-              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">Last name must be at least 3 characters.</p>
+              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.lastName.minlength' | translate }}</p>
+            }
+            @if (lastName?.touched && lastName?.hasError('maxlength')) {
+              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.lastName.maxlength' | translate }}</p>
+            }
+            @if (lastName?.touched && lastName?.hasError('hasSpaces')) {
+              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.lastName.hasSpaces' | translate }}</p>
+            }
+            @if (lastName?.touched && lastName?.hasError('mustStartWithLetter')) {
+              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.lastName.mustStartWithLetter' | translate }}</p>
+            }
+            @if (lastName?.touched && lastName?.hasError('invalidChars')) {
+              <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.lastName.invalidChars' | translate }}</p>
             }
           </div>
         </div>
 
         <!-- Email -->
         <div class="su-3 mb-3">
-          <input formControlName="email" class="input-field" type="email" placeholder="Email address"
+          <input formControlName="email" class="input-field" type="email" [placeholder]="'auth.email.placeholder' | translate"
                  [class.has-error]="email?.invalid && email?.touched"/>
           @if (email?.touched && email?.hasError('required')) {
-            <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">Email is required.</p>
+            <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.email.required' | translate }}</p>
           }
           @if (email?.touched && email?.hasError('email')) {
-            <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">Please enter a valid email address.</p>
+            <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.email.invalid' | translate }}</p>
           }
         </div>
 
@@ -232,7 +256,7 @@
         <div class="su-4 mb-3">
           <div class="relative">
             <input formControlName="password" class="input-field pr-12"
-                   [type]="showPass ? 'text' : 'password'" placeholder="Password"
+                   [type]="showPass ? 'text' : 'password'" [placeholder]="'auth.password.placeholder' | translate"
                    [class.has-error]="password?.invalid && password?.touched"/>
             <button class="pw-toggle" type="button" (click)="showPass = !showPass">
               @if (!showPass) {
@@ -250,10 +274,19 @@
           </div>
           <p class="mt-1" style="font-size:.7rem;min-height:1em;transition:color .3s;" [style.color]="getStrengthColor()">{{ getStrengthLabel() }}</p>
           @if (password?.touched && password?.hasError('required')) {
-            <p class="text-red-500" style="font-size:.73rem;animation:fadeInUp .2s ease both;">Password is required.</p>
+            <p class="text-red-500" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.password.required' | translate }}</p>
           }
           @if (password?.touched && password?.hasError('minlength')) {
-            <p class="text-red-500" style="font-size:.73rem;animation:fadeInUp .2s ease both;">Password must be at least 8 characters.</p>
+            <p class="text-red-500" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.password.minlength' | translate }}</p>
+          }
+          @if (password?.touched && password?.hasError('noLetter')) {
+            <p class="text-red-500" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.password.noLetter' | translate }}</p>
+          }
+          @if (password?.touched && password?.hasError('noDigit')) {
+            <p class="text-red-500" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.password.noDigit' | translate }}</p>
+          }
+          @if (password?.touched && password?.hasError('commonPassword')) {
+            <p class="text-red-500" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.password.commonPassword' | translate }}</p>
           }
         </div>
 
@@ -261,7 +294,7 @@
         <div class="su-5 mb-3">
           <div class="relative">
             <input formControlName="confirmPassword" class="input-field pr-12"
-                   [type]="showConfirm ? 'text' : 'password'" placeholder="Confirm password"
+                   [type]="showConfirm ? 'text' : 'password'" [placeholder]="'auth.confirmPw.placeholder' | translate"
                    [class.has-error]="confirmPassword?.invalid && confirmPassword?.touched"/>
             <button class="pw-toggle" type="button" (click)="showConfirm = !showConfirm">
               @if (!showConfirm) {
@@ -272,10 +305,10 @@
             </button>
           </div>
           @if (confirmPassword?.touched && confirmPassword?.hasError('required')) {
-            <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">Please confirm your password.</p>
+            <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.confirmPassword.required' | translate }}</p>
           }
           @if (confirmPassword?.touched && signupForm.hasError('passwordMismatch')) {
-            <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">Passwords do not match.</p>
+            <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.confirmPassword.mismatch' | translate }}</p>
           }
         </div>
 
@@ -284,11 +317,11 @@
           <div class="flex items-start gap-3">
             <input type="checkbox" formControlName="terms" class="mt-0.5 flex-shrink-0 cursor-pointer" style="accent-color:#6366f1;width:15px;height:15px;"/>
             <label class="text-sm text-slate-500 leading-snug cursor-pointer">
-              I agree to the <a href="#" class="text-blue-500 font-semibold no-underline hover:underline">Terms of Service</a> and <a href="#" class="text-blue-500 font-semibold no-underline hover:underline">Privacy Policy</a>.
+              {{ 'auth.register.terms' | translate }} <a href="#" class="text-blue-500 font-semibold no-underline hover:underline">{{ 'auth.register.termsLink' | translate }}</a> {{ 'auth.register.and' | translate }} <a href="#" class="text-blue-500 font-semibold no-underline hover:underline">{{ 'auth.register.privacyLink' | translate }}</a>.
             </label>
           </div>
           @if (terms?.touched && terms?.hasError('required')) {
-            <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">You must accept the terms and conditions.</p>
+            <p class="text-red-500 mt-1" style="font-size:.73rem;animation:fadeInUp .2s ease both;">{{ 'register.terms.required' | translate }}</p>
           }
         </div>
 
@@ -303,9 +336,9 @@
           <button type="submit" class="btn-submit" [disabled]="isLoading || signupForm.invalid">
             @if (isLoading) {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="animation:spinIcon .75s linear infinite;flex-shrink:0;"><path d="M12 2a10 10 0 0 1 10 10"/></svg>
-              <span>Creating account...</span>
+              <span>{{ 'auth.register.creating' | translate }}</span>
             } @else {
-              <span>Create Account</span>
+              <span>{{ 'auth.register.create' | translate }}</span>
             }
           </button>
         </div>
@@ -315,7 +348,7 @@
       <!-- Divider -->
       <div class="su-7 relative flex items-center my-3">
         <div class="flex-1 border-t border-slate-200"></div>
-        <span class="px-4 text-slate-400 font-medium uppercase" style="font-size:.72rem;letter-spacing:.1em;">or continue with</span>
+        <span class="px-4 text-slate-400 font-medium uppercase" style="font-size:.72rem;letter-spacing:.1em;">{{ 'auth.register.orWith' | translate }}</span>
         <div class="flex-1 border-t border-slate-200"></div>
       </div>
 
@@ -346,8 +379,8 @@
 
       <div class="su-8 text-center">
         <p class="text-sm text-slate-500">
-          Already have an account?
-          <a routerLink="/auth/login" class="text-blue-500 font-bold no-underline">Sign in</a>
+          {{ 'auth.register.hasAccount' | translate }}
+          <a routerLink="/auth/login" class="text-blue-500 font-bold no-underline">{{ 'auth.register.signIn' | translate }}</a>
         </p>
       </div>
 

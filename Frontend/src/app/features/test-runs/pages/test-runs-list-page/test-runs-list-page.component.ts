@@ -9,11 +9,13 @@ import { BreadcrumbService } from '../../../../core/services/breadcrumb.service'
 import { TestRunService } from '../../../../core/services/test-run.service';
 import { RunNotificationsService } from '../../../../core/services/run-notifications.service';
 import { TestRunListItem } from '../../../../core/models/test-run.model';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../core/services/translation.service';
 
 @Component({
   selector: 'app-test-runs-list-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, TranslatePipe],
   templateUrl: './test-runs-list-page.component.html'
 })
 export class TestRunsListPageComponent implements OnInit, OnDestroy {
@@ -27,15 +29,30 @@ export class TestRunsListPageComponent implements OnInit, OnDestroy {
   currentPage = 1;
   pageSize = 20;
   total = 0;
+  stoppingRunIds = new Set<string>();
 
-  readonly statusOptions = [
-    { value: '', label: 'All Statuses' },
-    { value: 'Pending', label: 'Pending' },
-    { value: 'Running', label: 'Running' },
-    { value: 'Completed', label: 'Completed' },
-    { value: 'Failed', label: 'Failed' },
-    { value: 'Cancelled', label: 'Cancelled' }
-  ];
+  get statusOptions() {
+    return [
+      { value: '', label: this.t('testRun.list.status.all') },
+      { value: 'Pending', label: this.t('testRun.list.status.pending') },
+      { value: 'Running', label: this.t('testRun.list.status.running') },
+      { value: 'Completed', label: this.t('testRun.list.status.completed') },
+      { value: 'Failed', label: this.t('testRun.list.status.failed') },
+      { value: 'Cancelled', label: this.t('testRun.list.status.cancelled') }
+    ];
+  }
+
+  getStatusLabel(status: string): string {
+    const normalized = (status || '').toLowerCase();
+    const map: Record<string, string> = {
+      pending: 'testRun.list.status.pending',
+      running: 'testRun.list.status.running',
+      completed: 'testRun.list.status.completed',
+      failed: 'testRun.list.status.failed',
+      cancelled: 'testRun.list.status.cancelled'
+    };
+    return map[normalized] ? this.t(map[normalized]) : (status || '');
+  }
 
   private destroy$ = new Subject<void>();
   private runNotifications = inject(RunNotificationsService);
@@ -43,8 +60,13 @@ export class TestRunsListPageComponent implements OnInit, OnDestroy {
   constructor(
     private testRunService: TestRunService,
     private breadcrumbService: BreadcrumbService,
+    private translationService: TranslationService,
     private router: Router
   ) {}
+
+  private t(key: string, ...args: string[]): string {
+    return this.translationService.t(key, ...args);
+  }
 
   ngOnInit(): void {
     this.breadcrumbService.setMultiple([{ label: 'Test Runs' }]);
@@ -143,6 +165,42 @@ export class TestRunsListPageComponent implements OnInit, OnDestroy {
 
   openRun(run: TestRunListItem): void {
     this.router.navigate(['/test-runs', run.id]);
+  }
+
+  canStopRun(run: TestRunListItem): boolean {
+    return (run.status || '').toLowerCase() === 'running';
+  }
+
+  isStoppingRun(runId: string): boolean {
+    return this.stoppingRunIds.has(runId);
+  }
+
+  stopRun(run: TestRunListItem, event: Event): void {
+    event.stopPropagation();
+
+    if (!this.canStopRun(run) || this.isStoppingRun(run.id)) {
+      return;
+    }
+
+    this.stoppingRunIds.add(run.id);
+    this.errorMessage = '';
+
+    this.testRunService.cancelTestRun(run.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.runs = this.runs.map(item => item.id === run.id ? { ...item, status: 'Cancelled' } : item);
+          this.stoppingRunIds.delete(run.id);
+          this.silentRefresh();
+        },
+        error: (error) => {
+          this.errorMessage =
+            error?.error?.fail_Messages ||
+            error?.error?.Fail_Messages ||
+            this.t('testRun.list.stopFailed');
+          this.stoppingRunIds.delete(run.id);
+        }
+      });
   }
 
   changePage(page: number): void {

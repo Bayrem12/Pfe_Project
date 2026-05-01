@@ -34,5 +34,11 @@ namespace Application.Interfaces
             Guid executedById,
             bool isHeadless = true,
             CancellationToken ct = default);
+
+        /// <summary>
+        /// Requests cancellation of a running AI execution.
+        /// </summary>
+        /// <param name="executionId">The execution to cancel.</param>
+        Task<bool> CancelExecutionAsync(Guid executionId);
     }
 }

@@ -23,7 +23,7 @@
       <span 
         class="material-symbols-outlined nav-icon"
         [style.font-variation-settings]="isActive(item.route) ? '\'FILL\' 1' : '\'FILL\' 0'">{{ item.icon }}</span>
-      <span class="nav-label">{{ item.label }}</span>
+      <span class="nav-label">{{ item.label | translate }}</span>
     </a>
   </nav>
 
@@ -38,15 +38,15 @@
       <span 
         class="material-symbols-outlined nav-icon"
         [style.font-variation-settings]="isActive(item.route) ? '\'FILL\' 1' : '\'FILL\' 0'">{{ item.icon }}</span>
-      <span class="nav-label">{{ item.label }}</span>
+      <span class="nav-label">{{ item.label | translate }}</span>
     </a>
     <a routerLink="/help" class="nav-link" title="Help">
       <span class="material-symbols-outlined nav-icon">help</span>
       <span class="nav-label">Help</span>
     </a>
-    <button (click)="logout()" class="nav-link logout-btn" title="Logout">
+    <button (click)="logout()" class="nav-link logout-btn" [title]="'nav.logout' | translate">
       <span class="material-symbols-outlined nav-icon">logout</span>
-      <span class="nav-label">Logout</span>
+      <span class="nav-label">{{ 'nav.logout' | translate }}</span>
     </button>
   </div>
 </aside>

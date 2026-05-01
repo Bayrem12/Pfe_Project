@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 import { BreadcrumbService } from '../../../../core/services/breadcrumb.service';
 import { TestRunService } from '../../../../core/services/test-run.service';
@@ -12,7 +13,7 @@ import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'app-test-run-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   templateUrl: './test-run-detail-page.component.html'
 })
 export class TestRunDetailPageComponent implements OnInit, OnDestroy {

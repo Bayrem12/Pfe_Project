@@ -1,5 +1,6 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { ScenarioService } from '../../../../core/services/scenario.service';
 import { ScenarioDetailDto, StepType } from '../../../../core/models/scenario.model';
@@ -9,11 +10,12 @@ import { IaAgentService } from '../../../../core/services/ia-agent.service';
 import { RunNotificationsService } from '../../../../core/services/run-notifications.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ConfirmDeleteDialogComponent } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 @Component({
   selector: 'app-scenario-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [TranslatePipe, CommonModule, RouterModule, ConfirmDeleteDialogComponent],
   templateUrl: './scenario-detail-page.component.html'
 })
 export class ScenarioDetailPageComponent implements OnInit, OnDestroy {
@@ -23,6 +25,9 @@ export class ScenarioDetailPageComponent implements OnInit, OnDestroy {
   error: string = '';
   selectedVersion: number | null = null;
   activeTab: 'gherkin' | 'history' | 'ai' = 'gherkin';
+
+  showDeleteConfirm = false;
+  deletingScenario = false;
 
   // AI run state
   aiRunning: boolean = false;
@@ -115,16 +120,23 @@ export class ScenarioDetailPageComponent implements OnInit, OnDestroy {
       this.error = 'Viewer role is read-only and cannot delete scenarios.';
       return;
     }
+    this.showDeleteConfirm = true;
+  }
 
-    if (!confirm(`Delete scenario "${this.scenario?.title}"?`)) return;
+  confirmDeleteScenario(): void {
+    this.deletingScenario = true;
     this.scenarioService.deleteScenario(this.scenarioId).subscribe({
       next: (response) => {
+        this.deletingScenario = false;
+        this.showDeleteConfirm = false;
         if (response.status === 204 || response.status === 200) {
           this.router.navigate(['/scenarios']);
         }
       },
       error: (err) => {
-        alert(err.error?.fail_Messages || 'Error deleting scenario');
+        this.deletingScenario = false;
+        this.showDeleteConfirm = false;
+        this.error = err.error?.fail_Messages || 'Error deleting scenario';
       }
     });
   }
@@ -256,3 +268,4 @@ export class ScenarioDetailPageComponent implements OnInit, OnDestroy {
     this.router.navigate(['/scenarios']);
   }
 }
+

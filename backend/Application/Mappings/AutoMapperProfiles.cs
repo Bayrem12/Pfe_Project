@@ -124,7 +124,7 @@ namespace Application.Mappings
                 .ForMember(dest => dest.FeatureName, opt => opt.MapFrom(src => src.Feature != null ? src.Feature.Name : string.Empty))
                 .ForMember(dest => dest.ModuleName, opt => opt.MapFrom(src => src.Feature != null && src.Feature.Module != null ? src.Feature.Module.Name : string.Empty))
                 .ForMember(dest => dest.StepCount, opt => opt.MapFrom(src => src.Steps != null ? src.Steps.Count(s => !s.IsDeleted) : 0))
-                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.ScenarioTags.Where(st => st.Tag != null).Select(st => st.Tag.Name).ToList()))
+                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.ScenarioTags.Where(st => !st.IsDeleted && st.Tag != null).Select(st => st.Tag.Name).ToList()))
                 .ForMember(dest => dest.LastTestStatus, opt => opt.MapFrom(src =>
                     src.TestResults != null && src.TestResults.Any()
                         ? src.TestResults.OrderByDescending(tr => tr.CompletedAt).First().Status.ToString()
@@ -136,7 +136,7 @@ namespace Application.Mappings
                 .ForMember(dest => dest.ProjectId, opt => opt.MapFrom(src => src.Feature != null && src.Feature.Module != null ? src.Feature.Module.ProjectId : (Guid?)null))
                 .ForMember(dest => dest.ProjectName, opt => opt.MapFrom(src => src.Feature != null && src.Feature.Module != null && src.Feature.Module.Project != null ? src.Feature.Module.Project.Name : string.Empty))
                 .ForMember(dest => dest.Steps, opt => opt.MapFrom(src => src.Steps.Where(s => !s.IsDeleted).OrderBy(s => s.DisplayOrder).ToList()))
-                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.ScenarioTags.Where(st => st.Tag != null).Select(st => st.Tag.Name).ToList()))
+                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.ScenarioTags.Where(st => !st.IsDeleted && st.Tag != null).Select(st => st.Tag.Name).ToList()))
                 .ForMember(dest => dest.LastTestStatus, opt => opt.MapFrom(src =>
                     src.TestResults != null && src.TestResults.Any()
                         ? src.TestResults.OrderByDescending(tr => tr.CompletedAt).First().Status.ToString()

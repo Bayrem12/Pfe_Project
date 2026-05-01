@@ -12,11 +12,14 @@ import { BreadcrumbService } from '../../../../core/services/breadcrumb.service'
 import { ResponseHttp } from '../../../../core/models/response-http.model';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../core/services/translation.service';
+import { ConfirmService } from '../../../../core/services/confirm.service';
 
 @Component({
   selector: 'app-scenarios-list-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, TranslatePipe],
   templateUrl: './scenarios-list-page.component.html',
   styleUrl: './scenarios-list-page.component.scss'
 })
@@ -75,22 +78,65 @@ export class ScenariosListPageComponent implements OnInit, OnDestroy {
     return this.authService.isProjectReadOnly();
   }
 
-  statusOptions = [
-    { value: '', label: 'Status: All' },
-    { value: ScenarioStatus.Draft, label: 'Draft' },
-    { value: ScenarioStatus.Active, label: 'Active' },
-    { value: ScenarioStatus.Archived, label: 'Archived' },
-    { value: ScenarioStatus.Deprecated, label: 'Deprecated' }
-  ];
-
   constructor(
     private scenarioService: ScenarioService,
     private projectService: ProjectService,
     private authService: AuthService,
     private breadcrumbService: BreadcrumbService,
+    private translationService: TranslationService,
+    private confirmService: ConfirmService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
+
+  get statusOptions(): Array<{ value: ScenarioStatus | ''; label: string }> {
+    return [
+      { value: '', label: this.t('scenario.list.statusAll') },
+      { value: ScenarioStatus.Draft, label: this.t('scenario.list.status.draft') },
+      { value: ScenarioStatus.Active, label: this.t('scenario.list.status.active') },
+      { value: ScenarioStatus.Archived, label: this.t('scenario.list.status.archived') },
+      { value: ScenarioStatus.Deprecated, label: this.t('scenario.list.status.deprecated') }
+    ];
+  }
+
+  private t(key: string, ...args: string[]): string {
+    return this.translationService.t(key, ...args);
+  }
+
+  private normalizeTag(tag: string): string {
+    return (tag || '').replace(/^@/, '').trim();
+  }
+
+  getDisplayTags(tags?: string[] | null): string[] {
+    const seen = new Set<string>();
+    const result: string[] = [];
+
+    for (const tag of tags ?? []) {
+      const normalized = this.normalizeTag(tag);
+      const key = normalized.toLowerCase();
+
+      if (!normalized || seen.has(key)) {
+        continue;
+      }
+
+      seen.add(key);
+      result.push(normalized);
+    }
+
+    return result;
+  }
+
+  getTestStatusLabel(testStatus?: string | null): string {
+    if ((testStatus || '').toLowerCase() === 'passed') {
+      return this.t('label.passed');
+    }
+
+    if ((testStatus || '').toLowerCase() === 'failed') {
+      return this.t('label.failed');
+    }
+
+    return this.t('label.notTested');
+  }
 
   ngOnInit(): void {
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
@@ -181,7 +227,7 @@ export class ScenariosListPageComponent implements OnInit, OnDestroy {
         this.loading = false;
       },
       error: (err) => {
-        this.error = err.error?.fail_Messages || 'Failed to load scenarios.';
+        this.error = err.error?.fail_Messages || this.t('scenario.list.error.loadFailed');
         this.loading = false;
       }
     });
@@ -304,13 +350,19 @@ export class ScenariosListPageComponent implements OnInit, OnDestroy {
   }
 
   // Bulk Actions
-  bulkDelete(): void {
+  async bulkDelete(): Promise<void> {
     if (this.isViewerRole) {
-      this.error = 'Viewer role is read-only and cannot delete scenarios.';
+      this.error = this.t('scenario.list.error.deleteReadonly');
       return;
     }
 
-    if (!confirm(`Delete ${this.selectedIds.size} selected scenarios?`)) return;
+    const ok = await this.confirmService.open({
+      title: this.t('scenario.list.confirm.bulkDelete', String(this.selectedIds.size)),
+      description: this.t('delete.dialog.defaultDesc'),
+      confirmLabel: this.t('action.delete'),
+      cancelLabel: this.t('action.cancel'),
+    });
+    if (!ok) return;
     const ids = Array.from(this.selectedIds);
     let completed = 0;
     ids.forEach(id => {
@@ -350,24 +402,30 @@ export class ScenariosListPageComponent implements OnInit, OnDestroy {
   }
 
   // Bulk Actions
-  bulkRun(): void {
+  async bulkRun(): Promise<void> {
     if (!this.canRunScenarioTests) {
-      this.error = 'Only Admin and Tester roles can run scenario tests.';
+      this.error = 'Only Owner and Tester roles can run scenario tests.';
       return;
     }
 
-    if (!confirm(`Run ${this.selectedIds.size} selected scenarios?`)) return;
+    const ok = await this.confirmService.open({
+      title: this.t('scenario.list.confirm.bulkRun', String(this.selectedIds.size)),
+      confirmLabel: this.t('action.run'),
+      cancelLabel: this.t('action.cancel'),
+      variant: 'primary',
+    });
+    if (!ok) return;
     // Placeholder: no run API yet — just show confirmation
-    alert(`${this.selectedIds.size} scenarios queued for execution.`);
+    alert(this.t('scenario.list.alert.runQueued', String(this.selectedIds.size)));
   }
 
   bulkAddTags(): void {
     if (this.isViewerRole) {
-      this.error = 'Viewer role is read-only and cannot update scenario tags.';
+      this.error = this.t('scenario.list.error.tagsReadonly');
       return;
     }
 
-    const tagInput = prompt('Enter tags to add (comma-separated):');
+    const tagInput = prompt(this.t('scenario.list.prompt.addTags'));
     if (!tagInput) return;
     const newTags = tagInput.split(',').map(t => t.trim()).filter(t => t.length > 0);
     if (newTags.length === 0) return;
@@ -387,7 +445,7 @@ export class ScenariosListPageComponent implements OnInit, OnDestroy {
 
   navigateToCreate(): void {
     if (!this.canCreateScenario) {
-      this.error = 'Only Admin and Tester roles can create scenarios.';
+      this.error = 'Only Owner and Tester roles can create scenarios.';
       return;
     }
 
@@ -409,7 +467,7 @@ export class ScenariosListPageComponent implements OnInit, OnDestroy {
     event.stopPropagation();
 
     if (this.isViewerRole) {
-      this.error = 'Viewer role is read-only and cannot edit scenarios.';
+      this.error = this.t('scenario.list.error.editReadonly');
       return;
     }
 
@@ -420,7 +478,7 @@ export class ScenariosListPageComponent implements OnInit, OnDestroy {
     event.stopPropagation();
 
     if (!this.canRunScenarioTests) {
-      this.error = 'Only Admin and Tester roles can run scenario tests.';
+      this.error = 'Only Owner and Tester roles can run scenario tests.';
       return;
     }
 
@@ -428,22 +486,28 @@ export class ScenariosListPageComponent implements OnInit, OnDestroy {
     this.router.navigate(['/scenarios', scenario.id], { fragment: 'ai' });
   }
 
-  deleteScenario(scenario: ScenarioDto, event: Event): void {
+  async deleteScenario(scenario: ScenarioDto, event: Event): Promise<void> {
     event.stopPropagation();
 
     if (this.isViewerRole) {
-      this.error = 'Viewer role is read-only and cannot delete scenarios.';
+      this.error = this.t('scenario.list.error.deleteReadonly');
       return;
     }
 
-    if (!confirm(`Delete scenario "${scenario.title}"?`)) return;
+    const ok = await this.confirmService.open({
+      title: this.t('scenario.list.confirm.delete', scenario.title),
+      description: this.t('delete.dialog.defaultDesc'),
+      confirmLabel: this.t('action.delete'),
+      cancelLabel: this.t('action.cancel'),
+    });
+    if (!ok) return;
     this.scenarioService.deleteScenario(scenario.id).subscribe({
       next: () => {
         this.scenarios = this.scenarios.filter(s => s.id !== scenario.id);
         this.applyFilters();
       },
       error: (err) => {
-        this.error = err.error?.fail_Messages || 'Failed to delete scenario.';
+        this.error = err.error?.fail_Messages || this.t('scenario.list.error.deleteFailed');
       }
     });
   }
@@ -470,10 +534,10 @@ export class ScenariosListPageComponent implements OnInit, OnDestroy {
 
   getStatusLabel(status: ScenarioStatus): string {
     const map: Record<string, string> = {
-      [ScenarioStatus.Draft]: 'DRAFT',
-      [ScenarioStatus.Active]: 'ACTIVE',
-      [ScenarioStatus.Archived]: 'ARCHIVED',
-      [ScenarioStatus.Deprecated]: 'DEPRECATED'
+      [ScenarioStatus.Draft]: this.t('label.draft'),
+      [ScenarioStatus.Active]: this.t('label.active'),
+      [ScenarioStatus.Archived]: this.t('label.archived'),
+      [ScenarioStatus.Deprecated]: this.t('label.deprecated')
     };
     return map[status] || status;
   }

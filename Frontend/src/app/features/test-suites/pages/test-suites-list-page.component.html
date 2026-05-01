@@ -1,9 +1,9 @@
-<div class="px-6 py-8">
+﻿<div class="px-6 py-8">
   <!-- Page Header Section -->
   <div class="flex justify-between items-end mb-8">
     <div>
-      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">Test Suites</h1>
-      <p class="text-slate-500 max-w-xl">Manage and organize your automated test scenarios into logical execution groups for regression and smoke testing.</p>
+      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">{{ 'testSuite.list.title' | translate }}</h1>
+      <p class="text-slate-500 max-w-xl">{{ 'testSuite.list.subtitle' | translate }}</p>
     </div>
     <div class="flex items-center gap-3">
       <div class="flex bg-slate-100 rounded-xl p-1">
@@ -20,13 +20,12 @@
               [disabled]="isViewerRole"
               class="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-xl shadow-primary/10 disabled:opacity-50 disabled:cursor-not-allowed">
         <span class="material-symbols-outlined text-sm">add</span>
-        Create Suite
+        {{ 'testSuite.list.createSuite' | translate }}
       </button>
     </div>
   </div>
 
   <!-- Filters & Controls -->
-  <div class="flex justify-between items-center mb-8">
     <div class="flex gap-4">
       <!-- Custom Project Dropdown -->
       <div class="relative">
@@ -37,9 +36,9 @@
             <span class="material-symbols-outlined text-lg">folder_open</span>
           </div>
           <div class="flex flex-col items-start">
-            <span class="text-[10px] font-bold tracking-widest text-slate-400 uppercase leading-none mb-0.5">Project</span>
+            <span class="text-[10px] font-bold tracking-widest text-slate-400 uppercase leading-none mb-0.5">{{ 'testSuite.list.projectLabel' | translate }}</span>
             <span class="text-sm font-semibold" [class]="selectedProjectId ? 'text-slate-800' : 'text-slate-400'">
-              {{ selectedProjectId ? getSelectedProjectName() : 'Select project...' }}
+              {{ selectedProjectId ? getSelectedProjectName() : ('testSuite.list.selectProject' | translate) }}
             </span>
           </div>
           <span class="material-symbols-outlined text-base text-slate-400 group-hover:text-primary transition-all duration-200 ml-2"
@@ -52,12 +51,12 @@
         <div *ngIf="projectDropdownOpen"
              class="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl border border-slate-200 shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
           <div class="p-2">
-            <div class="px-3 py-2 text-[10px] font-bold tracking-widest text-slate-400 uppercase">Select a project</div>
+            <div class="px-3 py-2 text-[10px] font-bold tracking-widest text-slate-400 uppercase">{{ 'testSuite.list.selectProjPanel' | translate }}</div>
             <button *ngIf="selectedProjectId"
                     (click)="selectProject('')"
                     class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm text-slate-500 hover:bg-slate-50 transition-colors">
               <span class="material-symbols-outlined text-base text-slate-400">close</span>
-              <span class="font-medium">Clear selection</span>
+              <span class="font-medium">{{ 'testSuite.list.clearSelection' | translate }}</span>
             </button>
             <button *ngFor="let project of projects"
                     (click)="selectProject(project.id)"
@@ -82,7 +81,7 @@
         <input (input)="onSearchChange($event)"
                [value]="searchTerm"
                class="border-none bg-transparent text-sm text-slate-700 focus:ring-0 focus:outline-none w-48 placeholder:text-slate-400"
-               placeholder="Search suites..."
+               [placeholder]="'testSuite.list.searchPh' | translate"
                type="text"/>
         <button *ngIf="searchTerm"
                 (click)="clearSearch()"
@@ -95,12 +94,11 @@
     <div class="text-sm text-slate-400" *ngIf="selectedProjectId && !loading">
       Showing <strong class="text-slate-700">{{ filteredSuites.length }}</strong> suites
     </div>
-  </div>
 
   <div *ngIf="loading" class="flex items-center justify-center py-24">
     <div class="flex flex-col items-center gap-4">
       <div class="h-11 w-11 rounded-full border-4 border-blue-100 border-t-[#2563eb] animate-spin"></div>
-      <span class="text-sm font-medium text-slate-400">Loading test suites...</span>
+      <span class="text-sm font-medium text-slate-400">{{ 'testSuite.list.loading' | translate }}</span>
     </div>
   </div>
 
@@ -108,8 +106,8 @@
     <div class="mb-5 w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
       <span class="material-symbols-outlined text-3xl text-slate-300">folder_open</span>
     </div>
-    <h2 class="text-xl font-bold text-slate-800 mb-2">Select a Project</h2>
-    <p class="text-sm text-slate-400 max-w-md">Choose a project from the filter above to view its test suites.</p>
+    <h2 class="text-xl font-bold text-slate-800 mb-2">{{ 'testSuite.list.selectAProject' | translate }}</h2>
+    <p class="text-sm text-slate-400 max-w-md">{{ 'testSuite.list.selectHint' | translate }}</p>
   </div>
 
   <div *ngIf="selectedProjectId && !loading && filteredSuites.length === 0 && suites.length === 0"
@@ -117,108 +115,106 @@
     <div class="mb-5 w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
       <span class="material-symbols-outlined text-3xl text-blue-300">playlist_add</span>
     </div>
-    <h2 class="text-xl font-bold text-slate-800 mb-2">No Test Suites Yet</h2>
-    <p class="text-sm text-slate-400 max-w-md mb-6">Create your first test suite to start organizing scenarios into execution groups.</p>
+    <h2 class="text-xl font-bold text-slate-800 mb-2">{{ 'testSuite.list.empty' | translate }}</h2>
+    <p class="text-sm text-slate-400 max-w-md mb-6">{{ 'testSuite.list.emptyHint' | translate }}</p>
         <button (click)="openCreateModal()"
           [disabled]="isViewerRole"
           class="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
       <span class="material-symbols-outlined text-sm">add</span>
-      Create First Suite
+      {{ 'testSuite.list.createFirst' | translate }}
     </button>
   </div>
 
   <div *ngIf="selectedProjectId && !loading && filteredSuites.length === 0 && suites.length > 0"
        class="flex flex-col items-center justify-center py-16 text-center">
     <span class="material-symbols-outlined text-3xl text-slate-300 mb-3">search_off</span>
-    <h2 class="text-lg font-bold text-slate-800 mb-1">No Matching Suites</h2>
+    <h2 class="text-lg font-bold text-slate-800 mb-1">{{ 'testSuite.list.noMatch' | translate }}</h2>
     <p class="text-sm text-slate-400 max-w-md mb-4">No suites match "{{ searchTerm }}".</p>
     <button (click)="clearSearch()"
             class="px-4 py-2 text-sm font-semibold text-primary hover:bg-blue-50 rounded-lg transition-colors">
-      Clear Search
+      {{ 'testSuite.list.clearSearch' | translate }}
     </button>
   </div>
+  <!-- Grid View -->
+  <div *ngIf="selectedProjectId && !loading && filteredSuites.length > 0 && viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div *ngFor="let suite of filteredSuites"
+         class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300">
+      <div class="flex justify-between items-start mb-4">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-1 rounded bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wider">{{ 'testSuite.list.testSuiteLabel' | translate }}</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        </div>
+      </div>
 
-  <div *ngIf="selectedProjectId && !loading && filteredSuites.length > 0">
-    <!-- Grid View -->
-    <div *ngIf="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <div *ngFor="let suite of filteredSuites"
-           class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300">
-        <div class="flex justify-between items-start mb-4">
-          <div class="flex items-center gap-2">
-            <span class="px-2 py-1 rounded bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wider">Test Suite</span>
-            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+      <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-primary transition-colors">{{ suite.name }}</h3>
+      <p class="text-sm text-slate-500 mb-6 line-clamp-2">{{ suite.description || 'No description provided.' }}</p>
+
+      <div class="grid grid-cols-2 gap-4 py-4 border-y border-slate-100 mb-6">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/5">
+            <span class="material-symbols-outlined text-base text-primary">layers</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-[10px] font-bold text-slate-400 uppercase">{{ 'testSuite.list.scenarios' | translate }}</span>
+            <span class="text-lg font-bold text-slate-900">{{ suite.scenarioCount || 0 }}</span>
           </div>
         </div>
-
-        <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-primary transition-colors">{{ suite.name }}</h3>
-        <p class="text-sm text-slate-500 mb-6 line-clamp-2">{{ suite.description || 'No description provided.' }}</p>
-
-        <div class="grid grid-cols-2 gap-4 py-4 border-y border-slate-100 mb-6">
-          <div class="flex items-center gap-3">
-            <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/5">
-              <span class="material-symbols-outlined text-base text-primary">layers</span>
-            </div>
-            <div class="flex flex-col">
-              <span class="text-[10px] font-bold text-slate-400 uppercase">Scenarios</span>
-              <span class="text-lg font-bold text-slate-900">{{ suite.scenarioCount || 0 }}</span>
-            </div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-100">
+            <span class="material-symbols-outlined text-base text-slate-500">update</span>
           </div>
-          <div class="flex items-center gap-3">
-            <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-100">
-              <span class="material-symbols-outlined text-base text-slate-500">update</span>
-            </div>
-            <div class="flex flex-col">
-              <span class="text-[10px] font-bold text-slate-400 uppercase">Last Updated</span>
-              <span class="text-lg font-bold text-slate-900">{{ suite.modifiedDate ? (suite.modifiedDate | date:'MMM d') : '—' }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 text-xs text-slate-400 font-medium">
-            <span class="material-symbols-outlined text-sm">schedule</span>
-            Updated: {{ suite.modifiedDate ? getTimeAgo(suite.modifiedDate) : 'Never' }}
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button (click)="openEditModal(suite)"
-                  [disabled]="isViewerRole"
-                    class="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
-                    title="Edit suite"
-                    type="button">
-              <span class="material-symbols-outlined text-[18px]">edit</span>
-            </button>
-            <button (click)="confirmDelete(suite)"
-                  [disabled]="isViewerRole"
-                    class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                    title="Delete suite"
-                    type="button">
-              <span class="material-symbols-outlined text-[18px]">delete</span>
-            </button>
-            <button (click)="openBuilder(suite)"
-                    class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-lg shadow-primary/10 hover:translate-y-[-2px] transition-all ml-1"
-                    type="button">
-              <span class="material-symbols-outlined text-sm">construction</span>
-              Builder
-            </button>
+          <div class="flex flex-col">
+            <span class="text-[10px] font-bold text-slate-400 uppercase">{{ 'testSuite.list.lastUpdated' | translate }}</span>
+            <span class="text-lg font-bold text-slate-900">{{ suite.modifiedDate ? (suite.modifiedDate | date:'MMM d') : '—' }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Create New Card -->
-            <button (click)="openCreateModal()"
-              [disabled]="isViewerRole"
-              class="flex flex-col items-center justify-center p-8 bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl hover:bg-slate-100 transition-all group/add"
-              type="button">
-        <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center text-slate-400 group-hover/add:scale-110 group-hover/add:text-primary transition-all mb-4">
-          <span class="material-symbols-outlined text-3xl">add</span>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xs text-slate-400 font-medium">
+          <span class="material-symbols-outlined text-sm">schedule</span>
+          Updated: {{ suite.modifiedDate ? getTimeAgo(suite.modifiedDate) : 'Never' }}
         </div>
-        <span class="text-sm font-bold text-slate-600 mb-1">New Suite</span>
-        <p class="text-xs text-slate-400 text-center max-w-[200px]">Combine manual steps or auto-generated tests into a new suite.</p>
-      </button>
+        <div class="flex items-center gap-1.5">
+          <button (click)="openEditModal(suite)"
+                  [disabled]="isViewerRole"
+                  class="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                  title="Edit suite"
+                  type="button">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+          </button>
+          <button (click)="confirmDelete(suite)"
+                  [disabled]="isViewerRole"
+                  class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                  title="Delete suite"
+                  type="button">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+          <button (click)="openBuilder(suite)"
+                  class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-lg shadow-primary/10 hover:translate-y-[-2px] transition-all ml-1"
+                  type="button">
+            <span class="material-symbols-outlined text-sm">construction</span>
+            {{ 'testSuite.list.builder' | translate }}
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- List View -->
-    <div *ngIf="viewMode === 'list'" class="space-y-3">
+    <!-- Create New Card -->
+    <button (click)="openCreateModal()"
+            [disabled]="isViewerRole"
+            class="flex flex-col items-center justify-center p-8 bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl hover:bg-slate-100 transition-all group/add"
+            type="button">
+      <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center text-slate-400 group-hover/add:scale-110 group-hover/add:text-primary transition-all mb-4">
+        <span class="material-symbols-outlined text-3xl">add</span>
+      </div>
+      <span class="text-sm font-bold text-slate-600 mb-1">{{ 'testSuite.list.newSuite' | translate }}</span>
+      <p class="text-xs text-slate-400 text-center max-w-[200px]">{{ 'testSuite.list.newSuiteHint' | translate }}</p>
+    </button>
+  </div>
+
+  <!-- List View -->
+  <div *ngIf="selectedProjectId && !loading && filteredSuites.length > 0 && viewMode === 'list'" class="space-y-3">
       <div *ngFor="let suite of filteredSuites"
            class="group bg-white rounded-2xl px-6 py-4 shadow-sm hover:shadow-lg transition-all">
         <div class="flex items-center justify-between gap-6">
@@ -228,12 +224,12 @@
           </div>
           <div class="flex items-center gap-6 shrink-0">
             <div class="text-right">
-              <div class="text-[10px] font-bold text-slate-400 uppercase">Created</div>
+              <div class="text-[10px] font-bold text-slate-400 uppercase">{{ 'label.created' | translate }}</div>
               <div class="text-sm font-semibold text-slate-700">{{ suite.createdDate | date:'mediumDate' }}</div>
             </div>
             <div class="text-right">
-              <div class="text-[10px] font-bold text-slate-400 uppercase">Updated</div>
-              <div class="text-sm font-semibold text-slate-700">{{ suite.modifiedDate ? (suite.modifiedDate | date:'mediumDate') : '—' }}</div>
+              <div class="text-[10px] font-bold text-slate-400 uppercase">{{ 'testSuite.list.lastUpdated' | translate }}</div>
+              <div class="text-sm font-semibold text-slate-700">{{ suite.modifiedDate ? (suite.modifiedDate | date:'mediumDate') : 'â€”' }}</div>
             </div>
             <div class="flex gap-1.5">
               <button (click)="openEditModal(suite)"
@@ -254,13 +250,12 @@
                       class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-lg shadow-primary/10 hover:translate-y-[-2px] transition-all"
                       type="button">
                 <span class="material-symbols-outlined text-sm">construction</span>
-                Builder
+                {{ 'testSuite.list.builder' | translate }}
               </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
   </div>
 
   <div *ngIf="errorMessage" class="mt-6 flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 px-5 py-3 text-sm text-red-700">
@@ -278,8 +273,8 @@
     <div class="border-b border-slate-100 px-8 py-6">
       <div class="flex items-start justify-between gap-4">
         <div>
-          <h2 class="text-xl font-bold text-slate-900">Create Test Suite</h2>
-          <p class="mt-1 text-sm text-slate-400">Define a focused suite before sending it into the builder.</p>
+          <h2 class="text-xl font-bold text-slate-900">{{ 'testSuite.modal.createTitle' | translate }}</h2>
+          <p class="mt-1 text-sm text-slate-400">{{ 'testSuite.modal.createHint' | translate }}</p>
         </div>
         <button (click)="showCreateModal = false" class="p-2 text-slate-400 hover:bg-slate-100 rounded-xl transition-colors" type="button">
           <span class="material-symbols-outlined">close</span>
@@ -296,7 +291,7 @@
                  placeholder="e.g. Checkout Critical Path"
                  type="text"/>
           <p *ngIf="createForm.get('name')?.invalid && createForm.get('name')?.touched" class="mt-2 text-xs text-red-500">
-            Name is required, must be at least 3 characters, and stay under 200 characters.
+            {{ 'testSuite.modal.nameHint' | translate }}
           </p>
         </div>
 
@@ -313,54 +308,34 @@
         <button (click)="showCreateModal = false"
                 class="px-5 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
                 type="button">
-          Cancel
+          {{ 'action.cancel' | translate }}
         </button>
         <button type="submit"
           [disabled]="createForm.invalid || creating || isViewerRole"
                 class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
           <div *ngIf="creating" class="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
-          {{ creating ? 'Creating...' : 'Create Suite' }}
+          {{ creating ? ('testSuite.modal.creating' | translate) : ('testSuite.modal.create' | translate) }}
         </button>
+      </div>
+
+      <div *ngIf="createError" class="mt-3 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <span class="material-symbols-outlined text-base flex-shrink-0">error_outline</span>
+        {{ createError }}
       </div>
     </form>
   </div>
 </div>
 
-<div *ngIf="suiteToDelete" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div (click)="suiteToDelete = null" class="absolute inset-0 bg-slate-950/45 backdrop-blur-sm"></div>
-  <div class="relative z-10 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
-    <div class="px-8 py-7">
-      <div class="mb-5 flex items-center gap-4">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-500">
-          <span class="material-symbols-outlined text-2xl">warning</span>
-        </div>
-        <div>
-          <h2 class="text-lg font-bold text-slate-900">Delete Suite</h2>
-          <p class="text-sm text-slate-400">This removes the suite and its scenario links.</p>
-        </div>
-      </div>
-
-      <p class="text-sm text-slate-500">
-        Are you sure you want to delete <strong class="text-slate-800">{{ suiteToDelete.name }}</strong>?
-      </p>
-
-      <div class="mt-6 flex justify-end gap-3">
-        <button (click)="suiteToDelete = null"
-                class="px-5 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
-                type="button">
-          Cancel
-        </button>
-        <button (click)="deleteSuite()"
-                [disabled]="deleting"
-                class="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-xl text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-50"
-                type="button">
-          <div *ngIf="deleting" class="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
-          {{ deleting ? 'Deleting...' : 'Delete Suite' }}
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+<app-confirm-delete-dialog
+  [visible]="!!suiteToDelete"
+  [title]="'Delete suite &quot;' + (suiteToDelete?.name || '') + '&quot;?'"
+  description="testSuite.delete.desc"
+  confirmLabel="testSuite.delete.label"
+  cancelLabel="action.cancel"
+  [loading]="deleting"
+  (confirmed)="deleteSuite()"
+  (cancelled)="suiteToDelete = null"
+></app-confirm-delete-dialog>
 
 <!-- Edit Suite Modal -->
 <div *ngIf="suiteToEdit" class="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -369,8 +344,8 @@
     <div class="border-b border-slate-100 px-8 py-6">
       <div class="flex items-start justify-between gap-4">
         <div>
-          <h2 class="text-xl font-bold text-slate-900">Edit Test Suite</h2>
-          <p class="mt-1 text-sm text-slate-400">Update the suite name and description.</p>
+          <h2 class="text-xl font-bold text-slate-900">{{ 'testSuite.modal.editTitle' | translate }}</h2>
+          <p class="mt-1 text-sm text-slate-400">{{ 'testSuite.modal.editHint' | translate }}</p>
         </div>
         <button (click)="suiteToEdit = null" class="p-2 text-slate-400 hover:bg-slate-100 rounded-xl transition-colors" type="button">
           <span class="material-symbols-outlined">close</span>
@@ -404,15 +379,16 @@
         <button (click)="suiteToEdit = null"
                 class="px-5 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
                 type="button">
-          Cancel
+          {{ 'action.cancel' | translate }}
         </button>
         <button type="submit"
           [disabled]="editForm.invalid || editing || isViewerRole"
                 class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
           <div *ngIf="editing" class="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
-          {{ editing ? 'Saving...' : 'Save Changes' }}
+          {{ editing ? ('testSuite.modal.saving' | translate) : ('testSuite.modal.save' | translate) }}
         </button>
       </div>
     </form>
   </div>
 </div>
+

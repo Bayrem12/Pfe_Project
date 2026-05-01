@@ -6,31 +6,42 @@ namespace Application.Features.UserFeature.Validators
 {
     public class AddUserRegisterValidator : ValidatorBase<AddUserRegister>
     {
+        private static readonly HashSet<string> CommonPasswords = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "123456", "password", "123456789", "12345678", "12345", "1234567",
+            "password1", "abc123", "qwerty", "azerty", "letmein", "iloveyou",
+            "admin", "welcome", "monkey", "login", "sunshine", "master"
+        };
+
         public AddUserRegisterValidator()
         {
             RuleFor(v => v.FirstName)
-                 .NotEmpty().WithMessage(ValidationConstants.FirstNameMustHasValue)
-                 .MinimumLength(3).WithMessage("First name must be at least 3 characters.")
-                 .MaximumLength(100).WithMessage("First name must not exceed 100 characters.");
+                .NotEmpty().WithMessage("Le prénom est obligatoire.")
+                .MinimumLength(3).WithMessage("Le prénom doit contenir au moins 3 caractères.")
+                .MaximumLength(20).WithMessage("Le prénom ne doit pas dépasser 20 caractères.")
+                .Matches(@"^[a-zA-ZÀ-ÿ][a-zA-ZÀ-ÿ0-9]*$")
+                    .WithMessage("Le prénom doit commencer par une lettre et ne contenir que des lettres et chiffres (sans espaces).");
 
-            RuleFor(v => v.LastName).NotEmpty()
-                .WithMessage(ValidationConstants.LastNameMustHasValue)
-                .MinimumLength(3).WithMessage("Last name must be at least 3 characters.")
-                .MaximumLength(100).WithMessage("Last name must not exceed 100 characters.");
+            RuleFor(v => v.LastName)
+                .NotEmpty().WithMessage("Le nom est obligatoire.")
+                .MinimumLength(3).WithMessage("Le nom doit contenir au moins 3 caractères.")
+                .MaximumLength(20).WithMessage("Le nom ne doit pas dépasser 20 caractères.")
+                .Matches(@"^[a-zA-ZÀ-ÿ][a-zA-ZÀ-ÿ0-9]*$")
+                    .WithMessage("Le nom doit commencer par une lettre et ne contenir que des lettres et chiffres (sans espaces).");
 
-            RuleFor(v => v.Email).NotEmpty()
-                .WithMessage(ValidationConstants.EmailMustHasValue)
-                .EmailAddress().WithMessage("Invalid email format.")
-                .MaximumLength(150).WithMessage("Email must not exceed 150 characters.");
+            RuleFor(v => v.Email)
+                .NotEmpty().WithMessage("L'adresse e-mail est obligatoire.")
+                .EmailAddress().WithMessage("Format d'email invalide.")
+                .MaximumLength(150).WithMessage("L'email ne doit pas dépasser 150 caractères.");
 
-            RuleFor(v => v.Password).NotEmpty()
-                .WithMessage("Password must have a value.")
-                .MinimumLength(8).WithMessage("Password must be at least 8 characters long.")
-                .Matches(@"[A-Z]").WithMessage("Password must contain at least one uppercase letter.")
-                .Matches(@"[a-z]").WithMessage("Password must contain at least one lowercase letter.")
-                .Matches(@"[0-9]").WithMessage("Password must contain at least one number.")
-                .Matches(@"[\W_]").WithMessage("Password must contain at least one special character.");
+            RuleFor(v => v.Password)
+                .NotEmpty().WithMessage("Le mot de passe est obligatoire.")
+                .MinimumLength(6).WithMessage("Le mot de passe doit contenir au moins 6 caractères.")
+                .Matches(@"[A-Za-z]").WithMessage("Le mot de passe doit contenir au moins une lettre.")
+                .Matches(@"[0-9]").WithMessage("Le mot de passe doit contenir au moins un chiffre.")
+                .Must(p => !CommonPasswords.Contains(p))
+                    .WithMessage("Ce mot de passe est trop simple. Choisissez un mot de passe plus sécurisé.");
         }
-    
+
     }
 }

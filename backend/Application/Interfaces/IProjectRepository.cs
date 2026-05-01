@@ -11,5 +11,7 @@ namespace Application.Interfaces
         Task<ProjectMember?> GetProjectMemberAsync(Guid projectId, Guid userId, CancellationToken cancellationToken);
         Task<ProjectMember> AddMemberAsync(ProjectMember member, CancellationToken cancellationToken);
         Task RemoveMemberAsync(Guid projectId, Guid userId, CancellationToken cancellationToken);
+        Task<bool> ExistsWithNameAsync(string name, Guid? excludeProjectId, CancellationToken cancellationToken);
+        Task<bool> ExistsWithUrlAsync(string url, Guid? excludeProjectId, CancellationToken cancellationToken);
     }
 }

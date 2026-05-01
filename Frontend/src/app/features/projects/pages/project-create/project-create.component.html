@@ -1,10 +1,9 @@
 <div class="project-create-container">
   <!-- Header -->
   <div class="page-header">
-    <h1>Create New Project</h1>
+    <h1>{{ 'project.create.title' | translate }}</h1>
     <p class="subtitle">
-      Initialize a new automation workspace. Define your scope and 
-      architectural constraints to begin building precision tests.
+      {{ 'project.create.subtitle' | translate }}
     </p>
     <div class="progress-bar">
       <div class="progress-fill"></div>
@@ -16,50 +15,53 @@
     <!-- Project Name -->
     <div class="form-group">
       <label for="name">
-        PROJECT NAME <span class="required">*</span>
+        {{ 'project.create.nameLabel' | translate }} <span class="required">*</span>
       </label>
       <input 
         type="text" 
         id="name" 
         formControlName="name"
-        placeholder="e.g. Enterprise CRM Regression"
-        [class.error]="f['name'].touched && f['name'].invalid">
-      <div *ngIf="f['name'].touched && f['name'].errors" class="error-message">
-        <span *ngIf="f['name'].errors['required']">Project name is required</span>
-        <span *ngIf="f['name'].errors['minlength']">Minimum 3 characters required</span>
+        [placeholder]="'project.create.namePh' | translate"
+        [class.error]="(f['name'].touched || formSubmitAttempted) && f['name'].invalid">
+      <div *ngIf="(f['name'].touched || formSubmitAttempted) && f['name'].errors" class="error-message">
+        <span *ngIf="f['name'].errors['required']">{{ 'project.create.name.required' | translate }}</span>
+        <span *ngIf="f['name'].errors['minlength']">{{ 'project.create.name.min' | translate }}</span>
+        <span *ngIf="f['name'].errors['maxlength']">{{ 'project.create.name.max' | translate }}</span>
       </div>
     </div>
 
-    <!-- Project URL (IMPORTANT - Added as per requirements) -->
+    <!-- Project URL -->
     <div class="form-group">
       <label for="url">
-        PROJECT URL
+        {{ 'project.create.urlLabel' | translate }}
       </label>
       <input 
         type="text" 
         id="url" 
         formControlName="url"
-        placeholder="e.g. https://myproject.example.com"
-        [class.error]="f['url'].touched && f['url'].invalid">
-      <div *ngIf="f['url'].touched && f['url'].errors" class="error-message">
-        <span *ngIf="f['url'].errors['pattern']">Please enter a valid URL</span>
+        [placeholder]="'project.create.urlPh' | translate"
+        [class.error]="(f['url'].touched || formSubmitAttempted) && f['url'].invalid">
+      <div *ngIf="(f['url'].touched || formSubmitAttempted) && f['url'].errors" class="error-message">
+        <span *ngIf="f['url'].errors['invalidUrl']">{{ 'project.create.url.pattern' | translate }}</span>
+        <span *ngIf="f['url'].errors['maxlength']">{{ 'project.create.url.max' | translate }}</span>
       </div>
     </div>
 
     <!-- Description -->
     <div class="form-group">
       <label for="description">
-        DESCRIPTION <span class="required">*</span>
+        {{ 'project.create.descLabel' | translate }} <span class="required">*</span>
       </label>
       <textarea 
         id="description" 
         formControlName="description"
-        placeholder="Briefly describe the architectural goals of this project..."
+        [placeholder]="'project.create.descPh' | translate"
         rows="4"
-        [class.error]="f['description'].touched && f['description'].invalid">
+        [class.error]="(f['description'].touched || formSubmitAttempted) && f['description'].invalid">
       </textarea>
-      <div *ngIf="f['description'].touched && f['description'].errors" class="error-message">
-        <span *ngIf="f['description'].errors['required']">Description is required</span>
+      <div *ngIf="(f['description'].touched || formSubmitAttempted) && f['description'].errors" class="error-message">
+        <span *ngIf="f['description'].errors['required']">{{ 'project.create.desc.required' | translate }}</span>
+        <span *ngIf="f['description'].errors['maxlength']">{{ 'project.create.desc.max' | translate }}</span>
       </div>
     </div>
 
@@ -67,15 +69,15 @@
     <div class="form-group status-group">
       <div class="status-content">
         <div class="status-info">
-          <span class="status-title">Project Status</span>
-          <span class="status-description">Set to active to enable immediate CI/CD integration.</span>
+          <span class="status-title">{{ 'project.create.statusLabel' | translate }}</span>
+          <span class="status-description">{{ 'project.create.statusHint' | translate }}</span>
         </div>
         <label class="toggle-switch">
           <input type="checkbox" formControlName="isActive">
           <span class="slider"></span>
         </label>
         <span class="status-label" [class.active]="projectForm.value.isActive">
-          {{ projectForm.value.isActive ? 'ACTIVE' : 'INACTIVE' }}
+          {{ projectForm.value.isActive ? ('label.active' | translate) : ('label.inactive' | translate) }}
         </span>
       </div>
     </div>
@@ -85,10 +87,15 @@
       {{ createProjectError }}
     </div>
 
+    <div *ngIf="formSubmitAttempted && projectForm.invalid" class="flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700">
+      <span class="material-symbols-outlined text-base flex-shrink-0">warning</span>
+      {{ 'project.create.errors' | translate }}
+    </div>
+
     <!-- Actions -->
     <div class="form-actions">
       <button type="button" class="btn-cancel" (click)="cancel()">
-        CANCEL
+        {{ 'project.create.cancel' | translate }}
       </button>
       <button 
         type="submit" 
@@ -99,7 +106,7 @@
           <path d="M11 2v3h3l-3-3z"/>
         </svg>
         <span *ngIf="isSubmitting" class="spinner-small"></span>
-        {{ isSubmitting ? 'SAVING...' : 'SAVE PROJECT' }}
+        {{ isSubmitting ? ('project.create.saving' | translate) : ('project.create.save' | translate) }}
       </button>
     </div>
   </form>
@@ -107,6 +114,6 @@
   <!-- Footer note -->
   <div class="footer-note">
     <span class="dot"></span>
-    CHANGES ARE TRACKED IN THE AUDIT LOG
+    {{ 'project.create.auditHint' | translate }}
   </div>
 </div>

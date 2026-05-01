@@ -1,5 +1,6 @@
-import { Component, OnInit, inject, HostListener, ElementRef } from '@angular/core';
+﻿import { Component, OnInit, inject, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TestSuiteService } from '../services/test-suite.service';
@@ -7,11 +8,12 @@ import { AuthService } from '../../../core/services/auth.service';
 import { Project } from '../../../core/models/project.model';
 import { ProjectService } from '../../../core/services/project.service';
 import { TestSuiteDto } from '../models/test-suite.model';
+import { ConfirmDeleteDialogComponent } from '../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 @Component({
   selector: 'app-test-suites-list-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [TranslatePipe, CommonModule, ReactiveFormsModule, ConfirmDeleteDialogComponent],
   templateUrl: './test-suites-list-page.component.html'
 })
 export class TestSuitesListPageComponent implements OnInit {
@@ -33,6 +35,7 @@ export class TestSuitesListPageComponent implements OnInit {
   creating = false;
   deleting = false;
   errorMessage = '';
+  createError = '';
   projectDropdownOpen = false;
 
   showCreateModal = false;
@@ -158,6 +161,7 @@ export class TestSuitesListPageComponent implements OnInit {
     if (this.createForm.invalid || !this.selectedProjectId) return;
 
     this.creating = true;
+    this.createError = '';
     const userId = this.authService.getCurrentUserId();
     this.testSuiteService.createTestSuite({
       projectId: this.selectedProjectId,
@@ -169,10 +173,11 @@ export class TestSuitesListPageComponent implements OnInit {
         this.showCreateModal = false;
         this.createForm.reset();
         this.creating = false;
+        this.createError = '';
         this.loadSuites();
       },
-      error: () => {
-        this.errorMessage = 'Failed to create test suite.';
+      error: (err) => {
+        this.createError = err?.error?.fail_Messages || 'Failed to create test suite.';
         this.creating = false;
       }
     });
@@ -269,3 +274,5 @@ export class TestSuitesListPageComponent implements OnInit {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 }
+
+
