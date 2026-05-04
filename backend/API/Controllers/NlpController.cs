@@ -301,10 +301,104 @@ namespace API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { FailMessages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
             }
         }
+
+        /// <summary>
+        /// POST /api/nlp/analyze-quality
+        /// Analyzes a scenario's quality (completeness, testability) BEFORE saving.
+        /// Returns quality score, detected issues, suggestions and an improved version.
+        /// </summary>
+        [HttpPost("analyze-quality")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> AnalyzeQuality([FromBody] AnalyzeQualityRequest request)
+        {
+            try
+            {
+                var command = new AnalyzeQualityCommand(
+                    request.ScenarioName,
+                    request.Steps,
+                    request.Language);
+
+                var result = await _mediator.Send(command);
+
+                if (result.Status == StatusCodes.Status200OK)
+                    return Ok(result);
+
+                return StatusCode(result.Status, result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error analyzing scenario quality");
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
+                {
+                    Fail_Messages = "An error occurred while analyzing scenario quality.",
+                    Status = StatusCodes.Status500InternalServerError
+                });
+            }
+        }
+
+        /// <summary>
+        /// POST /api/nlp/analyze-failure
+        /// Runs the deterministic AI failure analyzer against a single failed step.
+        /// Returns category, root cause, explanation, suggested fix and confidence.
+        /// </summary>
+        [HttpPost("analyze-failure")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> AnalyzeFailure([FromBody] AnalyzeFailureRequest request)
+        {
+            try
+            {
+                var command = new AnalyzeFailureCommand(
+                    request.StepText ?? string.Empty,
+                    request.ErrorMessage ?? string.Empty,
+                    request.Selector ?? string.Empty,
+                    request.Keyword ?? string.Empty,
+                    request.VisualFallbackUsed,
+                    request.RetryCount);
+
+                var result = await _mediator.Send(command);
+
+                if (result.Status == StatusCodes.Status200OK)
+                    return Ok(result);
+
+                return StatusCode(result.Status, result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error analyzing test failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
+                {
+                    Fail_Messages = "An error occurred while analyzing the failure.",
+                    Status = StatusCodes.Status500InternalServerError
+                });
+            }
+        }
     }
 
     public class ToggleStatusRequest
     {
         public bool IsActive { get; set; }
+    }
+
+    /// <summary>Request body for POST /api/nlp/analyze-quality</summary>
+    public class AnalyzeQualityRequest
+    {
+        public string ScenarioName { get; set; } = string.Empty;
+        public List<QualityStepDto> Steps { get; set; } = new();
+        public string Language { get; set; } = "en";
+    }
+
+    /// <summary>Request body for POST /api/nlp/analyze-failure</summary>
+    public class AnalyzeFailureRequest
+    {
+        public string StepText { get; set; } = string.Empty;
+        public string ErrorMessage { get; set; } = string.Empty;
+        public string Selector { get; set; } = string.Empty;
+        public string Keyword { get; set; } = string.Empty;
+        public bool VisualFallbackUsed { get; set; } = false;
+        public int RetryCount { get; set; } = 0;
     }
 }

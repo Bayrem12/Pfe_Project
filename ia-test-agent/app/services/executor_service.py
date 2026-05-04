@@ -442,13 +442,16 @@ class ExecutorService:
                 current_comment = re.sub(r"^#\s*\u2500*\s*\u2014*\s*\u2212*\s*[-─]*\s*", "", stripped)
                 current_comment = re.sub(r"\s*[-─\u2500]+\s*$", "", current_comment).strip()
             elif (
-                ("await page." in stripped or "await expect" in stripped)
+                ("await page." in stripped or "await expect" in stripped
+                 or stripped.startswith("assert "))
                 and not stripped.startswith("#")  # skip commented-out placeholder lines
             ):
                 # Only collect lines that belong to a named step (after a # ── Step N: comment).
                 # Lines before the first step comment are part of the generated script's
                 # preamble/initial-navigation block — the executor already handled navigation
                 # via url_cible, so those would cause duplicates in the results.
+                # `assert ...` lines are emitted by strict-assertion generation
+                # (dropdown selected-value, login success URL check, visible-text match).
                 if current_comment:
                     exec_blocks.append((current_comment, stripped))
             elif stripped.startswith("loc = ") or stripped.startswith("locator = "):
@@ -581,6 +584,10 @@ class ExecutorService:
         last_pw_error = ""
 
         for attempt in range(1, settings.MAX_RETRIES + 2):  # 1 + up to 2 retries
+            if page.is_closed():
+                last_exc = RuntimeError("Playwright page is closed — aborting step")
+                last_pw_error = "PageClosed: page was closed before attempt"
+                break
             try:
                 visual_success, attempted, trace, pw_err = (
                     await self._exec_line_with_fallback_tracked(page, line)
@@ -600,15 +607,28 @@ class ExecutorService:
                 if sfe.playwright_error:
                     last_pw_error = sfe.playwright_error
                 e = sfe.original
+                # Assertions (expect/assert lines) must NOT be adapted away —
+                # that would turn a real failure into a false PASS.
+                stripped = line.strip()
+                is_assertion_line = (
+                    stripped.startswith("await expect(")
+                    or stripped.startswith("expect(")
+                    or stripped.startswith("assert ")
+                )
+                if is_assertion_line:
+                    break  # propagate as failure immediately, no retry
                 if attempt <= settings.MAX_RETRIES:
                     delay_ms = 500 * (2 ** (attempt - 1))
                     logger.warning(
                         "Step attempt %d/%d failed (fallback tried, %s) — getting adaptation strategy…",
                         attempt, settings.MAX_RETRIES + 1, e,
                     )
+                    if page.is_closed():
+                        break
                     adaptation_str = await self._run_adaptation(page, e, line, adaptation_str)
-                    await page.wait_for_timeout(delay_ms)
-                    await self._handle_unexpected_modal(page)
+                    if not page.is_closed():
+                        await page.wait_for_timeout(delay_ms)
+                        await self._handle_unexpected_modal(page)
             except Exception as e:
                 last_exc = e
                 if attempt <= settings.MAX_RETRIES:
@@ -701,43 +721,58 @@ class ExecutorService:
     # Day 13: Cookie popup & modal handlers
     # ------------------------------------------------------------------
 
-    # Common accept / reject button texts for cookie banners (FR + EN)
+    # Common accept / reject button texts for cookie banners (FR + EN).
+    # Kept INTENTIONALLY narrow — matching too-generic words like "ok",
+    # "continuer" or "fermer" used to click form buttons mid-test and
+    # caused the dreaded "Target page, context or browser has been closed"
+    # because the click triggered an unintended navigation/form submission.
     _COOKIE_ACCEPT_TEXTS = [
-        "accept all", "accept cookies", "i accept", "agree", "consent",
-        "allow all", "allow cookies", "ok", "got it", "got it!",
-        "j'accepte", "accepter", "accepter tout", "tout accepter",
-        "autoriser", "j'ai compris", "continuer", "fermer",
+        "accept all cookies", "accept all", "accept cookies",
+        "allow all cookies", "allow cookies", "allow all",
+        "i accept", "agree to all", "i agree",
+        "accepter tous les cookies", "accepter les cookies",
+        "tout accepter", "j'accepte les cookies", "j'accepte tout",
     ]
 
     async def _handle_cookie_popup(self, page: Page) -> bool:
         """
         Detecte et ferme les bannieres de cookies apres navigation.
 
-        Cherche des boutons dont le texte correspond aux textes courants
-        d'acceptation/rejet. Retourne True si un popup a ete ferme.
+        Conservative on purpose: only acts when a cookie/consent banner is
+        clearly visible (text contains 'cookie', 'consent' or 'privacy'),
+        and silently aborts if the page has been closed.
         """
+        if page.is_closed():
+            return False
+        try:
+            page_text = (await page.evaluate(
+                "() => (document.body && document.body.innerText) ? document.body.innerText.slice(0, 4000).toLowerCase() : ''"
+            )) or ""
+        except Exception:
+            return False
+        if not any(kw in page_text for kw in ("cookie", "consent", "privacy", "confidentialit")):
+            return False  # No cookie banner detected — do not click random buttons.
+
         for text in self._COOKIE_ACCEPT_TEXTS:
             try:
-                # case-insensitive match with exact OR partial text
                 btn = page.get_by_role("button", name=re.compile(text, re.IGNORECASE))
                 if await btn.count() > 0:
-                    await btn.first.click(timeout=3_000)
-                    await page.wait_for_timeout(400)
+                    await btn.first.click(timeout=2_000)
+                    await page.wait_for_timeout(300)
                     logger.info("Cookie popup closed via button: '%s'", text)
                     return True
             except Exception:
-                pass
-        # Fallback: look for links styled as buttons ("Accepter", "Agree")
-        for text in ["Accepter", "Agree", "Accept", "Allow"]:
+                continue
+        for text in ["accepter les cookies", "accept cookies", "i accept", "agree"]:
             try:
                 lnk = page.get_by_role("link", name=re.compile(text, re.IGNORECASE))
                 if await lnk.count() > 0:
                     await lnk.first.click(timeout=2_000)
-                    await page.wait_for_timeout(400)
+                    await page.wait_for_timeout(300)
                     logger.info("Cookie popup closed via link: '%s'", text)
                     return True
             except Exception:
-                pass
+                continue
         return False
 
     # Modal close-button patterns (aria-label or text)
@@ -747,28 +782,20 @@ class ExecutorService:
 
     async def _handle_unexpected_modal(self, page: Page) -> bool:
         """
-        Gere les modales inattendues :
-        1. Presse Escape.
-        2. Cherche un bouton "close" / "fermer" dans d'eventuels dialogs.
-        Retourne True si quelque chose a ete ferme.
+        Gere les modales inattendues : presse Escape uniquement.
+
+        Auparavant cliquait aussi sur n'importe quel bouton 'cancel' / 'fermer',
+        ce qui annulait des formulaires en plein test et faisait fermer la
+        page. On se contente desormais d'Escape, qui est inoffensif.
         """
+        if page.is_closed():
+            return False
         try:
             await page.keyboard.press("Escape")
-            await page.wait_for_timeout(200)
+            await page.wait_for_timeout(150)
+            return True
         except Exception:
-            pass
-
-        for label in self._MODAL_CLOSE_LABELS:
-            try:
-                btn = page.get_by_role("button", name=re.compile(label, re.IGNORECASE))
-                if await btn.count() > 0:
-                    await btn.first.click(timeout=2_000)
-                    await page.wait_for_timeout(300)
-                    logger.info("Modal closed via button: '%s'", label)
-                    return True
-            except Exception:
-                pass
-        return False
+            return False
 
     async def _smart_wait_for_element(
         self, page: Page, selector: str, timeout_ms: Optional[int] = None
@@ -827,7 +854,11 @@ class ExecutorService:
             # missing text appear. Skip the (expensive) YOLO+DOM scan in
             # that case and let the original error propagate verbatim.
             stripped = line.strip()
-            is_assertion = stripped.startswith("await expect(") or stripped.startswith("expect(")
+            is_assertion = (
+                stripped.startswith("await expect(")
+                or stripped.startswith("expect(")
+                or stripped.startswith("assert ")
+            )
             if is_assertion:
                 raise _StepFailedError(
                     original_error, retry_count=0, fallback_tried=False,

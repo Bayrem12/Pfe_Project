@@ -20,6 +20,7 @@ import { CreatedFeaturePayload, FeatureCreateModalComponent } from '../../../pro
 import { TagCreateModalComponent } from '../../../projects/tag-create-modal/tag-create-modal.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../core/services/translation.service';
+import { AiScenarioAnalyzerComponent } from './ai-scenario-analyzer.component';
 
 interface DropdownItem {
   id: string;
@@ -38,7 +39,7 @@ interface DataTableRow {
 @Component({
   selector: 'app-scenario-editor-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, ModuleCreateComponent, FeatureCreateModalComponent, TagCreateModalComponent, TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, ModuleCreateComponent, FeatureCreateModalComponent, TagCreateModalComponent, TranslatePipe, AiScenarioAnalyzerComponent],
   templateUrl: './scenario-editor-page.component.html'
 })
 export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
@@ -393,6 +394,10 @@ export class ScenarioEditorPageComponent implements OnInit, OnDestroy {
     if (this.steps.length > 1) {
       this.steps.splice(index, 1);
     }
+  }
+
+  applyImprovedSteps(improved: { keyword: string; text: string }[]): void {
+    this.steps = improved.map(s => ({ keyword: s.keyword as StepType, text: s.text }));
   }
 
   onStepKeyPress(event: KeyboardEvent, index: number): void {

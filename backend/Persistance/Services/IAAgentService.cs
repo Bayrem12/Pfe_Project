@@ -363,7 +363,10 @@ namespace Persistance.Services
                     .FirstOrDefault(e => !string.IsNullOrWhiteSpace(e)),
                 Duration = TimeSpan.FromMilliseconds(durationMs),
                 StartedAt = now.AddMilliseconds(-durationMs),
-                CompletedAt = now
+                CompletedAt = now,
+                AiAnalysisJson = agent.ScenarioAnalysis != null && agent.ScenarioAnalysis.Count > 0
+                    ? JsonSerializer.Serialize(agent.ScenarioAnalysis)
+                    : null
             };
             _db.TestResults.Add(testResult);
 
@@ -388,7 +391,10 @@ namespace Persistance.Services
                     ErrorMessage = string.IsNullOrWhiteSpace(gr.Erreur) ? null : gr.Erreur,
                     Duration = TimeSpan.FromMilliseconds(gr.DureeMs),
                     ActionPerformed = dbStep.Text,
-                    SelectorUsed = gr.Selector ?? string.Empty
+                    SelectorUsed = gr.Selector ?? string.Empty,
+                    AiAnalysisJson = gr.AiAnalysis != null && gr.AiAnalysis.Count > 0
+                        ? JsonSerializer.Serialize(gr.AiAnalysis)
+                        : null
                 };
                 stepResultsToAdd.Add(sr);
 
@@ -522,6 +528,13 @@ namespace Persistance.Services
             /// </summary>
             [JsonPropertyName("gherkin_steps_results")]
             public List<AgentGherkinStepResult> GherkinStepsResults { get; set; } = new();
+
+            /// <summary>
+            /// Aggregated AI failure analysis for the whole scenario when at least one
+            /// step has failed.  Empty/null when the scenario passed.
+            /// </summary>
+            [JsonPropertyName("scenario_analysis")]
+            public Dictionary<string, object>? ScenarioAnalysis { get; set; }
         }
 
         private sealed class AgentGherkinStepResult
@@ -546,6 +559,14 @@ namespace Persistance.Services
 
             [JsonPropertyName("selector")]
             public string Selector { get; set; } = string.Empty;
+
+            /// <summary>
+            /// AI-generated failure analysis for this step (only present when the step
+            /// failed).  Stored as a free-form dictionary so the frontend can display
+            /// any new fields without requiring a backend change.
+            /// </summary>
+            [JsonPropertyName("ai_analysis")]
+            public Dictionary<string, object>? AiAnalysis { get; set; }
         }
 
         private sealed class AgentStepResult

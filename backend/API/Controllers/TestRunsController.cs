@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Persistance.Data;
 using System.Security.Claims;
+using System.Text.Json;
 
 using Asp.Versioning;
 namespace API.Controllers
@@ -260,6 +261,9 @@ namespace API.Controllers
                             startedAt = r.StartedAt,
                             completedAt = r.CompletedAt,
                             durationSeconds = Math.Round(r.Duration.TotalSeconds, 2),
+                            aiAnalysis = string.IsNullOrWhiteSpace(r.AiAnalysisJson)
+                                ? null
+                                : (object?)JsonSerializer.Deserialize<JsonElement>(r.AiAnalysisJson),
                             stepResults = r.StepResults
                                 .OrderBy(sr => sr.Step.DisplayOrder)
                                 .Select(sr => new
@@ -272,6 +276,9 @@ namespace API.Controllers
                                     durationSeconds = Math.Round(sr.Duration.TotalSeconds, 2),
                                     actionPerformed = sr.ActionPerformed,
                                     selectorUsed = sr.SelectorUsed,
+                                    aiAnalysis = string.IsNullOrWhiteSpace(sr.AiAnalysisJson)
+                                        ? null
+                                        : (object?)JsonSerializer.Deserialize<JsonElement>(sr.AiAnalysisJson),
                                     screenshot = sr.Screenshot == null
                                         ? null
                                         : new

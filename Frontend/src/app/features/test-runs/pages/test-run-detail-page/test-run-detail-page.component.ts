@@ -9,11 +9,12 @@ import { BreadcrumbService } from '../../../../core/services/breadcrumb.service'
 import { TestRunService } from '../../../../core/services/test-run.service';
 import { TestRunDetail, TestRunScenarioResult, TestRunStepResult } from '../../../../core/models/test-run.model';
 import { environment } from '../../../../../environments/environment';
+import { AiFailureAnalyzerComponent } from '../../components/ai-failure-analyzer.component';
 
 @Component({
   selector: 'app-test-run-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslatePipe],
+  imports: [CommonModule, RouterModule, TranslatePipe, AiFailureAnalyzerComponent],
   templateUrl: './test-run-detail-page.component.html'
 })
 export class TestRunDetailPageComponent implements OnInit, OnDestroy {
@@ -188,6 +189,44 @@ export class TestRunDetailPageComponent implements OnInit, OnDestroy {
 
   getFailedStepCount(result: TestRunScenarioResult): number {
     return result.stepResults.filter(s => (s.status || '').toLowerCase() === 'failed').length;
+  }
+
+  /** Returns the error message of the first failed step in a scenario, used as
+   *  a fallback when the scenario itself has no top-level errorMessage but the
+   *  user wants to analyse the failure. */
+  firstFailedStepError(result: TestRunScenarioResult): string | null {
+    const failed = (result.stepResults || []).find(s => (s.status || '').toLowerCase() === 'failed');
+    return failed?.errorMessage ?? null;
+  }
+
+  /**
+   * Returns Tailwind classes for the category chip displayed in the AI failure
+   * analysis section, mapping each canonical category to a colour scheme.
+   */
+  categoryChipClass(category: string | null | undefined): string {
+    const base = 'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider';
+    switch ((category || '').toLowerCase()) {
+      case 'test':           return `${base} bg-amber-100 text-amber-800 border border-amber-200`;
+      case 'application':    return `${base} bg-rose-100 text-rose-800 border border-rose-200`;
+      case 'detection':      return `${base} bg-blue-100 text-blue-800 border border-blue-200`;
+      case 'timing':         return `${base} bg-indigo-100 text-indigo-800 border border-indigo-200`;
+      case 'environment':    return `${base} bg-slate-200 text-slate-800 border border-slate-300`;
+      default:               return `${base} bg-slate-100 text-slate-700 border border-slate-200`;
+    }
+  }
+
+  /** Translation key for the category label. */
+  categoryLabelKey(category: string | null | undefined): string {
+    const c = (category || 'unknown').toLowerCase();
+    const allowed = ['test', 'application', 'detection', 'timing', 'environment', 'unknown'];
+    return `testRun.failure.category.${allowed.includes(c) ? c : 'unknown'}`;
+  }
+
+  /** Confidence as a percentage string (e.g. 0.85 → "85%"). */
+  formatConfidence(value: number | null | undefined): string {
+    if (value == null || isNaN(value)) return '';
+    const pct = Math.round(Math.max(0, Math.min(1, value)) * 100);
+    return `${pct}%`;
   }
 
   /**

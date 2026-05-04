@@ -33,6 +33,20 @@ export interface TestRunScreenshot {
   capturedAt: string;
 }
 
+export interface AiFailureAnalysis {
+  category: string;
+  root_cause: string;
+  title: string;
+  explanation: string;
+  where: string;
+  is_test_issue: boolean;
+  suggested_fix: string;
+  confidence: number;
+  scenario_name?: string;
+  failed_step_count?: number;
+  first_failed_step?: string;
+}
+
 export interface TestRunStepResult {
   id: string;
   stepText: string;
@@ -43,6 +57,7 @@ export interface TestRunStepResult {
   actionPerformed: string;
   selectorUsed: string;
   screenshot: TestRunScreenshot | null;
+  aiAnalysis?: AiFailureAnalysis | null;
 }
 
 export interface TestRunScenarioResult {
@@ -55,6 +70,7 @@ export interface TestRunScenarioResult {
   completedAt: string;
   durationSeconds: number;
   stepResults: TestRunStepResult[];
+  aiAnalysis?: AiFailureAnalysis | null;
 }
 
 export interface TestRunLog {

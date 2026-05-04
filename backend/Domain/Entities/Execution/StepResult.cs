@@ -15,6 +15,11 @@ namespace Domain.Entities.Execution
         public string ActionPerformed { get; set; } = string.Empty;
         public string SelectorUsed { get; set; } = string.Empty;
 
+        // AI failure analysis (rule-based diagnosis produced by the IA agent
+        // when the step fails).  Stored as JSON so the schema can evolve
+        // without further migrations.  Null on passing steps.
+        public string? AiAnalysisJson { get; set; }
+
         public TestResult TestResult { get; set; } = null!;
         public Step Step { get; set; } = null!;
         public Screenshot? Screenshot { get; set; }

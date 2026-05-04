@@ -15,6 +15,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { TranslationService } from '../../core/services/translation.service';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { AvatarService } from '../../core/services/avatar.service';
+import { ThemeService } from '../../core/services/theme.service';
 import { ResponseHttp } from '../../core/models/response-http.model';
 import { ChangePasswordResponse } from '../../core/models/auth.model';
 
@@ -64,6 +65,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private destroy$      = new Subject<void>();
   translationService    = inject(TranslationService);
   private avatarService = inject(AvatarService);
+  private themeService  = inject(ThemeService);
 
   @ViewChild('avatarInput') avatarInput?: ElementRef<HTMLInputElement>;
 
@@ -86,7 +88,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   autoHealingEnabled = true;
   emailNotificationsEnabled = true;
-  preferredTheme: 'light' | 'dark' = 'light';
+  get preferredTheme(): 'light' | 'dark' { return this.themeService.current; }
   twoFactorEnabled = true;
 
   activeTab: ProfileTab = 'overview';
@@ -186,7 +188,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
       this.autoHealingEnabled = prefs.autoHealingEnabled ?? true;
       this.emailNotificationsEnabled = prefs.emailNotificationsEnabled ?? true;
-      this.preferredTheme = prefs.preferredTheme ?? 'light';
+      // Theme is now owned by ThemeService; sync it if the profile pref differs
+      if (prefs.preferredTheme && prefs.preferredTheme !== this.themeService.current) {
+        this.themeService.set(prefs.preferredTheme);
+      }
       this.twoFactorEnabled = prefs.twoFactorEnabled ?? true;
       this.applyTheme(this.preferredTheme);
     } catch {
@@ -214,8 +219,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   setTheme(theme: 'light' | 'dark'): void {
-    this.preferredTheme = theme;
-    this.applyTheme(theme);
+    this.themeService.set(theme);
     this.persistPreferences();
   }
 
@@ -224,13 +228,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.persistPreferences();
   }
 
-  private applyTheme(theme: 'light' | 'dark'): void {
-    const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+  private applyTheme(_theme: 'light' | 'dark'): void {
+    // Delegated to ThemeService — kept for backward compat with persistPreferences
   }
 
   // ── Avatar upload ────────────────────────────────────────────────────
