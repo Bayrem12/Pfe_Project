@@ -23,7 +23,7 @@ build/
 # Modeles entraines (trop lourds pour Git)
 trained_models/nlp/*.pt
 trained_models/nlp/*.joblib
-trained_models/vision/*.pt
+
 
 # Donnees
 data/ui_screenshots/*.png
