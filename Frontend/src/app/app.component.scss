@@ -20,12 +20,18 @@ $bg-main: #f8fafc;
   background-color: $bg-main;
   display: flex;
   flex-direction: column;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.3s ease, background-color 0.25s ease;
   
   // When sidebar is collapsed
   &.sidebar-collapsed {
     margin-left: $sidebar-collapsed-width;
   }
+}
+
+// ── DARK MODE: cascade body background to main shell ──
+:host-context(html.dark) .main-content,
+html.dark .main-content {
+  background-color: #0d1117 !important;
 }
 
 // Page content wrapper — padding is managed by each page's root element

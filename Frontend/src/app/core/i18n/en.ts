@@ -851,6 +851,23 @@
   'testRun.detail.duration':          'Duration',
   'testRun.detail.noSteps':           'No step-level results available.',
 
+  // ── AI Failure Analysis ──────────────────────────────────────────
+  'testRun.failure.title':            'Failed Test',
+  'testRun.failure.aiAnalysis':       'AI Failure Analysis',
+  'testRun.failure.rootCause':        'Root Cause',
+  'testRun.failure.suggestedFix':     'Suggested Fix',
+  'testRun.failure.where':            'Location',
+  'testRun.failure.confidence':       'Confidence',
+  'testRun.failure.firstFailedStep':  'First failed step',
+  'testRun.failure.category.test':         'Test Issue',
+  'testRun.failure.category.application':  'Application Bug',
+  'testRun.failure.category.detection':    'Detection Issue',
+  'testRun.failure.category.timing':       'Timing Issue',
+  'testRun.failure.category.environment':  'Environment Issue',
+  'testRun.failure.category.unknown':      'Unknown',
+  'testRun.failure.isTestIssue.yes':       'Yes — likely a test problem',
+  'testRun.failure.isTestIssue.no':        'No — likely an application problem',
+
   // ── Feature form (page + modal) ──────────────────────────────────
   'feature.form.editTitle':           'Edit Feature',
   'feature.form.createTitle':         'Create Feature',

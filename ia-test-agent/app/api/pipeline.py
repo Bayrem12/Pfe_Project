@@ -19,6 +19,10 @@ from app.services.nlp_service import NLPService
 from app.services.generator_service import GeneratorService
 from app.services.executor_service import ExecutorService
 from app.services.report_service import ReportService, _classify_error, _classify_method
+from app.services.failure_analysis_service import (
+    analyze_step_failure,
+    analyze_scenario_failure,
+)
 
 router = APIRouter(prefix="/api/ia", tags=["Pipeline"])
 
@@ -70,6 +74,10 @@ class PipelineResponse(BaseModel):
     # all raw steps_results that belong to that step.  Consumers should use this
     # field instead of steps_results when they need a 1-to-1 mapping with Gherkin.
     gherkin_steps_results: list[dict] = []
+    # AI failure analysis — one verdict for the whole scenario.  Empty dict when
+    # the scenario passed.  Each failed entry inside gherkin_steps_results also
+    # carries its own ai_analysis sub-dict.
+    scenario_analysis: dict = Field(default_factory=dict)
 
 
 def _extract_selector(code_lines: list[str]) -> str:
@@ -310,6 +318,52 @@ async def run_pipeline(request: PipelineRequest):
         pipeline_trace_path = report_service.generate_pipeline_html(exec_result.test_id) or ""
         technical_trace_path = report_service.generate_technical_trace_html(exec_result.test_id) or ""
 
+        # ── 7. AI failure analysis ─────────────────────────────────────
+        # Build the per-Gherkin-step result list, attaching ai_analysis to any
+        # entry whose statut is not "OK".  Then derive a scenario-level verdict.
+        gherkin_payload: list[dict] = []
+        failed_for_summary: list[dict] = []
+        for s in trace.steps:
+            statut = s.statut if s.statut else "OK"
+            entry: dict = {
+                "step_num": s.step_num,
+                "keyword": s.keyword,
+                "gherkin_text": s.gherkin_text,
+                "statut": statut,
+                "duree_ms": s.duree_ms,
+                "erreur": s.erreur,
+                "selector": _extract_selector(s.generated_code),
+            }
+            if statut.upper() not in ("OK", "PASSED"):
+                # Pull retry / fallback info from the matching raw exec entry, if any.
+                retry_count = 0
+                visual_fallback_used = False
+                for raw in exec_result.steps_results:
+                    if getattr(raw, "step_num", None) == s.step_num:
+                        retry_count = max(retry_count, getattr(raw, "retry_count", 0) or 0)
+                        if getattr(raw, "visual_fallback_used", False):
+                            visual_fallback_used = True
+                analysis = analyze_step_failure(
+                    step_text=s.gherkin_text,
+                    error_message=s.erreur or "",
+                    selector=entry["selector"],
+                    keyword=s.keyword,
+                    visual_fallback_used=visual_fallback_used,
+                    retry_count=retry_count,
+                )
+                entry["ai_analysis"] = analysis.to_dict()
+                failed_for_summary.append(entry)
+            gherkin_payload.append(entry)
+
+        scenario_analysis = (
+            analyze_scenario_failure(
+                scenario_name=request.scenario_name,
+                failed_steps=failed_for_summary,
+            )
+            if failed_for_summary
+            else {}
+        )
+
         return PipelineResponse(
             test_id=exec_result.test_id,
             scenario_name=request.scenario_name,
@@ -324,19 +378,8 @@ async def run_pipeline(request: PipelineRequest):
             report_html_path=html_path,
             pipeline_trace_path=pipeline_trace_path,
             technical_trace_path=technical_trace_path,
-            # One entry per Gherkin step — consumers should prefer this over steps_results
-            gherkin_steps_results=[
-                {
-                    "step_num": s.step_num,           # 1-based Gherkin step index
-                    "keyword": s.keyword,
-                    "gherkin_text": s.gherkin_text,
-                    "statut": s.statut if s.statut else "OK",  # default OK when no exec ran
-                    "duree_ms": s.duree_ms,
-                    "erreur": s.erreur,
-                    "selector": _extract_selector(s.generated_code),
-                }
-                for s in trace.steps
-            ],
+            gherkin_steps_results=gherkin_payload,
+            scenario_analysis=scenario_analysis,
         )
 
     except Exception as e:

@@ -14,6 +14,9 @@ namespace Domain.Entities.Execution
         public DateTime StartedAt { get; set; }
         public DateTime CompletedAt { get; set; }
 
+        // Scenario-level AI failure analysis (JSON, see StepResult.AiAnalysisJson).
+        public string? AiAnalysisJson { get; set; }
+
         // Navigation
         public TestExecution Execution { get; set; } = null!;
         public Scenario Scenario { get; set; } = null!;

@@ -360,3 +360,78 @@ table {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------------------------------------------
+   DARK MODE OVERRIDES (component-scoped)
+   --------------------------------------------- */
+:host-context(html.dark) {
+  .users-shell { color: var(--text-primary); }
+  .users-header h1 { color: var(--text-primary); }
+  .users-header p  { color: var(--text-secondary); }
+
+  .stat-card {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+    p  { color: var(--text-muted); }
+    h3 { color: var(--text-primary); }
+  }
+
+  .table-card {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+  }
+
+  .toolbar { border-bottom-color: var(--border-color); }
+
+  .filters select,
+  .filters .ghost-btn,
+  .search-input {
+    background: var(--input-bg);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+  }
+  .search-input input { background: transparent; color: var(--text-primary); }
+  .search-input span  { color: var(--text-muted); }
+
+  table th { color: var(--text-muted); }
+  table td { color: var(--text-primary); }
+  table th, table td { border-bottom-color: var(--border-color); }
+
+  .name  { color: var(--text-primary); }
+  .email { color: var(--text-secondary); }
+
+  .row-actions button {
+    background: var(--input-bg);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+  }
+
+  .table-footer {
+    background: var(--input-bg);
+    p { color: var(--text-secondary); }
+    strong { color: var(--text-primary); }
+  }
+
+  .pagination button {
+    background: var(--input-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+    &.active {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+    }
+  }
+
+  .danger-btn {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #f87171;
+  }
+
+  .alert-error {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.25);
+    color: #fca5a5;
+  }
+}
