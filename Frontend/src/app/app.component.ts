@@ -7,6 +7,7 @@ import { SidebarNavComponent } from './shared/components/sidebar-nav/sidebar-nav
 import { TopbarComponent } from './shared/components/topbar/topbar.component';
 import { ConfirmHostComponent } from './shared/components/confirm-host/confirm-host.component';
 import { SidebarService } from './core/services/sidebar.service';
+import { ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +22,7 @@ export class AppComponent {
 
   sidebarService = inject(SidebarService);
   router = inject(Router);
+  private themeService = inject(ThemeService);
 
   private shouldDisplayLayout(url: string): boolean {
     const normalizedUrl = (url || '').split('?')[0].split('#')[0];
@@ -31,6 +33,9 @@ export class AppComponent {
   }
 
   constructor() {
+    // Apply persisted theme immediately on startup
+    this.themeService.init();
+
     // 🔥 au chargement (refresh)
     const currentUrl = this.router.url;
     this.showLayout = this.shouldDisplayLayout(currentUrl);

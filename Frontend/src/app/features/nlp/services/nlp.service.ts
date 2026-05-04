@@ -89,4 +89,69 @@ export class NlpService {
       map(response => response.resultat)
     );
   }
+
+  /**
+   * Analyze the quality of a scenario's steps before execution.
+   * POST /api/nlp/analyze-quality
+   * Works before saving — no scenarioId required.
+   */
+  analyzeQuality(scenarioName: string, steps: { keyword: string; text: string }[], language = 'en'): Observable<ScenarioQualityResult> {
+    return this.apiService.post<ScenarioQualityResult>('nlp/analyze-quality', {
+      scenarioName,
+      steps,
+      language,
+    }).pipe(map(r => r.resultat));
+  }
+
+  /**
+   * Analyze a single failed step — returns root cause, category, explanation,
+   * suggested fix and confidence. Triggered manually from the UI when a test
+   * has failed.
+   * POST /api/nlp/analyze-failure
+   */
+  analyzeFailure(req: AnalyzeFailureRequest): Observable<FailureAnalysisResult> {
+    return this.apiService.post<FailureAnalysisResult>('nlp/analyze-failure', req)
+      .pipe(map(r => r.resultat));
+  }
+}
+
+// ── Quality analysis models ───────────────────────────────────────────────
+
+export interface QualityIssue {
+  severity: 'error' | 'warning' | 'info';
+  step_index: number | null;
+  step_text: string | null;
+  message: string;
+  why: string;
+}
+
+export interface ScenarioQualityResult {
+  quality_score: number;
+  quality_label: 'good' | 'medium' | 'poor';
+  issues: QualityIssue[];
+  suggestions: string[];
+  improved_steps: { keyword: string; text: string }[];
+  best_practices: string[];
+}
+
+// ── Failure analysis models ───────────────────────────────────────────────
+
+export interface AnalyzeFailureRequest {
+  stepText: string;
+  errorMessage: string;
+  selector?: string;
+  keyword?: string;
+  visualFallbackUsed?: boolean;
+  retryCount?: number;
+}
+
+export interface FailureAnalysisResult {
+  category: string;          // test | application | detection | timing | environment | unknown
+  root_cause: string;
+  title: string;
+  explanation: string;
+  where: string;
+  is_test_issue: boolean;
+  suggested_fix: string;
+  confidence: number;        // 0..1
 }

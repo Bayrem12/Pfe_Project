@@ -332,3 +332,71 @@ $border: #e3e7f0;
   box-shadow: none !important;
   pointer-events: none !important;
 }
+
+/* ─────────────────────────────────────────────
+   DARK MODE OVERRIDES
+   ───────────────────────────────────────────── */
+:host-context(html.dark) {
+  .project-create-container {
+    background: var(--app-bg);
+    color: var(--text-primary);
+  }
+
+  .page-header {
+    h1 { color: var(--text-primary); }
+    .subtitle { color: var(--text-secondary); }
+    .progress-bar { background: var(--input-bg); }
+  }
+
+  .project-form {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+    box-shadow: 0 .25rem 1.25rem rgba(0,0,0,0.45);
+  }
+
+  .form-group {
+    label { color: var(--text-secondary); }
+    input[type='text'],
+    textarea {
+      background: var(--input-bg);
+      border-color: var(--border-color);
+      color: var(--text-primary);
+      &::placeholder { color: var(--text-muted); }
+      &:focus {
+        background: var(--input-bg);
+        border-color: #6382ff;
+        box-shadow: 0 0 0 .2rem rgba(99, 130, 255, 0.18);
+      }
+      &.error {
+        background: rgba(239, 68, 68, 0.08);
+        border-color: rgba(239, 68, 68, 0.5);
+      }
+    }
+  }
+
+  .status-group {
+    background: var(--input-bg);
+    border-color: var(--border-color);
+    .status-info .status-title { color: var(--text-primary); }
+    .status-info .status-description { color: var(--text-secondary); }
+    .status-label { color: var(--text-muted); &.active { color: #a8b8ff; } }
+  }
+
+  .toggle-switch .slider { background: #3a4358; }
+
+  .form-actions { border-top-color: var(--border-color); }
+
+  .btn-cancel {
+    color: var(--text-secondary);
+    &:hover {
+      color: var(--text-primary);
+      background: var(--hover-bg);
+    }
+  }
+
+  .btn-submit {
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    box-shadow: 0 .24rem .75rem rgba(0,0,0,.45);
+    &:hover:not(:disabled) { background: linear-gradient(135deg, #1d4ed8, #4338ca); }
+  }
+}

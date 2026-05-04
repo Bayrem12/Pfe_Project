@@ -4,6 +4,16 @@ Agent intelligent d'automatisation des tests fonctionnels.
 """
 
 import os
+import sys
+import asyncio
+
+# Windows + Python 3.8+ : Playwright spawns a Node.js subprocess via
+# asyncio.create_subprocess_exec, which is NOT supported on the
+# WindowsSelectorEventLoopPolicy (it raises NotImplementedError).
+# Force the Proactor policy BEFORE uvicorn / FastAPI create the loop so
+# the executor service can take screenshots without crashing.
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,6 +27,8 @@ from app.api import (
     adaptation,
     reporting,
     pipeline,
+    failure_analysis,
+    scenario_quality,
 )
 from app.config import settings
 
@@ -50,3 +62,5 @@ app.include_router(test_execution.router)
 app.include_router(adaptation.router)
 app.include_router(reporting.router)
 app.include_router(pipeline.router)
+app.include_router(failure_analysis.router)
+app.include_router(scenario_quality.router)

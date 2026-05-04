@@ -900,6 +900,23 @@ export const fr: Record<string, string> = {
   'testRun.detail.duration':          'Durée',
   'testRun.detail.noSteps':           "Aucun résultat d'étape disponible.",
 
+  // ── Analyse intelligente des échecs ──────────────────────────────
+  'testRun.failure.title':            'Test échoué',
+  'testRun.failure.aiAnalysis':       "Analyse IA de l'échec",
+  'testRun.failure.rootCause':        'Cause principale',
+  'testRun.failure.suggestedFix':     'Correction suggérée',
+  'testRun.failure.where':            'Localisation',
+  'testRun.failure.confidence':       'Confiance',
+  'testRun.failure.firstFailedStep':  'Première étape échouée',
+  'testRun.failure.category.test':         'Problème de test',
+  'testRun.failure.category.application':  "Bug applicatif",
+  'testRun.failure.category.detection':    'Problème de détection',
+  'testRun.failure.category.timing':       'Problème de synchronisation',
+  'testRun.failure.category.environment':  "Problème d'environnement",
+  'testRun.failure.category.unknown':      'Inconnu',
+  'testRun.failure.isTestIssue.yes':       'Oui — probablement un problème de test',
+  'testRun.failure.isTestIssue.no':        "Non — probablement un problème de l'application",
+
   // ── Feature form (page + modal) ──────────────────────────────────
   'feature.form.editTitle':           'Modifier la fonctionnalité',
   'feature.form.createTitle':         'Créer une fonctionnalité',

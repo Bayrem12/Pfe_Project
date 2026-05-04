@@ -156,13 +156,16 @@ def _pw_code_from_mapping(step, mapping, timeout_ms: int = 10000) -> list[str]:
     return [f'await {locator_expr}.click(timeout={timeout_ms})']
 
 
-def _pw_code_for_step(step, context: str = "main", timeout_ms: int = 10000) -> list[str]:
+def _pw_code_for_step(step, context: str = "main", timeout_ms: int = 10000, prev_step=None) -> list[str]:
     """Generate Playwright lines for a single parsed step.
     
     Args:
         step: ParsedStep with intention, raw_text, entites.
         context: 'main' | 'iframe' | 'shadow' | 'popup'.
         timeout_ms: Default timeout for waits and assertions.
+        prev_step: The previous ParsedStep (used for context-aware assertions,
+            e.g. asserting the SELECTED value of a dropdown when the previous
+            step was `selectionner`). May be None for the first step.
     """
     intent = step.intention
     entities = {e.nom: e.valeur for e in step.entites}
@@ -255,13 +258,35 @@ def _pw_code_for_step(step, context: str = "main", timeout_ms: int = 10000) -> l
 
     # ── SELECT ────────────────────────────────────────────────────────────────
     elif intent == "selectionner":
-        # Detect whether this is a RADIO/OPTION pattern ("choose Male for Gender",
-        # "select option Yes") versus a true <select> dropdown pattern
-        # ("select France from the Country dropdown"). The presence of
-        # "dropdown / list / menu / from" is a strong dropdown hint;
-        # otherwise the "for / as / pour / comme" preposition or the absence
-        # of any list-keyword strongly suggests a radio/segmented control.
         raw_lower = (step.raw_text or "").lower()
+        raw_text  = step.raw_text or ""
+
+        # ── Regex fallback: extract value+target when NLP didn't quote them ──
+        # Handles: "I select Option 2 from the dropdown"
+        #          "select France from the Country list"
+        #          "sélectionner Option 1 dans la liste"
+        if not valeur:
+            _sel_re = re.search(
+                r'(?:select|choose|pick|s[ée]lectionner|choisir)\s+'
+                r'(["\']?[\w\u00C0-\u024F][\w\u00C0-\u024F\s]*?["\']?)'
+                r'\s+(?:from|depuis|dans|in)\s+(?:the\s+)?'
+                r'(["\']?[\w\u00C0-\u024F][\w\u00C0-\u024F\s]*?["\']?)'
+                r'(?:\s+(?:dropdown|list|liste|d[ée]roul|menu|select))?\s*$',
+                raw_text, re.I,
+            )
+            if _sel_re:
+                valeur = _sel_re.group(1).strip().strip("'\"")
+                cible  = _sel_re.group(2).strip().strip("'\"")
+            else:
+                # Simpler: "select Option 2" with no "from"
+                _sel_re2 = re.search(
+                    r'(?:select|choose|pick|s[ée]lectionner|choisir)\s+'
+                    r'(?:option\s+)?(["\']?[\w\u00C0-\u024F][\w\u00C0-\u024F\s]*?["\']?)\s*$',
+                    raw_text, re.I,
+                )
+                if _sel_re2:
+                    valeur = _sel_re2.group(1).strip().strip("'\"")
+
         is_dropdown_hint = any(
             kw in raw_lower for kw in (
                 "dropdown", "liste déroul", "liste deroul", " menu ",
@@ -274,14 +299,6 @@ def _pw_code_for_step(step, context: str = "main", timeout_ms: int = 10000) -> l
         )
 
         if is_radio_hint and valeur and target == "page":
-            # Robust radio/segmented-control click that works on the vast
-            # majority of real forms (DemoQA, Bootstrap, Material, custom):
-            #   • <input type="radio" value="Male">           (attribute match)
-            #   • <label for="x">Male</label>                  (label-text click)
-            #   • <button role="radio" aria-label="Male">      (ARIA radio)
-            # `.first` avoids strict-mode violations when several elements
-            # match (e.g. the input + its label). `force=True` handles inputs
-            # that are visually hidden behind a styled <label>.
             esc = valeur.replace('"', '\\"').replace("'", "\\'")
             selector = (
                 f'{target}.locator('
@@ -292,18 +309,24 @@ def _pw_code_for_step(step, context: str = "main", timeout_ms: int = 10000) -> l
             )
             lines.append(f'await {selector}.click(force=True)')
         else:
-            # True <select> dropdown — keep the original behaviour.
-            if cible:
-                if " " not in cible:
-                    selector = (
-                        f"{target}.locator("
-                        f"\"select[id='{cible}'], select[name='{cible}']\""
-                        f").first"
-                    )
-                else:
-                    selector = f'{target}.get_by_label("{cible}")'
+            # True <select> dropdown.
+            if cible and " " not in cible:
+                selector = (
+                    f"{target}.locator("
+                    f"\"select[id='{cible}'], select[name='{cible}']\""
+                    f").first"
+                )
             else:
                 selector = f'{target}.locator("select").first'
+            # If NLP extracted a bare number (e.g. "2") but the raw text
+            # mentions "Option 2" or "option 2", reconstruct the full label.
+            if valeur and re.match(r'^\d+$', valeur):
+                _opt_label_re = re.search(
+                    r'\b(option|opt)\s+' + re.escape(valeur) + r'\b',
+                    raw_text, re.I,
+                )
+                if _opt_label_re:
+                    valeur = f'{_opt_label_re.group(1).capitalize()} {valeur}'
             lines.append(f'await {selector}.select_option(label="{valeur}")')
 
     # ── CHECK ────────────────────────────────────────────────────────────────
@@ -390,29 +413,99 @@ def _pw_code_for_step(step, context: str = "main", timeout_ms: int = 10000) -> l
     # ── ASSERT TEXT ───────────────────────────────────────────────────────────
     elif intent == "verifier_texte":
         expected = valeur or cible
+        raw_lower = (step.raw_text or "").lower()
+        raw_text  = step.raw_text or ""
+
+        # ── Regex fallback: extract expected value when NLP missed it ────────
+        # Handles unquoted patterns like "I should see Option 1",
+        # "the page should display Welcome", "je dois voir Succès".
+        if not expected:
+            _see_re = re.search(
+                r'(?:should\s+(?:see|display|contain|show|have)\s+'
+                r'|devrait\s+(?:afficher|contenir|montrer|avoir)\s+'
+                r'|I\s+see\s+|vois?\s+|affiche\s+)'
+                r'(?:an?\s+|the\s+|le\s+|la\s+|les\s+|l\'\s*)?'
+                r'(["\']?[\w\u00C0-\u024F][\w\u00C0-\u024F\s\-\.]*?["\']?)'
+                r'(?:\s+(?:message|text|texte|button|link|element|page))?\s*$',
+                raw_text, re.I,
+            )
+            if _see_re:
+                expected = _see_re.group(1).strip().strip("'\"")
+
+        # ── Login-success assertion ─────────────────────────────────────────
+        # "I should be connected/logged in/successfully" is a SEMANTIC check.
+        # The page after a wrong password still contains words like "login"
+        # everywhere → a naive text-contain check always passes (false-positive).
+        # Strict check: URL must have changed away from the auth page AND no
+        # visible error/invalid message must be present.
+        login_success_kw = (
+            "connected", "logged in", "log in success", "login success",
+            "successfully", "succesfully", "signed in",
+            "connecté", "authentifié", "connexion réussie", "connexion reussie",
+        )
+        if any(kw in raw_lower for kw in login_success_kw):
+            lines.append(
+                'assert not __import__("re").search(r"/(login|signin|sign-in|connexion|auth)(?:[/?#]|$)", page.url, 2), '
+                '"Login failed — still on auth page: " + page.url'
+            )
+            lines.append(
+                'assert (await page.locator('
+                '"text=/incorrect|invalid|wrong password|erreur|invalide|password.{0,30}(incorrect|invalid|wrong)|login failed|échec/i"'
+                ').count()) == 0, "Login failed — error message visible on page"'
+            )
+            return lines
+
+        # ── Dropdown selected-value assertion ───────────────────────────────
+        # If the PREVIOUS step was `selectionner` on a dropdown, "I should see X"
+        # means "the dropdown's currently-selected value should be X" — NOT
+        # "X exists somewhere on the page" (trivially true: X is an <option>).
+        prev_intent = getattr(prev_step, "intention", "") if prev_step else ""
+        prev_raw = (getattr(prev_step, "raw_text", "") or "").lower() if prev_step else ""
+        prev_was_dropdown_select = prev_intent == "selectionner" and any(
+            kw in prev_raw for kw in (
+                "dropdown", "liste déroul", "liste deroul", " menu ",
+                " from ", " depuis ", " dans la liste", " in the list",
+            )
+        )
+        if prev_was_dropdown_select and expected:
+            esc = expected.replace('"', '\\"')
+            # evaluate() reads el.selectedIndex property (not DOM attribute),
+            # so it reflects the live selection even in headless mode.
+            lines.append(
+                f'assert (await {target}.locator("select").first.evaluate('
+                f'"el => el.options[el.selectedIndex] ? el.options[el.selectedIndex].text.trim() : \'\'"))'
+                f' == "{esc}", "Dropdown mismatch: expected \\\'{esc}\\\' but different option selected"'
+            )
+            return lines
+
         if cible and valeur:
             # Scoped assertion: text "{valeur}" must appear inside element "{cible}".
             selector = _build_selector(cible, "", target)
             lines.append(f'await expect({selector}).to_contain_text("{valeur}", timeout={timeout_ms})')
         elif expected:
-            # Generic "I should see X on the page" assertion.
-            #
-            # We use `expect(body).to_contain_text(...)` because it is the
-            # most semantically correct interpretation of "the page should
-            # show X": Playwright auto-retries on body.text_content() and
-            # matches text *anywhere* in the rendered DOM (case-insensitive
-            # via `ignore_case=True`).
-            #
-            # We DELIBERATELY avoid `get_by_text(...).first.to_be_visible()`:
-            # on text-rich pages (e.g. Wikipedia articles) the substring
-            # often matches 10+ DOM nodes — including hidden anchors,
-            # collapsed sections, sr-only labels — and `.first` arbitrarily
-            # picks the first match in DOM order which is frequently the
-            # hidden one, causing false-negative assertions.
+            # Generic "I should see X on the page" assertion — STRICT version:
+            # only counts text actually visible to the user. Excludes <option>,
+            # <script>, <style>, [hidden], aria-hidden, display:none, etc.
+            # This prevents the classic false-positive where a dropdown
+            # <option> value satisfies the assertion regardless of selection.
             esc = expected.replace('"', '\\"')
+            js = (
+                "() => { const skip = new Set(['SCRIPT','STYLE','NOSCRIPT','OPTION','TEMPLATE']); "
+                "const w = (n,o) => { if (!n) return; "
+                "if (n.nodeType===3){o.push(n.nodeValue);return;} "
+                "if (n.nodeType!==1) return; "
+                "if (skip.has(n.tagName)) return; "
+                "if (n.hidden || (n.getAttribute && n.getAttribute('aria-hidden')==='true')) return; "
+                "const cs = window.getComputedStyle(n); "
+                "if (cs.display==='none'||cs.visibility==='hidden'||cs.opacity==='0') return; "
+                "for (const c of n.childNodes) w(c,o); }; "
+                "const o=[]; w(document.body,o); return o.join(' ').replace(/\\s+/g,' ').trim(); }"
+            )
+            js_esc = js.replace('"', '\\"')
             lines.append(
-                f'await expect({target}.locator("body"))'
-                f'.to_contain_text("{esc}", ignore_case=True, timeout={timeout_ms})'
+                f'assert "{esc}".lower() in '
+                f'(await {target}.evaluate("{js_esc}")).lower(), '
+                f'"Expected visible text \'{esc}\' not found on page"'
             )
 
     # ── ASSERT VISIBLE ────────────────────────────────────────────────────────
@@ -512,7 +605,25 @@ def _pw_code_for_step(step, context: str = "main", timeout_ms: int = 10000) -> l
 
     # ── UNKNOWN ────────────────────────────────────────────────────────────────
     else:
-        lines.append(f'# TODO (intention inconnue: {intent}): {step.raw_text}')
+        raw_lower_unk = (step.raw_text or "").lower()
+        # Detect assertion-like unknown steps before giving up.
+        # "I should be logged in / connected / signed in" → URL-based auth check.
+        login_success_kw_unk = (
+            "logged in", "log in success", "login success", "signed in",
+            "connected", "successfully logged", "authentifié", "connexion réussie",
+        )
+        if any(kw in raw_lower_unk for kw in login_success_kw_unk):
+            lines.append(
+                'assert not __import__("re").search(r"/(login|signin|sign-in|connexion|auth)(?:[/?#]|$)", page.url, 2), '
+                '"Login failed — still on auth page: " + page.url'
+            )
+            lines.append(
+                'assert (await page.locator('
+                '"text=/incorrect|invalid|wrong password|erreur|invalide|password.{0,30}(incorrect|invalid|wrong)|login failed|échec/i"'
+                ').count()) == 0, "Login failed — error message visible on page"'
+            )
+        else:
+            lines.append(f'# TODO (intention inconnue: {intent}): {step.raw_text}')
 
     return lines
 
@@ -635,7 +746,10 @@ class GeneratorService:
             if override is not None:
                 code_lines = _pw_code_from_mapping(step, override, timeout_ms=timeout_ms)
             else:
-                code_lines = _pw_code_for_step(step, context=context, timeout_ms=timeout_ms)
+                prev_step = request.steps[i - 2] if i >= 2 else None
+                code_lines = _pw_code_for_step(
+                    step, context=context, timeout_ms=timeout_ms, prev_step=prev_step,
+                )
 
             step_blocks.append({
                 "number": i,
