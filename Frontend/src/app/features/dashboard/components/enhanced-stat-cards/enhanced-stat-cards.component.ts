@@ -79,7 +79,7 @@ import { DashboardSummary } from '../../models/dashboard.model';
         </div>
       </div>
 
-      <!-- Pass Rate Card -->
+      <!-- Passed Runs Card -->
       <div class="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center space-x-2">
@@ -87,52 +87,75 @@ import { DashboardSummary } from '../../models/dashboard.model';
               <span class="material-symbols-outlined text-green-600 text-xl">check_circle</span>
             </div>
             <div>
-              <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Pass Rate</p>
-              <p class="text-2xl font-bold text-gray-900">{{ summary?.passRate?.percentage || 0 }}%</p>
+              <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Passed Runs</p>
+              <p class="text-2xl font-bold text-gray-900">{{ summary?.passedRuns?.count || 0 }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-1">
+            <span class="text-xs text-gray-500">Pass rate:</span>
+            <span class="text-sm font-semibold text-green-600">{{ summary?.passedRuns?.percentage || 0 }}%</span>
+          </div>
+          <div class="flex items-center space-x-1" [ngClass]="getTrendClass(summary?.passedRuns?.trend)">
+            <span class="material-symbols-outlined text-xs">{{ getTrendIcon(summary?.passedRuns?.trend) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Failed Runs Card -->
+      <div class="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow"
+           [ngClass]="summary?.failedRuns?.hasFailures ? 'border-red-200' : 'border-green-200'">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center space-x-2">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center"
+                 [ngClass]="summary?.failedRuns?.hasFailures ? 'bg-red-100' : 'bg-green-100'">
+              <span class="material-symbols-outlined text-xl"
+                    [ngClass]="summary?.failedRuns?.hasFailures ? 'text-red-600' : 'text-green-600'">
+                {{ summary?.failedRuns?.hasFailures ? 'cancel' : 'verified' }}
+              </span>
+            </div>
+            <div>
+              <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Failed Runs</p>
+              <p class="text-2xl font-bold"
+                 [ngClass]="summary?.failedRuns?.hasFailures ? 'text-red-700' : 'text-green-700'">
+                {{ summary?.failedRuns?.count || 0 }}
+              </p>
             </div>
           </div>
         </div>
         <div class="flex items-center justify-end">
           <span class="px-2 py-1 text-xs font-medium rounded-full"
-                [ngClass]="getPassRateStatusClass(summary?.passRate?.status)">
-            {{ getPassRateStatusText(summary?.passRate?.status) }}
+                [ngClass]="summary?.failedRuns?.hasFailures ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'">
+            {{ summary?.failedRuns?.hasFailures ? (summary?.failedRuns?.percentage || 0) + '% failure rate' : 'All passing' }}
           </span>
         </div>
       </div>
 
-      <!-- Quality Score Card -->
-      <div class="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
+      <!-- Pending Runs Card -->
+      <div class="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow"
+           [ngClass]="summary?.pendingRuns?.isUrgent ? 'border-amber-200' : ''">
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center space-x-2">
-            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <span class="text-2xl font-bold text-yellow-600">{{ summary?.qualityScore?.grade || 'F' }}</span>
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center"
+                 [ngClass]="summary?.pendingRuns?.isUrgent ? 'bg-amber-100' : 'bg-slate-100'">
+              <span class="material-symbols-outlined text-xl"
+                    [ngClass]="summary?.pendingRuns?.isUrgent ? 'text-amber-600' : 'text-slate-500'">schedule</span>
             </div>
             <div>
-              <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Quality Score</p>
-              <p class="text-sm font-semibold text-gray-700">{{ summary?.qualityScore?.label || 'Needs Improvement' }}</p>
+              <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Pending Runs</p>
+              <p class="text-2xl font-bold"
+                 [ngClass]="summary?.pendingRuns?.isUrgent ? 'text-amber-700' : 'text-gray-900'">
+                {{ summary?.pendingRuns?.count || 0 }}
+              </p>
             </div>
           </div>
         </div>
         <div class="flex items-center justify-end">
-          <span class="text-xs text-gray-500">{{ summary?.qualityScore?.metricsCount || 0 }} metrics</span>
-        </div>
-      </div>
-
-      <!-- Test Coverage Card -->
-      <div class="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center space-x-2">
-            <div class="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
-              <span class="material-symbols-outlined text-cyan-600 text-xl">shield</span>
-            </div>
-            <div>
-              <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Test Coverage</p>
-              <p class="text-2xl font-bold text-gray-900">{{ summary?.testCoverage?.percentage || 0 }}%</p>
-            </div>
-          </div>
-        </div>
-        <div class="flex items-center justify-end">
-          <span class="text-xs text-gray-500">Goal: {{ summary?.testCoverage?.goal || 100 }}%</span>
+          <span class="px-2 py-1 text-xs font-medium rounded-full"
+                [ngClass]="summary?.pendingRuns?.isUrgent ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'">
+            {{ summary?.pendingRuns?.isUrgent ? 'Needs attention' : 'Queue clear' }}
+          </span>
         </div>
       </div>
     </div>
@@ -160,21 +183,4 @@ export class EnhancedStatCardsComponent {
     }
   }
 
-  getPassRateStatusClass(status?: string): string {
-    switch (status) {
-      case 'improving': return 'bg-green-100 text-green-800';
-      case 'stable': return 'bg-blue-100 text-blue-800';
-      case 'declining': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  }
-
-  getPassRateStatusText(status?: string): string {
-    switch (status) {
-      case 'improving': return 'Improving';
-      case 'stable': return 'Stable';
-      case 'declining': return 'Declining';
-      default: return 'No Data';
-    }
-  }
 }

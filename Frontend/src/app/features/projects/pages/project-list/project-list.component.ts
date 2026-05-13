@@ -7,7 +7,7 @@ import { Subject, debounceTime } from 'rxjs';
 import { filter, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { ProjectService } from '../../../../core/services/project.service';
 import { toSlug } from '../../../../core/services/project.service';
-import { Project } from '../../../../core/models/project.model';
+import { Project, ProjectMember } from '../../../../core/models/project.model';
 import { ResponseHttp } from '../../../../core/models/response-http.model';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
@@ -97,6 +97,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
     projectId: '',
     name: '',
     description: '',
+    url: '',
     isActive: true
   };
 
@@ -211,6 +212,14 @@ export class ProjectListComponent implements OnInit, OnDestroy {
           }
           this.applyFilter();
           this.isLoading = false;
+
+          // Re-sync the members modal if it's open
+          if (this.selectedProjectForMembers) {
+            const updated = this.projects.find(p => p.id === this.selectedProjectForMembers!.id);
+            if (updated) {
+              this.selectedProjectForMembers = updated;
+            }
+          }
         },
         error: (error) => {
           console.error('Erreur lors du chargement des projets:', error);
@@ -362,6 +371,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
       projectId: project.id,
       name: project.name || '',
       description: project.description || '',
+      url: (project as any).url || (project as any).Url || '',
       isActive: !!project.isActive
     };
 
@@ -378,6 +388,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
             projectId: data.id || project.id,
             name: data.name || '',
             description: data.description || '',
+            url: (data as any).url || (data as any).Url || '',
             isActive: !!data.isActive
           };
         },
@@ -395,6 +406,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
       projectId: '',
       name: '',
       description: '',
+      url: '',
       isActive: true
     };
   }
@@ -422,20 +434,26 @@ export class ProjectListComponent implements OnInit, OnDestroy {
       ProjectId: this.editProjectForm.projectId,
       Name: this.editProjectForm.name.trim(),
       Description: this.editProjectForm.description?.trim() || '',
+      Url: this.editProjectForm.url?.trim() || undefined,
       IsActive: !!this.editProjectForm.isActive
     };
 
     this.projectService.updateProject(this.editProjectForm.projectId, payload as unknown as import('../../../../core/models/project.model').UpdateProjectRequest)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: () => {
+        next: (response: any) => {
           this.isUpdatingProject = false;
+          const errorMsg = response?.failMessages || response?.fail_Messages || response?.FailMessages;
+          if (errorMsg) {
+            this.editProjectError = errorMsg;
+            return;
+          }
           this.closeEditProjectModal();
           this.loadProjects();
         },
         error: (error) => {
-          console.error('Erreur lors de la mise Ã  jour du projet:', error);
-          this.editProjectError = error?.error?.fail_Messages || error?.error?.Fail_Messages || 'Failed to update project';
+          console.error('Erreur lors de la mise à jour du projet:', error);
+          this.editProjectError = error?.error?.failMessages || error?.error?.fail_Messages || error?.error?.FailMessages || 'Failed to update project';
           this.isUpdatingProject = false;
         }
       });
@@ -510,13 +528,21 @@ export class ProjectListComponent implements OnInit, OnDestroy {
   }
 
   selectUserToAdd(user: UserWithOptionalName): void {
+    const systemRole = (user.roles?.[0] || 'viewer').toLowerCase();
+    const projectRole = systemRole === 'manager' ? 'Manager'
+      : systemRole === 'viewer' ? 'Viewer'
+      : 'Tester';
     this.selectedMembers.push({
       userId: user.id,
       firstName: user.firstName || user.userName || user.email || '',
       lastName: user.lastName || '',
-      role: user.roles?.[0] || 'Viewer'
+      role: projectRole
     });
     this.memberSearchQuery = '';
+  }
+
+  updateMemberRole(index: number, role: string): void {
+    this.selectedMembers[index] = { ...this.selectedMembers[index], role };
   }
 
   selectUserToAddFromKeyboard(user: UserWithOptionalName, event: Event): void {
@@ -663,6 +689,24 @@ export class ProjectListComponent implements OnInit, OnDestroy {
     if (!this.selectedProjectForMembers || !this.canManageProjects()) return;
     this.membersListError = '';
 
+    const members = this.selectedProjectForMembers.members ?? [];
+    const targetMember = members.find(m => (m.userId || m.id) === userId);
+
+    const isManagingRole = (role: any) =>
+      role === 'Admin' || role === '0' || role === 0 ||
+      role === 'Manager' || role === '1' || role === 1;
+
+    if (isManagingRole(targetMember?.role)) {
+      const remainingManagers = members.filter(m =>
+        isManagingRole(m.role) && (m.userId || m.id) !== userId
+      );
+      if (remainingManagers.length === 0) {
+        this.membersListError = 'Cannot remove the last manager of the project. Assign another manager first.';
+        this.deletingMemberId = null;
+        return;
+      }
+    }
+
     this.http.delete<void>(
       `${this.apiUrl}/projet/${this.selectedProjectForMembers.id}/members/${userId}`
     )
@@ -670,16 +714,27 @@ export class ProjectListComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.deletingMemberId = null;
-          if (this.selectedProjectForMembers?.members) {
-            this.selectedProjectForMembers.members = this.selectedProjectForMembers.members.filter(
-              m => (m.userId || m.id) !== userId
-            );
-          }
+          const projectId = this.selectedProjectForMembers!.id;
+          // Refresh members from API to get accurate list
+          this.projectService.getProjectMembers(projectId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (res: any) => {
+                const fresh: ProjectMember[] = res?.resultat ?? res?.Resultat ?? [];
+                if (this.selectedProjectForMembers) {
+                  this.selectedProjectForMembers = { ...this.selectedProjectForMembers, members: fresh };
+                }
+              }
+            });
           this.loadProjects();
         },
         error: (error) => {
           this.deletingMemberId = null;
-          this.membersListError = error?.error?.fail_Messages || error?.error?.Fail_Messages || 'Failed to remove member. Please try again.';
+          this.membersListError =
+            error?.error?.failMessages ||
+            error?.error?.fail_Messages ||
+            error?.error?.FailMessages ||
+            'Failed to remove member. Please try again.';
           console.error('Error removing member:', error);
         }
       });

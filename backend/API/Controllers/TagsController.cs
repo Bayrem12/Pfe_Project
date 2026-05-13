@@ -8,6 +8,8 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Persistance.Data;
 using System.Security.Claims;
 
 using Asp.Versioning;
@@ -26,24 +28,39 @@ namespace API.Controllers
         private readonly IProjectRepository _projectRepository;
         private readonly ITagsRepository _tagsRepository;
         private readonly ILogger<TagsController> _logger;
+        private readonly TestAutoumatisationContext _dbContext;
 
-        public TagsController(IMediator mediator, IProjectRepository projectRepository, ITagsRepository tagsRepository, ILogger<TagsController> logger)
+        public TagsController(IMediator mediator, IProjectRepository projectRepository, ITagsRepository tagsRepository, ILogger<TagsController> logger, TestAutoumatisationContext dbContext)
         {
             _mediator = mediator;
             _projectRepository = projectRepository;
             _tagsRepository = tagsRepository;
             _logger = logger;
+            _dbContext = dbContext;
+        }
+
+        private Guid CurrentUserId => Guid.TryParse(
+            User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var id) ? id : Guid.Empty;
+
+        private async Task<bool> IsSystemAdminAsync()
+        {
+            if (CurrentUserId == Guid.Empty) return false;
+            var roleName = await _dbContext.Users
+                .AsNoTracking()
+                .Where(u => u.Id == CurrentUserId)
+                .SelectMany(u => u.UserRoles)
+                .Select(ur => ur.Role.Name)
+                .FirstOrDefaultAsync();
+            return (roleName ?? string.Empty).Trim().ToLowerInvariant() == "admin";
         }
 
         private async Task<bool> CurrentUserBelongsToProjectAsync(Guid projectId, CancellationToken cancellationToken)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (!Guid.TryParse(userIdClaim, out var userId))
-            {
-                return false;
-            }
+            if (await IsSystemAdminAsync()) return true;
 
-            var member = await _projectRepository.GetProjectMemberAsync(projectId, userId, cancellationToken);
+            if (CurrentUserId == Guid.Empty) return false;
+
+            var member = await _projectRepository.GetProjectMemberAsync(projectId, CurrentUserId, cancellationToken);
             return member != null;
         }
 

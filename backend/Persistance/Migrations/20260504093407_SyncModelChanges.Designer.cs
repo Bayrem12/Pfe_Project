@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Persistance.Data;
@@ -11,9 +12,11 @@ using Persistance.Data;
 namespace Persistance.Migrations
 {
     [DbContext(typeof(TestAutoumatisationContext))]
-    partial class TestAutoumatisationContextModelSnapshot : ModelSnapshot
+    [Migration("20260504093407_SyncModelChanges")]
+    partial class SyncModelChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1116,9 +1119,6 @@ namespace Persistance.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime?>("LastAnalyzedAt")
-                        .HasColumnType("timestamp without time zone");
-
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("text");
 
@@ -1127,12 +1127,6 @@ namespace Persistance.Migrations
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("QualityLabel")
-                        .HasColumnType("text");
-
-                    b.Property<int?>("QualityScore")
-                        .HasColumnType("integer");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");

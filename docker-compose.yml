@@ -1,0 +1,117 @@
+# AutoTestify – Full-stack Docker Compose
+# Starts: postgres, backend API, ia-test-agent, frontend (nginx)
+#
+# Usage:
+#   cp .env.example .env        # fill in your secrets
+#   docker compose up --build   # first run (builds all images)
+#   docker compose up -d        # subsequent runs (detached)
+#   docker compose logs -f      # tail all logs
+#   docker compose down         # stop everything
+
+services:
+
+  # ── PostgreSQL ────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB:-TestAutomation_Db}
+      POSTGRES_USER:     ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-TestAutomation_Db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Backend (.NET 8 API) ──────────────────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: API/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT:   Production
+      ASPNETCORE_URLS:          http://+:5288
+
+      # Database
+      DataConnection__Hostname: postgres
+      DataConnection__Database: ${POSTGRES_DB:-TestAutomation_Db}
+      DataConnection__Username: ${POSTGRES_USER:-postgres}
+      DataConnection__Password: ${POSTGRES_PASSWORD}
+
+      # JWT (must be at least 32 characters)
+      Jwt__Key:      ${JWT_KEY}
+      Jwt__Issuer:   TestApi
+      Jwt__Audience: TestApiUsers
+
+      # IA Agent (internal Docker network name)
+      IAAgent__BaseUrl: http://ia-agent:8000
+
+      # Email (optional — leave blank to disable)
+      EmailSettings__SmtpHost:        ${SMTP_HOST:-smtp.gmail.com}
+      EmailSettings__SmtpPort:        ${SMTP_PORT:-587}
+      EmailSettings__SenderEmail:     ${SMTP_EMAIL:-}
+      EmailSettings__SenderName:      AutoTestify
+      EmailSettings__Password:        ${SMTP_PASSWORD:-}
+      EmailSettings__FrontendBaseUrl: http://localhost
+
+      # OAuth (optional)
+      OAuth__Google__ClientId:     ${GOOGLE_CLIENT_ID:-}
+      OAuth__Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
+      OAuth__Github__ClientId:     ${GITHUB_CLIENT_ID:-}
+      OAuth__Github__ClientSecret: ${GITHUB_CLIENT_SECRET:-}
+    ports:
+      - "5288:5288"
+
+  # ── IA Test Agent (Python / FastAPI) ─────────────────────────────────────
+  ia-agent:
+    build:
+      context: ./ia-test-agent
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DEBUG:        "false"
+      BACKEND_URL:  "http://api:5288"
+      # X11 forwarding for Watch Run (headed browser visible on host screen).
+      # Run `xhost +local:docker` once on the host before `docker compose up`.
+      DISPLAY:      ${DISPLAY:-:0}
+    volumes:
+      - ia_reports:/app/reports
+      - ia_data:/app/data
+      - ia_models:/app/trained_models
+      # Mount host X11 socket so Playwright can open windows on the host display
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s   # allow time for ML model warm-up on first start
+
+  # ── Frontend (Angular → nginx) ────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - api
+      - ia-agent
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
+  ia_reports:
+  ia_data:
+  ia_models:

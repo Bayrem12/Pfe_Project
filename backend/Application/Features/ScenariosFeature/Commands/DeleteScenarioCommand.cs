@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.ScenariosFeature.Commands
 {
-    public record DeleteScenarioCommand(Guid Id, Guid DeletedById) : IRequest<ResponseHttp>
+    public record DeleteScenarioCommand(Guid Id, Guid DeletedById, bool IsSystemAdmin = false) : IRequest<ResponseHttp>
     {
         public class DeleteScenarioCommandHandler : IRequestHandler<DeleteScenarioCommand, ResponseHttp>
         {
@@ -69,7 +69,8 @@ namespace Application.Features.ScenariosFeature.Commands
                         };
                     }
 
-                    var isMember = project.UserId == request.DeletedById ||
+                    var isMember = request.IsSystemAdmin ||
+                        project.UserId == request.DeletedById ||
                         project.Members.Any(m =>
                         m.UserId == request.DeletedById && !m.IsDeleted);
 

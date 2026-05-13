@@ -10,7 +10,9 @@ using Persistance.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Persistance.Data;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
@@ -90,7 +92,10 @@ builder.Services.AddCors(options =>
                 "http://localhost:4200",
                 "https://localhost:4200",
                 "http://127.0.0.1:4200",
-                "https://127.0.0.1:4200"
+                "https://127.0.0.1:4200",
+                "http://localhost",
+                "http://localhost:80",
+                "http://127.0.0.1"
             )
             .AllowAnyMethod()
             .AllowAnyHeader()
@@ -135,6 +140,13 @@ builder.Services.AddApiVersioning(options =>
 
 var app = builder.Build();
 
+// Apply EF Core migrations automatically on startup (safe to run repeatedly)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<TestAutoumatisationContext>();
+    await db.Database.MigrateAsync();
+}
+
 app.UseRouting();
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 
@@ -145,10 +157,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-else
-{
-    app.UseHttpsRedirection();
-}
+
 app.UseAuthentication();
 app.UseAuthorization();
 

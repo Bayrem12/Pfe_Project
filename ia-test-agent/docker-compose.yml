@@ -14,6 +14,15 @@ services:
     depends_on:
       - postgres
       - redis
+    # GPU support — requires nvidia-container-toolkit on the host.
+    # Harmless on machines without a GPU (container starts normally, models use CPU).
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
   postgres:
     image: postgres:16-alpine

@@ -56,17 +56,37 @@ namespace Application.Features.ModulesFeature.Commands
 
             var currentUserGuid = Guid.Parse(currentUserId);
 
-            // Any project member who is not Viewer can create modules
-            var isMember = await _context.Projects
-                .AnyAsync(p => p.Id == request.ProjectId
-                    && p.Members.Any(m =>
-                        m.UserId == currentUserGuid &&
-                        (m.Role == ProjectRole.Admin || m.Role == ProjectRole.Manager || m.Role == ProjectRole.Tester)),
-                    cancellationToken);
+            // System-level Admins can act on any project without being an explicit member
+            var systemRole = _httpContextAccessor.HttpContext?.User
+                .Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
-            if (!isMember)
-                throw new UnauthorizedAccessException(
-                    "Vous devez être membre actif du projet pour créer un module.");
+            var isSystemAdmin = string.Equals(systemRole, "Admin", StringComparison.OrdinalIgnoreCase);
+
+            if (!isSystemAdmin)
+            {
+                // Any project member who is not Viewer can create modules
+                var isMember = await _context.Projects
+                    .AnyAsync(p => p.Id == request.ProjectId
+                        && p.Members.Any(m =>
+                            m.UserId == currentUserGuid &&
+                            (m.Role == ProjectRole.Admin || m.Role == ProjectRole.Manager || m.Role == ProjectRole.Tester)),
+                        cancellationToken);
+
+                if (!isMember)
+                    throw new UnauthorizedAccessException(
+                        "Vous devez être membre actif du projet pour créer un module.");
+            }
+
+            // No duplicate module name in the same project
+            var nameExists = await _context.Modules
+                .AnyAsync(m => m.ProjectId == request.ProjectId
+                    && m.Name.ToLower() == request.Name.ToLower()
+                    && !m.IsDeleted, cancellationToken);
+
+            if (nameExists)
+                throw new InvalidOperationException(
+                    $"A module named '{request.Name}' already exists in this project.");
 
             var module = new Module
             {

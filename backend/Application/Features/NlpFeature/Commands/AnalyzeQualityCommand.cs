@@ -13,6 +13,7 @@ using Application.Setting;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Features.NlpFeature.Commands
 {
@@ -39,6 +40,7 @@ namespace Application.Features.NlpFeature.Commands
         {
             private readonly IHttpClientFactory _httpFactory;
             private readonly string _agentBaseUrl;
+            private readonly ILogger<AnalyzeQualityCommandHandler> _logger;
 
             private static readonly JsonSerializerOptions _jsonOptions = new()
             {
@@ -48,10 +50,12 @@ namespace Application.Features.NlpFeature.Commands
 
             public AnalyzeQualityCommandHandler(
                 IHttpClientFactory httpFactory,
-                IConfiguration configuration)
+                IConfiguration configuration,
+                ILogger<AnalyzeQualityCommandHandler> logger)
             {
                 _httpFactory = httpFactory;
                 _agentBaseUrl = (configuration["IAAgent:BaseUrl"] ?? "http://localhost:8000").TrimEnd('/');
+                _logger = logger;
             }
 
             public async Task<ResponseHttp> Handle(AnalyzeQualityCommand request, CancellationToken cancellationToken)
@@ -65,7 +69,9 @@ namespace Application.Features.NlpFeature.Commands
                         language = request.Language,
                     };
 
+                    // Quality analysis may warm up SBERT + zero-shot models on first call — allow up to 5 minutes.
                     var client = _httpFactory.CreateClient();
+                    client.Timeout = TimeSpan.FromMinutes(5);
                     var agentUrl = $"{_agentBaseUrl}/api/ia/analyze-quality";
 
                     var response = await client.PostAsJsonAsync(agentUrl, payload, cancellationToken);
@@ -73,10 +79,11 @@ namespace Application.Features.NlpFeature.Commands
                     if (!response.IsSuccessStatusCode)
                     {
                         var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                        _logger.LogError("IA Agent quality analysis returned {StatusCode}: {Body}", (int)response.StatusCode, errorBody);
                         return new ResponseHttp
                         {
                             Status = StatusCodes.Status502BadGateway,
-                            Fail_Messages = $"IA Agent returned {(int)response.StatusCode}: {errorBody}"
+                            FailMessages = "The quality analysis service is temporarily unavailable."
                         };
                     }
 
@@ -91,18 +98,20 @@ namespace Application.Features.NlpFeature.Commands
                 }
                 catch (HttpRequestException httpEx)
                 {
+                    _logger.LogError(httpEx, "Could not reach IA Agent for quality analysis.");
                     return new ResponseHttp
                     {
                         Status = StatusCodes.Status502BadGateway,
-                        Fail_Messages = $"Could not reach IA Agent: {httpEx.Message}"
+                        FailMessages = "The quality analysis service is temporarily unavailable."
                     };
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError(ex, "Unexpected error during quality analysis.");
                     return new ResponseHttp
                     {
                         Status = StatusCodes.Status500InternalServerError,
-                        Fail_Messages = $"Unexpected error during quality analysis: {ex.Message}"
+                        FailMessages = "An unexpected error occurred during quality analysis."
                     };
                 }
             }

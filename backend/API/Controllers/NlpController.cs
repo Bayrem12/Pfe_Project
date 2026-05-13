@@ -332,7 +332,7 @@ namespace API.Controllers
                 _logger.LogError(ex, "Error analyzing scenario quality");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
-                    Fail_Messages = "An error occurred while analyzing scenario quality.",
+                    FailMessages = "An error occurred while analyzing scenario quality.",
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -371,7 +371,7 @@ namespace API.Controllers
                 _logger.LogError(ex, "Error analyzing test failure");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
                 {
-                    Fail_Messages = "An error occurred while analyzing the failure.",
+                    FailMessages = "An error occurred while analyzing the failure.",
                     Status = StatusCodes.Status500InternalServerError
                 });
             }

@@ -5,6 +5,7 @@ using AutoMapper;
 using Domain.Entities.ProjectManagement;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.FeatureFeature.Commands
 {
@@ -19,11 +20,13 @@ namespace Application.Features.FeatureFeature.Commands
     public class AddFeatureCommandHandler : IRequestHandler<AddFeatureCommand, ResponseHttp>
     {
         private readonly IFeatureRepository _featureRepository;
+        private readonly ITestTestAutoumatisationContext _context;
         private readonly IMapper _mapper;
 
-        public AddFeatureCommandHandler(IFeatureRepository featureRepository, IMapper mapper)
+        public AddFeatureCommandHandler(IFeatureRepository featureRepository, ITestTestAutoumatisationContext context, IMapper mapper)
         {
             _featureRepository = featureRepository;
+            _context = context;
             _mapper = mapper;
         }
 
@@ -31,6 +34,19 @@ namespace Application.Features.FeatureFeature.Commands
         {
             try
             {
+                // No duplicate feature name in the same module
+                var nameExists = await _context.Features
+                    .AnyAsync(f => f.ModuleId == request.ModuleId
+                              && f.Name.ToLower() == request.Name.ToLower()
+                              && !f.IsDeleted, cancellationToken);
+
+                if (nameExists)
+                    return new ResponseHttp
+                    {
+                        FailMessages = $"A feature named '{request.Name}' already exists in this module.",
+                        Status = StatusCodes.Status409Conflict
+                    };
+
                 // Création de l'entité Feature
                 var feature = new Feature
                 {

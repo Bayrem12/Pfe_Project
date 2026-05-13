@@ -27,6 +27,9 @@ export interface ScenarioDto {
   stepCount: number;
   tags?: string[];
   lastTestStatus?: string;
+  qualityScore?: number;
+  qualityLabel?: 'good' | 'medium' | 'poor';
+  lastAnalyzedAt?: Date;
 }
 
 export interface ScenarioDetailDto {
@@ -48,6 +51,9 @@ export interface ScenarioDetailDto {
   versions: ScenarioVersionDto[];
   tags?: string[];
   lastTestStatus?: string;
+  qualityScore?: number;
+  qualityLabel?: 'good' | 'medium' | 'poor';
+  lastAnalyzedAt?: Date;
 }
 
 export interface StepDto {

@@ -65,15 +65,15 @@ export interface PagedAuditLogsResponse {
 export interface DashboardSummary {
   // Project Statistics
   totalProjects: ProjectStatCard;
-  
-  // Test Statistics  
+
+  // Test Statistics
   totalScenarios: StatCard;
   totalExecutions: ExecutionStatCard;
-  
-  // Quality Metrics
-  passRate: PassRateCard;
-  qualityScore: QualityScoreCard;
-  testCoverage: TestCoverageCard;
+
+  // Execution Results (computed from real backend data)
+  passedRuns: PassedRunsCard;
+  failedRuns: FailedRunsCard;
+  pendingRuns: PendingRunsCard;
 }
 
 export interface ProjectStatCard {
@@ -96,20 +96,21 @@ export interface ExecutionStatCard {
   trend: 'up' | 'down' | 'stable' | 'neutral';
 }
 
-export interface PassRateCard {
+export interface PassedRunsCard {
+  count: number;
   percentage: number;
-  status: 'stable' | 'improving' | 'declining';
+  trend: 'up' | 'down' | 'stable' | 'neutral';
 }
 
-export interface QualityScoreCard {
-  grade: 'A' | 'B' | 'C' | 'D' | 'F';
-  label: string;
-  metricsCount: number;
+export interface FailedRunsCard {
+  count: number;
+  percentage: number;
+  hasFailures: boolean;
 }
 
-export interface TestCoverageCard {
-  percentage: number;
-  goal: number;
+export interface PendingRunsCard {
+  count: number;
+  isUrgent: boolean;
 }
 
 // Test Execution Trends (matches real API data)

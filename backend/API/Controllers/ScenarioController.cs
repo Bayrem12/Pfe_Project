@@ -172,9 +172,10 @@ namespace API.Controllers
                     request.Title,
                     request.Description,
                     request.GherkinContent,
-                    CurrentUserId, // ✅ FIX SÉCURITÉ #2: CurrentUserId utilisé
+                    CurrentUserId,
                     request.Status ?? ScenarioStatus.Draft,
-                    request.Tags ?? new List<string>()
+                    request.Tags ?? new List<string>(),
+                    IsSystemAdmin: User.IsInRole("Admin")
                 );
 
                 // Validation déplacée dans le handler (MediatR pipeline)
@@ -241,9 +242,10 @@ namespace API.Controllers
                     request.Description,
                     request.GherkinContent,
                     request.ChangeDescription,
-                    CurrentUserId, // ✅ FIX SÉCURITÉ #2: CurrentUserId utilisé
+                    CurrentUserId,
                     request.Status,
-                    request.Tags
+                    request.Tags,
+                    IsSystemAdmin: User.IsInRole("Admin")
                 );
 
                 var result = await _mediator.Send(cmd);
@@ -306,7 +308,7 @@ namespace API.Controllers
             try
             {
                 // ✅ FIX SÉCURITÉ #3: Authorization check ajouté
-                var result = await _mediator.Send(new DeleteScenarioCommand(id, CurrentUserId));
+                var result = await _mediator.Send(new DeleteScenarioCommand(id, CurrentUserId, IsSystemAdmin: User.IsInRole("Admin")));
 
                 if (result.Status == StatusCodes.Status403Forbidden)
                 {
@@ -372,6 +374,44 @@ namespace API.Controllers
                 {
                     Status = StatusCodes.Status500InternalServerError,
                     FailMessages = "An unexpected error occurred.",
+                });
+            }
+        }
+
+        /// <summary>
+        /// Save the AI quality score after analysis
+        /// </summary>
+        [HttpPut("{id}/quality-score")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> SaveQualityScore(Guid id, [FromBody] SaveQualityScoreRequest request)
+        {
+            try
+            {
+                var result = await _mediator.Send(new SaveQualityScoreCommand(id, request.Score, request.Label, CurrentUserId));
+
+                if (result.Status == StatusCodes.Status404NotFound)
+                    return NotFound(result);
+
+                if (result.Status == StatusCodes.Status500InternalServerError)
+                    return StatusCode(StatusCodes.Status500InternalServerError, result);
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return Unauthorized(new ResponseHttp { Status = StatusCodes.Status401Unauthorized, FailMessages = "Not authenticated." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error processing request.");
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp
+                {
+                    Status = StatusCodes.Status500InternalServerError,
+                    FailMessages = "An unexpected error occurred."
                 });
             }
         }
@@ -458,6 +498,12 @@ namespace API.Controllers
     public class ValidateGherkinRequest
     {
         public string GherkinContent { get; set; } = string.Empty;
+    }
+
+    public class SaveQualityScoreRequest
+    {
+        public int Score { get; set; }
+        public string Label { get; set; } = string.Empty;
     }
 
     #endregion

@@ -80,6 +80,13 @@ export class ScenarioService {
   }
 
   /**
+   * Save AI quality score after analysis
+   */
+  saveQualityScore(id: string, score: number, label: string): Observable<ResponseHttp<ScenarioDto>> {
+    return this.http.put<ResponseHttp<ScenarioDto>>(`${this.apiUrl}/${id}/quality-score`, { score, label });
+  }
+
+  /**
    * Exporter un scénario au format .feature
    */
   exportScenario(id: string): Observable<ResponseHttp<string>> {

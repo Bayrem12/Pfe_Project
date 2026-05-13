@@ -178,15 +178,11 @@ export class ScenariosListPageComponent implements OnInit, OnDestroy {
       this.projectService.getProjects(userId).subscribe({
         next: (response: ResponseHttp) => {
           const data = response?.resultat;
-          if (Array.isArray(data)) {
-            this.projects = data;
-          } else if (data && Array.isArray(data.items)) {
-            this.projects = data.items;
-          } else if (data && Array.isArray(data.Items)) {
-            this.projects = data.Items;
-          } else {
-            this.projects = [];
-          }
+          const raw: any[] = Array.isArray(data) ? data
+            : data && Array.isArray(data.items) ? data.items
+            : data && Array.isArray(data.Items) ? data.Items
+            : [];
+          this.projects = raw.filter((p: any) => p.isActive !== false);
           this.loadingProjects = false;
         },
         error: () => {

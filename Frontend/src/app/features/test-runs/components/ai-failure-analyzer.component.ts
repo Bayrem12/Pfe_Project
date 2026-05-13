@@ -56,8 +56,32 @@ import {
                 v2 · Pro
               </span>
             </p>
-            <p class="mt-0.5 text-[10px] font-medium tracking-wide text-slate-400">
-              Deterministic root-cause engine · 0-latency verdict
+            <p class="mt-0.5 flex items-center gap-1.5">
+              <ng-container *ngIf="!result">
+                <span class="text-[10px] font-medium tracking-wide text-slate-400">ML Cascade · 4-stage analysis</span>
+              </ng-container>
+              <ng-container *ngIf="result">
+                <span *ngIf="result.analysis_method === 'regex'"
+                      class="inline-flex items-center gap-1 rounded-md bg-slate-500/20 px-2 py-0.5 text-[10px] font-bold text-slate-300 ring-1 ring-slate-400/20">
+                  <span class="material-symbols-outlined text-[11px]">rule</span> Rule Engine
+                </span>
+                <span *ngIf="result.analysis_method === 'semantic-ai'"
+                      class="inline-flex items-center gap-1 rounded-md bg-blue-500/20 px-2 py-0.5 text-[10px] font-bold text-blue-300 ring-1 ring-blue-400/30">
+                  <span class="material-symbols-outlined text-[11px]">hub</span> Semantic AI ✦
+                </span>
+                <span *ngIf="result.analysis_method === 'zero-shot-ai'"
+                      class="inline-flex items-center gap-1 rounded-md bg-violet-500/20 px-2 py-0.5 text-[10px] font-bold text-violet-300 ring-1 ring-violet-400/30">
+                  <span class="material-symbols-outlined text-[11px]">psychology</span> Zero-Shot AI ✦
+                </span>
+                <span *ngIf="result.analysis_method === 'llm-ai'"
+                      class="inline-flex items-center gap-1 rounded-md bg-gradient-to-r from-amber-500/20 to-rose-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 ring-1 ring-amber-400/30">
+                  <span class="material-symbols-outlined text-[11px]">auto_awesome</span> LLM Enhanced ✦✦
+                </span>
+                <span *ngIf="result.analysis_method === 'fallback' || !result.analysis_method"
+                      class="inline-flex items-center gap-1 rounded-md bg-slate-500/20 px-2 py-0.5 text-[10px] font-bold text-slate-400 ring-1 ring-slate-400/20">
+                  Fallback
+                </span>
+              </ng-container>
             </p>
           </div>
         </div>
@@ -300,24 +324,6 @@ import {
             </div>
           </section>
 
-          <!-- Best Practices -->
-          <details class="group rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 open:bg-slate-50">
-            <summary class="flex cursor-pointer select-none items-center justify-between text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-600 transition-colors hover:text-slate-900">
-              <span class="flex items-center gap-2">
-                <span class="flex h-5 w-5 items-center justify-center rounded-md bg-violet-100 text-violet-600">
-                  <span class="material-symbols-outlined text-[13px]">school</span>
-                </span>
-                Best Practices
-              </span>
-              <span class="material-symbols-outlined text-[16px] text-slate-400 transition-transform group-open:rotate-180">expand_more</span>
-            </summary>
-            <ul class="mt-3 space-y-1.5 pl-7">
-              <li *ngFor="let bp of bestPractices" class="flex gap-2 text-xs leading-relaxed text-slate-600">
-                <span class="text-violet-400">▸</span>
-                {{ bp }}
-              </li>
-            </ul>
-          </details>
         </div>
 
         <!-- ── FOOTER ─────────────────────────────────────── -->
@@ -330,8 +336,17 @@ import {
         </footer>
       </div>
 
+      <!-- ── LOADING ─────────────────────────────────────────── -->
+      <div *ngIf="loading" class="relative flex flex-col items-center justify-center px-6 py-10 text-center">
+        <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-rose-100 to-violet-100">
+          <span class="h-8 w-8 animate-spin rounded-full border-4 border-rose-200 border-t-rose-500"></span>
+        </div>
+        <p class="text-sm font-bold text-slate-700">Analyzing failure…</p>
+        <p class="mt-1 text-xs text-slate-500">Deterministic engine is diagnosing the root cause.</p>
+      </div>
+
       <!-- ── IDLE ───────────────────────────────────────────── -->
-      <div *ngIf="!result && !loading" class="relative px-6 py-10 text-center">
+      <div *ngIf="!result && !loading && !errorState" class="relative px-6 py-10 text-center">
         <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-rose-100 to-violet-100">
           <span class="material-symbols-outlined text-3xl text-rose-500">troubleshoot</span>
         </div>
@@ -343,9 +358,17 @@ import {
       </div>
 
       <!-- ── ERROR STATE ────────────────────────────────────── -->
-      <div *ngIf="errorState" class="relative flex items-start gap-2 border-t border-rose-200 bg-rose-50 px-6 py-3 text-xs text-rose-700">
-        <span class="material-symbols-outlined text-[15px]">error</span>
-        <span class="font-medium">{{ errorState }}</span>
+      <div *ngIf="errorState && !loading" class="relative px-6 py-8 text-center">
+        <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-rose-100">
+          <span class="material-symbols-outlined text-3xl text-rose-500">wifi_off</span>
+        </div>
+        <p class="text-sm font-bold text-rose-700">Analysis Failed</p>
+        <p class="mx-auto mt-1 max-w-md text-xs leading-relaxed text-rose-600">{{ errorState }}</p>
+        <button (click)="runAnalysis()" type="button"
+          class="mt-4 inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-4 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition-colors">
+          <span class="material-symbols-outlined text-[14px]">refresh</span>
+          Retry
+        </button>
       </div>
     </div>
   `,
@@ -366,13 +389,6 @@ export class AiFailureAnalyzerComponent implements OnChanges {
   result: FailureAnalysisResult | null = null;
   errorState = '';
 
-  bestPractices: string[] = [
-    'Always wait for the application to finish loading before asserting visible text.',
-    'Prefer stable selectors (data-testid, role, label) over fragile CSS/XPath.',
-    'Match assertion values exactly — case and spacing both count.',
-    'When a test fails, reproduce manually first to decide if it is an app bug or a test bug.',
-  ];
-
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['autoResult'] && this.autoResult) {
       this.result = this.autoResult;
@@ -391,12 +407,18 @@ export class AiFailureAnalyzerComponent implements OnChanges {
     };
     this.loading = true;
     this.errorState = '';
+    this.result = null;
     this.nlpService
       .analyzeFailure(req)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: r => (this.result = r),
-        error: () => (this.errorState = 'Could not reach the AI agent. Please try again.'),
+        error: (err) => {
+          console.error('[AI Failure Analyzer] error:', err);
+          this.errorState = err?.error?.failMessages
+            || err?.error?.fail_Messages
+            || 'Could not reach the analysis service. Please check that the AI agent is running.';
+        },
       });
   }
 

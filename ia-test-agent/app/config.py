@@ -14,12 +14,6 @@ class Settings(BaseSettings):
     # CORS
     CORS_ORIGINS: list[str] = ["*"]
 
-    # Base de donnees
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/ia_test_agent"
-
-    # Redis
-    REDIS_URL: str = "redis://localhost:6379/0"
-
     # Modeles IA
     NLP_MODEL_PATH: str = "trained_models/nlp"
     YOLO_MODEL_PATH: str = "trained_models/vision/yolov8_ui_elements.pt"

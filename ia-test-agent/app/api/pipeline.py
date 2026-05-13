@@ -19,10 +19,7 @@ from app.services.nlp_service import NLPService
 from app.services.generator_service import GeneratorService
 from app.services.executor_service import ExecutorService
 from app.services.report_service import ReportService, _classify_error, _classify_method
-from app.services.failure_analysis_service import (
-    analyze_step_failure,
-    analyze_scenario_failure,
-)
+
 
 router = APIRouter(prefix="/api/ia", tags=["Pipeline"])
 
@@ -318,9 +315,10 @@ async def run_pipeline(request: PipelineRequest):
         pipeline_trace_path = report_service.generate_pipeline_html(exec_result.test_id) or ""
         technical_trace_path = report_service.generate_technical_trace_html(exec_result.test_id) or ""
 
-        # ── 7. AI failure analysis ─────────────────────────────────────
-        # Build the per-Gherkin-step result list, attaching ai_analysis to any
-        # entry whose statut is not "OK".  Then derive a scenario-level verdict.
+        # ── 7. Build per-Gherkin-step result list ─────────────────────────────
+        # ai_analysis is NOT computed here — analysis is on-demand via the
+        # POST /api/ia/analyze-failure endpoint, triggered from the UI after
+        # the run completes so it does not slow down test execution.
         gherkin_payload: list[dict] = []
         failed_for_summary: list[dict] = []
         for s in trace.steps:
@@ -335,34 +333,12 @@ async def run_pipeline(request: PipelineRequest):
                 "selector": _extract_selector(s.generated_code),
             }
             if statut.upper() not in ("OK", "PASSED"):
-                # Pull retry / fallback info from the matching raw exec entry, if any.
-                retry_count = 0
-                visual_fallback_used = False
-                for raw in exec_result.steps_results:
-                    if getattr(raw, "step_num", None) == s.step_num:
-                        retry_count = max(retry_count, getattr(raw, "retry_count", 0) or 0)
-                        if getattr(raw, "visual_fallback_used", False):
-                            visual_fallback_used = True
-                analysis = analyze_step_failure(
-                    step_text=s.gherkin_text,
-                    error_message=s.erreur or "",
-                    selector=entry["selector"],
-                    keyword=s.keyword,
-                    visual_fallback_used=visual_fallback_used,
-                    retry_count=retry_count,
-                )
-                entry["ai_analysis"] = analysis.to_dict()
+                # ai_analysis is intentionally omitted — analysis is on-demand
+                # via POST /api/ia/analyze-failure from the UI.
                 failed_for_summary.append(entry)
             gherkin_payload.append(entry)
 
-        scenario_analysis = (
-            analyze_scenario_failure(
-                scenario_name=request.scenario_name,
-                failed_steps=failed_for_summary,
-            )
-            if failed_for_summary
-            else {}
-        )
+        scenario_analysis = {}
 
         return PipelineResponse(
             test_id=exec_result.test_id,

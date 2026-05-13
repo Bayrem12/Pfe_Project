@@ -18,7 +18,8 @@ namespace Application.Features.ScenariosFeature.Commands
         string GherkinContent,
         Guid CreatedById,
         ScenarioStatus Status = ScenarioStatus.Draft,
-        List<string>? Tags = null
+        List<string>? Tags = null,
+        bool IsSystemAdmin = false
     ) : IRequest<ResponseHttp>
     {
         public class Handler : IRequestHandler<CreateScenarioCommand, ResponseHttp>
@@ -59,19 +60,22 @@ namespace Application.Features.ScenariosFeature.Commands
 
                 var projectId = feature.Module.ProjectId;
 
-                // 🔒 Check membership
-                var project = await _projectRepository.GetProjectWithMembersAsync(projectId, ct);
-                var isMember = project != null &&
-                    (project.UserId == request.CreatedById ||
-                     project.Members.Any(m => m.UserId == request.CreatedById && !m.IsDeleted));
-
-                if (!isMember)
+                // 🔒 Check membership (system admins bypass project membership)
+                if (!request.IsSystemAdmin)
                 {
-                    return new ResponseHttp
+                    var project = await _projectRepository.GetProjectWithMembersAsync(projectId, ct);
+                    var isMember = project != null &&
+                        (project.UserId == request.CreatedById ||
+                         project.Members.Any(m => m.UserId == request.CreatedById && !m.IsDeleted));
+
+                    if (!isMember)
                     {
-                        FailMessages = "Access denied",
-                        Status = StatusCodes.Status403Forbidden
-                    };
+                        return new ResponseHttp
+                        {
+                            FailMessages = "Access denied",
+                            Status = StatusCodes.Status403Forbidden
+                        };
+                    }
                 }
 
                 // ✅ Validate Gherkin

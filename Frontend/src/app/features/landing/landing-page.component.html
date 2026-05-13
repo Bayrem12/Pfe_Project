@@ -17,7 +17,6 @@
     <div class="hidden md:flex gap-8 items-center">
       <button class="text-on-surface-variant hover:text-lp-primary transition-colors font-medium tracking-tight" (click)="scrollToSection('features')">Features</button>
       <button class="text-on-surface-variant hover:text-lp-primary transition-colors font-medium tracking-tight" (click)="scrollToSection('how-it-works')">How It Works</button>
-      <button class="text-on-surface-variant hover:text-lp-primary transition-colors font-medium tracking-tight" (click)="scrollToSection('testimonials')">Reviews</button>
     </div>
 
     <!-- CTA Buttons -->
@@ -46,7 +45,7 @@
     <div class="py-4 space-y-1">
       <button class="block w-full text-left py-3 px-4 rounded-lg text-on-surface font-medium hover:bg-surface-dim transition-colors" (click)="scrollToSection('features')">Features</button>
       <button class="block w-full text-left py-3 px-4 rounded-lg text-on-surface font-medium hover:bg-surface-dim transition-colors" (click)="scrollToSection('how-it-works')">How It Works</button>
-      <button class="block w-full text-left py-3 px-4 rounded-lg text-on-surface font-medium hover:bg-surface-dim transition-colors" (click)="scrollToSection('testimonials')">Reviews</button>
+
       <div class="flex gap-3 pt-2">
         <button class="flex-1 py-3 border border-outline-variant rounded-xl text-on-surface font-semibold" (click)="navigateTo('/auth/login')">Login</button>
         <button class="flex-1 py-3 btn-gradient rounded-xl text-white font-bold" (click)="navigateTo('/auth/register')">Start Free</button>
@@ -70,18 +69,17 @@
         <!-- Badge -->
         <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-outline-variant shadow-sm">
           <span class="flex h-2 w-2 rounded-full bg-lp-secondary pulse-dot"></span>
-          <span class="text-xs font-bold tracking-widest text-lp-secondary uppercase">✨ AI-Powered Testing Platform</span>
+          <span class="text-xs font-bold tracking-widest text-lp-secondary uppercase">✨ AI-Powered BDD Testing Platform</span>
         </div>
 
         <!-- Headline -->
         <h1 class="text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[1.05]">
-          Test <span class="text-gradient">Smarter</span>,<br/>Not Harder
+          Write, Analyze<br/>&amp; <span class="text-gradient">Execute</span> Tests
         </h1>
 
         <!-- Subhead -->
         <p class="text-lg lg:text-xl text-on-surface-variant leading-relaxed max-w-xl">
-          The first test automation platform that uses AI to predict failures, eliminate duplicates,
-          and ensure quality — before you even run your tests.
+          AutoTestify is an end-to-end BDD test management platform. Write Gherkin scenarios, get AI quality scores powered by Mistral LLM, and execute them automatically with Playwright — all in one place.
         </p>
 
         <!-- CTA Buttons -->
@@ -90,7 +88,7 @@
             class="px-8 py-4 btn-gradient rounded-xl text-white font-black text-lg shadow-xl shadow-lp-primary/20"
             (click)="navigateTo('/auth/register')"
           >
-            Get Started Free
+            Get Started
           </button>
           <button
             class="px-8 py-4 bg-white border border-outline-variant rounded-xl text-on-surface font-bold text-lg flex items-center gap-2 hover:bg-surface-dim transition-all shadow-sm"
@@ -101,19 +99,19 @@
           </button>
         </div>
 
-        <!-- Trust Signals -->
+        <!-- Feature highlights -->
         <div class="flex flex-wrap items-center gap-6 pt-4 border-t border-outline-variant">
           <div class="flex items-center gap-2 text-sm font-semibold text-on-surface-variant">
-            <span class="material-symbols-outlined text-green-500 text-base" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-            No credit card required
+            <span class="material-symbols-outlined text-lp-primary text-base" style="font-variation-settings: 'FILL' 1;">edit_note</span>
+            Gherkin BDD Editor
           </div>
           <div class="flex items-center gap-2 text-sm font-semibold text-on-surface-variant">
-            <span class="material-symbols-outlined text-green-500 text-base" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-            14-day free trial
+            <span class="material-symbols-outlined text-lp-secondary text-base" style="font-variation-settings: 'FILL' 1;">psychology</span>
+            Mistral AI Analysis
           </div>
           <div class="flex items-center gap-2 text-sm font-semibold text-on-surface-variant">
-            <span class="material-symbols-outlined text-green-500 text-base" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-            5 AI Services
+            <span class="material-symbols-outlined text-lp-tertiary text-base" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+            Playwright Execution
           </div>
         </div>
       </div>
@@ -135,336 +133,123 @@
             <div class="px-3 py-1 rounded-lg bg-secondary-container text-lp-secondary text-xs font-bold tracking-wider">LIVE ANALYSIS</div>
           </div>
 
-          <!-- Score Grid -->
-          <div class="grid grid-cols-3 gap-3 mb-6">
-            <div class="p-4 rounded-xl bg-surface-dim border border-outline-variant/50 text-center">
-              <div class="text-on-surface-variant text-xs mb-1 font-medium">Quality</div>
-              <div class="text-2xl font-black text-lp-secondary">A+</div>
-            </div>
-            <div class="p-4 rounded-xl bg-surface-dim border border-outline-variant/50 text-center">
-              <div class="text-on-surface-variant text-xs mb-1 font-medium">Coverage</div>
-              <div class="text-2xl font-black text-lp-primary">98%</div>
-            </div>
-            <div class="p-4 rounded-xl bg-surface-dim border border-outline-variant/50 text-center">
-              <div class="text-on-surface-variant text-xs mb-1 font-medium">Passed</div>
-              <div class="text-2xl font-black text-green-500">247</div>
-            </div>
+          <!-- Gherkin Scenario -->
+          <div class="mb-4 p-4 bg-surface-dim rounded-xl border border-outline-variant/50 font-mono text-xs leading-6">
+            <div class="text-on-surface-variant mb-1 font-bold text-[10px] uppercase tracking-widest">Scenario Editor</div>
+            <div><span class="text-lp-primary font-bold">Feature:</span> <span class="text-on-surface">User Login</span></div>
+            <div class="ml-2"><span class="text-lp-secondary font-bold">Given</span> <span class="text-on-surface">I am on the login page</span></div>
+            <div class="ml-2"><span class="text-lp-secondary font-bold">When</span> <span class="text-on-surface">I enter valid credentials</span></div>
+            <div class="ml-2"><span class="text-lp-secondary font-bold">Then</span> <span class="text-on-surface">I should be redirected to dashboard</span></div>
           </div>
 
-          <!-- AI Checks -->
+          <!-- AI Quality Score -->
           <div class="space-y-2">
             <div class="h-12 w-full bg-white rounded-lg flex items-center px-4 justify-between border-l-4 border-lp-secondary shadow-sm">
               <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-lp-secondary text-base" style="font-variation-settings: 'FILL' 1;">cycle</span>
-                <span class="text-sm font-semibold text-on-surface">Smart Re-test Analysis</span>
+                <span class="material-symbols-outlined text-lp-secondary text-base" style="font-variation-settings: 'FILL' 1;">psychology</span>
+                <span class="text-sm font-semibold text-on-surface">AI Quality Score</span>
               </div>
-              <span class="text-xs text-lp-secondary font-bold px-2 py-0.5 bg-lp-secondary/10 rounded-full">OPTIMIZED</span>
+              <span class="text-xs text-lp-secondary font-bold px-2 py-0.5 bg-lp-secondary/10 rounded-full">87 / 100</span>
             </div>
             <div class="h-12 w-full bg-white rounded-lg flex items-center px-4 justify-between border-l-4 border-lp-primary shadow-sm">
               <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-lp-primary text-base" style="font-variation-settings: 'FILL' 1;">content_copy</span>
-                <span class="text-sm font-semibold text-on-surface">Duplicate Test Detection</span>
+                <span class="material-symbols-outlined text-lp-primary text-base" style="font-variation-settings: 'FILL' 1;">account_tree</span>
+                <span class="text-sm font-semibold text-on-surface">NLP Step Mapping</span>
               </div>
-              <span class="text-xs text-lp-primary font-bold px-2 py-0.5 bg-lp-primary/10 rounded-full">99% MATCH</span>
-            </div>
-            <div class="h-12 w-full bg-white rounded-lg flex items-center px-4 justify-between border-l-4 border-lp-tertiary shadow-sm">
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-lp-tertiary text-base" style="font-variation-settings: 'FILL' 1;">psychology</span>
-                <span class="text-sm font-semibold text-on-surface">NLP Context Mapping</span>
-              </div>
-              <span class="text-xs text-lp-tertiary font-bold px-2 py-0.5 bg-lp-tertiary/10 rounded-full">ACTIVE</span>
+              <span class="text-xs text-lp-primary font-bold px-2 py-0.5 bg-lp-primary/10 rounded-full">MATCHED</span>
             </div>
             <div class="h-12 w-full bg-white rounded-lg flex items-center px-4 justify-between border-l-4 border-green-400 shadow-sm">
               <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-green-500 text-base" style="font-variation-settings: 'FILL' 1;">timeline</span>
-                <span class="text-sm font-semibold text-on-surface">Failure Prediction</span>
+                <span class="material-symbols-outlined text-green-500 text-base" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+                <span class="text-sm font-semibold text-on-surface">Playwright Execution</span>
               </div>
-              <span class="text-xs text-green-600 font-bold px-2 py-0.5 bg-green-100 rounded-full">SOLVED</span>
+              <span class="text-xs text-green-600 font-bold px-2 py-0.5 bg-green-100 rounded-full">PASSED</span>
             </div>
           </div>
 
           <!-- Progress bar -->
           <div class="mt-5 pt-4 border-t border-outline-variant/50">
             <div class="flex justify-between text-xs font-bold text-on-surface-variant mb-2">
-              <span>AI Confidence Score</span>
-              <span class="text-lp-secondary">94%</span>
+              <span>✨ Mistral LLM Analysis</span>
+              <span class="text-lp-secondary">Active</span>
             </div>
             <div class="h-2 w-full bg-surface-dim rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-lp-primary to-lp-secondary rounded-full" style="width: 94%"></div>
+              <div class="h-full bg-gradient-to-r from-lp-primary to-lp-secondary rounded-full" style="width: 87%"></div>
             </div>
           </div>
-
-          <!-- AI Dashboard image -->
-          <img
-            alt="AI Dashboard"
-            class="mt-6 rounded-lg opacity-60 group-hover:opacity-100 transition-all duration-700 h-32 w-full object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAmi2OGjjgDA0RMnyWEHYAiTFs-jST0OdokYjk5IcByscHaLD5xbR9jyKuv-FL_2Zy6e9ZRP-LlLoiA-AVB9w8mPTrwzr67Hznr9bolYLhnNPzAMrPh3vfSNftVC92QvZkPWxggyS6DuB8eiUbImqt06WT1CyEAmD0Lgz5JUERQNc4_4BfyFnj6eWCwOCOJpfv3aeaepvjbn5DzG8h2jaVjOvEKdMA5q1peME4Gr8fxRWJc5mWku1UlHkf-9HMSMBhKL4DFS29EWOm"
-          />
         </div>
 
         <!-- Floating badges -->
         <div class="float-badge absolute -top-6 -right-6 bg-white p-4 rounded-2xl shadow-xl border border-outline-variant flex flex-col items-center min-w-[80px]">
-          <span class="text-3xl font-black text-lp-secondary">98%</span>
-          <span class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Coverage</span>
+          <span class="text-3xl font-black text-lp-secondary">87</span>
+          <span class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Quality</span>
         </div>
 
         <div class="float-badge-delay absolute bottom-12 -left-12 bg-white p-3 rounded-2xl shadow-xl border border-outline-variant flex items-center gap-3">
           <div class="w-9 h-9 rounded-full bg-lp-secondary/10 flex items-center justify-center flex-shrink-0">
-            <span class="material-symbols-outlined text-lp-secondary text-lg" style="font-variation-settings: 'FILL' 1;">psychology</span>
+            <span class="material-symbols-outlined text-lp-secondary text-lg" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
           </div>
           <div>
-            <div class="text-sm font-bold text-on-surface">AI Recommended</div>
-            <div class="text-xs text-on-surface-variant">Update Selector #42</div>
+            <div class="text-sm font-bold text-on-surface">✨ Mistral</div>
+            <div class="text-xs text-on-surface-variant">Add assertion step</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ========== STATS STRIP ========== -->
-  <section class="py-12 px-6 lg:px-12 bg-white border-y border-outline-variant">
-    <div class="max-w-7xl mx-auto w-full">
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
-        <div *ngFor="let stat of stats" class="stat-card text-center p-6 rounded-2xl border border-outline-variant/50">
-          <div class="text-4xl font-black text-gradient mb-1">{{ stat.value }}</div>
-          <div class="text-sm font-semibold text-on-surface-variant uppercase tracking-widest">{{ stat.label }}</div>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- ========== PROBLEM vs SOLUTION ========== -->
-  <section class="py-24 px-6 lg:px-12 bg-background">
-    <div class="max-w-7xl mx-auto w-full">
-      <div class="text-center mb-16 animate-on-scroll">
-        <span class="inline-block px-4 py-1.5 rounded-full bg-secondary-container text-lp-secondary text-xs font-bold tracking-widest uppercase mb-4">The Problem</span>
-        <h2 class="text-4xl lg:text-5xl font-black tracking-tight mb-4">The New Testing Paradigm</h2>
-        <p class="text-on-surface-variant font-medium text-lg">Stop wasting hours on brittle tests and redundant maintenance.</p>
-      </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Without -->
-        <div class="animate-on-scroll relative bg-white border border-outline-variant rounded-3xl p-10 overflow-hidden group hover:border-red-200 transition-all duration-300">
-          <div class="absolute top-0 right-0 w-40 h-40 bg-red-50 rounded-full blur-3xl opacity-50 -z-10"></div>
-          <div class="text-red-500 mb-8 font-black text-lg flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-              <span class="material-symbols-outlined text-red-500" style="font-variation-settings: 'FILL' 1;">cancel</span>
-            </div>
-            Without AutoTestify
-          </div>
-          <ul class="space-y-5">
-            <li class="flex items-start gap-4 text-on-surface-variant">
-              <span class="material-symbols-outlined text-red-400 mt-0.5 flex-shrink-0">remove_circle</span>
-              <span class="font-medium">Manual maintenance consumes 40% of every sprint cycle.</span>
-            </li>
-            <li class="flex items-start gap-4 text-on-surface-variant">
-              <span class="material-symbols-outlined text-red-400 mt-0.5 flex-shrink-0">remove_circle</span>
-              <span class="font-medium">Duplicate tests run on every single build, wasting CI minutes.</span>
-            </li>
-            <li class="flex items-start gap-4 text-on-surface-variant">
-              <span class="material-symbols-outlined text-red-400 mt-0.5 flex-shrink-0">remove_circle</span>
-              <span class="font-medium">Flaky tests erode team confidence and slow releases.</span>
-            </li>
-            <li class="flex items-start gap-4 text-on-surface-variant">
-              <span class="material-symbols-outlined text-red-400 mt-0.5 flex-shrink-0">remove_circle</span>
-              <span class="font-medium">No insight into which tests matter — run everything and hope.</span>
-            </li>
-          </ul>
-          <div class="mt-10">
-            <img
-              alt="Frustrated developer"
-              class="rounded-xl w-full opacity-50 h-64 object-contain bg-surface-dim border border-outline-variant"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDMQULw55R1wUtsdToxpHZWPidyYsRYHcDfESoclf2iOu0X6gkXJ5VaZSrtazXiTay_yMT1KcqSK-HKEAlUGT4mR0TsjMZsLY9kmbS08oQSkQjhvnS9OTG5tlQtK6PmHxTx1j1gL0tUkjFmpIlctuvEZ99kFHinqWfhlmJ_MXAaqkpSpeBGp9dcd1GL77Vf0ziQM6thQc8YFSegIpLFkN96p-Ou1pKU7eU3WqGi7BLV5_1BXz0UyqLgsg3LepcwFzWN2rKywbLWbGM"
-            />
-          </div>
-          <div class="mt-6 p-4 rounded-2xl bg-red-50 border border-red-100 text-center">
-            <div class="text-2xl font-black text-red-500">40% slower</div>
-            <div class="text-sm text-red-400 font-medium">release cycle impact</div>
-          </div>
-        </div>
-
-        <!-- With -->
-        <div class="animate-on-scroll animate-delay-200 relative bg-white border border-lp-primary/20 rounded-3xl p-10 overflow-hidden group hover:scale-[1.01] shadow-xl shadow-lp-primary/5 transition-all duration-300">
-          <div class="absolute top-0 right-0 w-40 h-40 bg-lp-primary/5 rounded-full blur-3xl -z-10"></div>
-          <div class="text-lp-primary mb-8 font-black text-lg flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-lp-primary/10 flex items-center justify-center">
-              <span class="material-symbols-outlined text-lp-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
-            </div>
-            With AutoTestify
-          </div>
-          <ul class="space-y-5">
-            <li class="flex items-start gap-4 text-on-surface">
-              <span class="material-symbols-outlined text-lp-primary mt-0.5 flex-shrink-0" style="font-variation-settings: 'FILL' 1;">add_circle</span>
-              <span class="font-medium">AI self-heals broken tests automatically in seconds.</span>
-            </li>
-            <li class="flex items-start gap-4 text-on-surface">
-              <span class="material-symbols-outlined text-lp-primary mt-0.5 flex-shrink-0" style="font-variation-settings: 'FILL' 1;">add_circle</span>
-              <span class="font-medium">Zero duplicate execution via semantic hashing and LLM analysis.</span>
-            </li>
-            <li class="flex items-start gap-4 text-on-surface">
-              <span class="material-symbols-outlined text-lp-primary mt-0.5 flex-shrink-0" style="font-variation-settings: 'FILL' 1;">add_circle</span>
-              <span class="font-medium">99.9% test reliability with predictive failure logic.</span>
-            </li>
-            <li class="flex items-start gap-4 text-on-surface">
-              <span class="material-symbols-outlined text-lp-primary mt-0.5 flex-shrink-0" style="font-variation-settings: 'FILL' 1;">add_circle</span>
-              <span class="font-medium">Impact-based test targeting — only run what matters.</span>
-            </li>
-          </ul>
-          <div class="mt-8 relative">
-            <div class="absolute -inset-2 bg-lp-primary/5 blur-xl rounded-xl"></div>
-            <img
-              alt="Happy developer"
-              class="relative rounded-xl w-full h-64 object-contain bg-surface-dim border border-outline-variant shadow-sm"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9N14bfosTblKM_gWSuDgKBKD0mVYen_5PnfWDSlroDdj_I_ZmdHBd5E6OAUlPsNxi7qs_sA-Z33fyGKhKuKW35njeu7e7Ppm7sd17_QqfaoOqEkC_ijNXHoad88Mvrk3F5faKSVbKyZq6Fxp1enMQLLh7ALpY6vyzkxjOb_xidBLZtJjGUCm_wc8WgVuOh7Y1L8fe0Kt5KRtFegfYC3WFXDyk5dc0izK61HrIRtCkBImBUbcBZxZ1QQw07ww2Qq5Fa4Zzu0NbJfh-"
-            />
-          </div>
-          <div class="mt-6 p-4 rounded-2xl bg-lp-primary/5 border border-lp-primary/10 text-center">
-            <div class="text-2xl font-black text-lp-primary">3x faster</div>
-            <div class="text-sm text-lp-primary/70 font-medium">release cycle acceleration</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========== AI FEATURES BENTO ========== -->
+  <!-- ========== FEATURES GRID ========== -->
   <section id="features" class="py-24 px-6 lg:px-12 bg-white border-y border-outline-variant">
-    <div class="w-full">
+    <div class="max-w-7xl mx-auto w-full">
       <div class="text-center mb-16 animate-on-scroll">
-        <span class="inline-block px-4 py-1.5 rounded-full bg-lp-primary/10 text-lp-primary text-xs font-bold tracking-widest uppercase mb-4">AI Capabilities</span>
-        <h2 class="text-4xl lg:text-5xl font-black tracking-tight mb-4">5 AI Superpowers</h2>
-        <p class="text-on-surface-variant text-lg font-medium max-w-2xl mx-auto">Every feature is purpose-built to tackle the real problems modern QA teams face.</p>
+        <span class="inline-block px-4 py-1.5 rounded-full bg-lp-primary/10 text-lp-primary text-xs font-bold tracking-widest uppercase mb-4">Platform Capabilities</span>
+        <h2 class="text-4xl lg:text-5xl font-black tracking-tight mb-4">Everything You Need</h2>
+        <p class="text-on-surface-variant text-lg font-medium max-w-2xl mx-auto">From writing your first Gherkin scenario to reviewing AI-powered execution reports — AutoTestify covers the full testing lifecycle.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-6">
-        <!-- Feature 1: Smart Re-test -->
-        <div class="animate-on-scroll md:col-span-3 lg:col-span-4 feature-card glass-panel rounded-3xl p-8 hover:border-lp-secondary hover:shadow-lg hover:shadow-lp-secondary/5 bg-white/80 border border-outline-variant/60">
-          <div class="w-12 h-12 rounded-2xl bg-lp-secondary/10 flex items-center justify-center mb-5">
-            <span class="material-symbols-outlined text-lp-secondary text-2xl" style="font-variation-settings: 'FILL' 1;">cycle</span>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div
+          *ngFor="let f of features; let i = index"
+          class="animate-on-scroll feature-card glass-panel rounded-3xl p-7 bg-white/80 border border-outline-variant/60 hover:shadow-lg transition-all duration-300"
+          [class.animate-delay-100]="i % 4 === 1"
+          [class.animate-delay-200]="i % 4 === 2"
+          [class.animate-delay-300]="i % 4 === 3"
+          [ngClass]="{
+            'hover:border-lp-primary hover:shadow-lp-primary/5': f.color === 'primary',
+            'hover:border-lp-secondary hover:shadow-lp-secondary/5': f.color === 'secondary',
+            'hover:border-lp-tertiary hover:shadow-lp-tertiary/5': f.color === 'tertiary'
+          }"
+        >
+          <div
+            class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5"
+            [ngClass]="{
+              'bg-lp-primary/10': f.color === 'primary',
+              'bg-lp-secondary/10': f.color === 'secondary',
+              'bg-lp-tertiary/10': f.color === 'tertiary'
+            }"
+          >
+            <span
+              class="material-symbols-outlined text-2xl"
+              [ngClass]="{
+                'text-lp-primary': f.color === 'primary',
+                'text-lp-secondary': f.color === 'secondary',
+                'text-lp-tertiary': f.color === 'tertiary'
+              }"
+              style="font-variation-settings: 'FILL' 1;"
+            >{{ f.icon }}</span>
           </div>
-          <div class="inline-block px-2 py-0.5 rounded-full bg-lp-secondary/10 text-lp-secondary text-[10px] font-bold tracking-widest uppercase mb-3">ML-Powered</div>
-          <h3 class="text-xl font-bold mb-2 text-on-surface">Smart Re-test</h3>
-          <p class="text-on-surface-variant text-sm font-medium leading-relaxed mb-6">Automatically identifies and re-runs only the affected modules after code changes — slashing build times.</p>
-          <div class="space-y-1">
-            <div class="flex justify-between text-xs font-bold text-on-surface-variant">
-              <span>Impact Coverage</span><span class="text-lp-secondary">75%</span>
-            </div>
-            <div class="h-1.5 w-full bg-surface-dim rounded-full overflow-hidden">
-              <div class="h-full bg-lp-secondary rounded-full transition-all duration-1000" style="width: 75%"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Feature 2: Duplicate Detection -->
-        <div class="animate-on-scroll animate-delay-100 md:col-span-3 lg:col-span-8 feature-card glass-panel rounded-3xl p-8 hover:border-lp-primary hover:shadow-lg hover:shadow-lp-primary/5 flex flex-col md:flex-row gap-8 items-center bg-white/80 border border-outline-variant/60">
-          <div class="flex-1">
-            <div class="w-12 h-12 rounded-2xl bg-lp-primary/10 flex items-center justify-center mb-5">
-              <span class="material-symbols-outlined text-lp-primary text-2xl" style="font-variation-settings: 'FILL' 1;">content_copy</span>
-            </div>
-            <div class="inline-block px-2 py-0.5 rounded-full bg-lp-primary/10 text-lp-primary text-[10px] font-bold tracking-widest uppercase mb-3">LLM Engine</div>
-            <h3 class="text-xl font-bold mb-2 text-on-surface">Duplicate Detection</h3>
-            <p class="text-on-surface-variant text-sm font-medium leading-relaxed">Eliminate redundancy. Our LLM analyzes test intent to prevent duplicate scripts across teams using semantic similarity scoring.</p>
-          </div>
-          <div class="flex-1 bg-surface-dim rounded-2xl p-4 w-full border border-outline-variant/30">
-            <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">Detected Duplicates</div>
-            <div class="space-y-2">
-              <div class="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-lp-primary/10 shadow-sm">
-                <div class="w-2 h-2 rounded-full bg-lp-primary flex-shrink-0"></div>
-                <div class="text-[11px] font-mono font-bold text-on-surface-variant flex-1">TEST_AUTH_FLOW_01</div>
-                <span class="text-[10px] text-lp-primary font-bold">98% match</span>
-              </div>
-              <div class="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-lp-primary/10 shadow-sm">
-                <div class="w-2 h-2 rounded-full bg-lp-primary flex-shrink-0"></div>
-                <div class="text-[11px] font-mono font-bold text-on-surface-variant flex-1">LOGIN_VERIFICATION_FINAL</div>
-                <span class="text-[10px] text-lp-primary font-bold">96% match</span>
-              </div>
-              <div class="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-yellow-400/30 shadow-sm">
-                <div class="w-2 h-2 rounded-full bg-yellow-400 flex-shrink-0"></div>
-                <div class="text-[11px] font-mono font-bold text-on-surface-variant flex-1">AUTH_SUCCESS_CHECK_V2</div>
-                <span class="text-[10px] text-yellow-600 font-bold">89% match</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Feature 3: Quality Scoring + Coverage Analysis -->
-        <div class="animate-on-scroll animate-delay-200 md:col-span-6 lg:col-span-7 feature-card glass-panel rounded-3xl p-8 hover:border-lp-tertiary hover:shadow-lg hover:shadow-lp-tertiary/5 flex flex-col md:flex-row gap-8 items-center bg-white/80 border border-outline-variant/60">
-          <div class="flex-1 bg-surface-dim rounded-2xl p-4 overflow-hidden h-40 border border-outline-variant/30">
-            <img
-              alt="AI Network graph"
-              class="w-full h-full object-cover rounded-lg opacity-80"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDflsQqeBA7UmnvrEC-Yx5CrT_paXWkFPkpOkSCHo5tAmfH9XIOz-hFJEh46iILbMh0BW26zoNsctWfHYDytiZIBXCWsQAOk-WKQ18QgMqqVyHNJ7GlqYHuYtAVi0Aro73oHQa6Y3S0VHRfWECxKJnOqIUpqSWdFahrQ0Pj7xp2PRnpA4BYpQqZjRbJeIKTMNWJ2GVlJ6pYXdsotdmAA9V_zqYkhRXIatoMKwlwmL46t5nxQqMvpjGcKJGHyzBC5aLcHzeV1HXYEEuD"
-            />
-          </div>
-          <div class="flex-1">
-            <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-4">Quality Breakdown</div>
-            <div class="space-y-3">
-              <div>
-                <div class="flex justify-between text-xs font-semibold text-on-surface-variant mb-1"><span>Reliability</span><span class="text-lp-tertiary">94%</span></div>
-                <div class="h-1.5 bg-white rounded-full overflow-hidden"><div class="h-full bg-lp-tertiary rounded-full" style="width: 94%"></div></div>
-              </div>
-              <div>
-                <div class="flex justify-between text-xs font-semibold text-on-surface-variant mb-1"><span>Coverage</span><span class="text-lp-primary">98%</span></div>
-                <div class="h-1.5 bg-white rounded-full overflow-hidden"><div class="h-full bg-lp-primary rounded-full" style="width: 98%"></div></div>
-              </div>
-              <div>
-                <div class="flex justify-between text-xs font-semibold text-on-surface-variant mb-1"><span>Maintainability</span><span class="text-lp-secondary">87%</span></div>
-                <div class="h-1.5 bg-white rounded-full overflow-hidden"><div class="h-full bg-lp-secondary rounded-full" style="width: 87%"></div></div>
-              </div>
-            </div>
-            <div class="mt-4 text-center"><span class="text-3xl font-black text-lp-tertiary">A+</span><span class="text-xs text-on-surface-variant font-bold ml-2">Overall Grade</span></div>
-          </div>
-          <div class="flex-1">
-            <div class="w-12 h-12 rounded-2xl bg-lp-tertiary/10 flex items-center justify-center mb-5">
-              <span class="material-symbols-outlined text-lp-tertiary text-2xl" style="font-variation-settings: 'FILL' 1;">analytics</span>
-            </div>
-            <div class="inline-block px-2 py-0.5 rounded-full bg-lp-tertiary/10 text-lp-tertiary text-[10px] font-bold tracking-widest uppercase mb-3">Real-time</div>
-            <h3 class="text-xl font-bold mb-2 text-on-surface">Quality Scoring</h3>
-            <p class="text-on-surface-variant text-sm font-medium leading-relaxed">Real-time health monitoring of your entire test suite with actionable improvement scores and AI recommendations.</p>
-          </div>
-        </div>
-
-        <!-- Feature 4: Execution Prediction -->
-        <div class="animate-on-scroll animate-delay-300 md:col-span-3 lg:col-span-5 feature-card glass-panel rounded-3xl p-8 hover:border-lp-secondary hover:shadow-lg hover:shadow-lp-secondary/5 bg-white/80 border border-outline-variant/60">
-          <div class="w-12 h-12 rounded-2xl bg-lp-secondary/10 flex items-center justify-center mb-5">
-            <span class="material-symbols-outlined text-lp-secondary text-2xl" style="font-variation-settings: 'FILL' 1;">timeline</span>
-          </div>
-          <div class="inline-block px-2 py-0.5 rounded-full bg-lp-secondary/10 text-lp-secondary text-[10px] font-bold tracking-widest uppercase mb-3">Deep ML</div>
-          <h3 class="text-xl font-bold mb-2 text-on-surface">Execution Prediction</h3>
-          <p class="text-on-surface-variant text-sm font-medium leading-relaxed mb-5">Know if your build will pass before you even hit 'Run' based on historical patterns and code diff analysis.</p>
-          <div class="flex items-center gap-3 p-3 rounded-xl bg-surface-dim border border-outline-variant/30">
-            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-              <span class="material-symbols-outlined text-green-600" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-            </div>
-            <div>
-              <div class="text-sm font-bold text-on-surface">Build #247 will PASS</div>
-              <div class="text-xs text-on-surface-variant">96% confidence · 2.3min estimated</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Feature 5: Coverage Analysis (bonus) -->
-        <div class="animate-on-scroll animate-delay-400 md:col-span-3 lg:col-span-7 feature-card glass-panel rounded-3xl p-8 hover:border-lp-primary hover:shadow-lg hover:shadow-lp-primary/5 bg-white/80 border border-outline-variant/60">
-          <div class="w-12 h-12 rounded-2xl bg-lp-primary/10 flex items-center justify-center mb-5">
-            <span class="material-symbols-outlined text-lp-primary text-2xl" style="font-variation-settings: 'FILL' 1;">auto_fix_high</span>
-          </div>
-          <div class="inline-block px-2 py-0.5 rounded-full bg-lp-primary/10 text-lp-primary text-[10px] font-bold tracking-widest uppercase mb-3">AI Insights</div>
-          <h3 class="text-xl font-bold mb-2 text-on-surface">Coverage Analysis</h3>
-          <p class="text-on-surface-variant text-sm font-medium leading-relaxed mb-5">Identify blind spots in your test coverage and get AI-generated suggestions for new test scenarios to maximize confidence across every user journey.</p>
-          <div class="grid grid-cols-3 gap-3">
-            <div class="text-center p-3 rounded-xl bg-surface-dim border border-outline-variant/30">
-              <div class="text-xl font-black text-lp-primary">247</div>
-              <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wide">Tests Run</div>
-            </div>
-            <div class="text-center p-3 rounded-xl bg-surface-dim border border-outline-variant/30">
-              <div class="text-xl font-black text-green-500">98%</div>
-              <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wide">Pass Rate</div>
-            </div>
-            <div class="text-center p-3 rounded-xl bg-surface-dim border border-outline-variant/30">
-              <div class="text-xl font-black text-lp-secondary">12</div>
-              <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wide">Suggestions</div>
-            </div>
-          </div>
+          <div
+            class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase mb-3"
+            [ngClass]="{
+              'bg-lp-primary/10 text-lp-primary': f.badgeColor === 'primary',
+              'bg-lp-secondary/10 text-lp-secondary': f.badgeColor === 'secondary',
+              'bg-lp-tertiary/10 text-lp-tertiary': f.badgeColor === 'tertiary'
+            }"
+          >{{ f.badge }}</div>
+          <h3 class="text-lg font-bold mb-2 text-on-surface">{{ f.title }}</h3>
+          <p class="text-on-surface-variant text-sm font-medium leading-relaxed">{{ f.description }}</p>
         </div>
       </div>
     </div>
@@ -529,47 +314,7 @@
 
 
 
-  <!-- ========== TESTIMONIALS ========== -->
-  <section id="testimonials" class="py-24 px-6 lg:px-12 bg-background">
-    <div class="max-w-7xl mx-auto w-full">
-      <div class="text-center mb-16 animate-on-scroll">
-        <span class="inline-block px-4 py-1.5 rounded-full bg-green-100 text-green-700 text-xs font-bold tracking-widest uppercase mb-4">Social Proof</span>
-        <h2 class="text-4xl lg:text-5xl font-black tracking-tight mb-4">Loved by Engineering Teams</h2>
-        <p class="text-on-surface-variant text-lg font-medium">Join 500+ teams shipping with confidence.</p>
-      </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div
-          *ngFor="let t of testimonials; let i = index"
-          class="animate-on-scroll testimonial-card bg-white rounded-3xl p-8 border border-outline-variant shadow-sm"
-          [class.animate-delay-100]="i === 1"
-          [class.animate-delay-200]="i === 2"
-        >
-          <!-- Stars -->
-          <div class="flex gap-1 mb-5">
-            <span *ngFor="let star of [1,2,3,4,5]" class="material-symbols-outlined text-yellow-400 text-base" style="font-variation-settings: 'FILL' 1;">star</span>
-          </div>
-          <!-- Quote -->
-          <p class="text-on-surface font-medium leading-relaxed mb-6 text-sm">"{{ t.quote }}"</p>
-          <!-- Author -->
-          <div class="flex items-center gap-4 pt-5 border-t border-outline-variant">
-            <div
-              class="w-11 h-11 rounded-full flex items-center justify-center font-black text-sm text-white flex-shrink-0"
-              [ngClass]="{
-                'bg-lp-primary': t.color === 'primary',
-                'bg-lp-secondary': t.color === 'secondary',
-                'bg-lp-tertiary': t.color === 'tertiary'
-              }"
-            >{{ t.avatar }}</div>
-            <div>
-              <div class="font-bold text-on-surface text-sm">{{ t.name }}</div>
-              <div class="text-on-surface-variant text-xs font-medium">{{ t.role }} · {{ t.company }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- ========== FINAL CTA ========== -->
   <section class="py-24 px-6 lg:px-12 relative overflow-hidden cta-section bg-white border-t border-outline-variant">
@@ -580,40 +325,40 @@
     <div class="max-w-4xl mx-auto w-full text-center relative z-10">
       <div class="glass-panel p-12 lg:p-16 rounded-[40px] shadow-2xl bg-white/90 border border-outline-variant/60">
         <span class="inline-block px-4 py-1.5 rounded-full bg-secondary-container text-lp-secondary text-xs font-bold tracking-widest uppercase mb-6">Get Started Today</span>
-        <h2 class="text-4xl lg:text-5xl font-black tracking-tighter mb-6 text-on-surface">Ready to Test Smarter?</h2>
+        <h2 class="text-4xl lg:text-5xl font-black tracking-tighter mb-6 text-on-surface">Start Testing Smarter</h2>
         <p class="text-on-surface-variant text-lg mb-10 max-w-2xl mx-auto font-medium">
-          Join over 500+ engineering teams that have accelerated their release cycles by 3x with AutoTestify.
+          Create your account and start writing, analyzing, and executing BDD tests with the power of Mistral AI and Playwright.
         </p>
 
-        <!-- Email CTA -->
-        <div class="flex flex-col sm:flex-row gap-3 justify-center items-center mb-8">
-          <input
-            [(ngModel)]="emailInput"
-            type="email"
-            placeholder="Enter your work email"
-            class="w-full sm:w-80 px-6 py-4 rounded-xl bg-background border border-outline-variant focus:border-lp-primary focus:ring-2 focus:ring-lp-primary/20 text-on-surface font-medium transition-all outline-none"
-          />
+        <!-- CTA Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
           <button
             class="w-full sm:w-auto px-10 py-4 btn-gradient rounded-xl text-white font-black shadow-xl shadow-lp-primary/20 whitespace-nowrap"
-            (click)="submitEmail()"
+            (click)="navigateTo('/auth/register')"
           >
-            Start Free Trial →
+            Create Account →
+          </button>
+          <button
+            class="w-full sm:w-auto px-10 py-4 bg-white border border-outline-variant rounded-xl text-on-surface font-bold whitespace-nowrap hover:bg-surface-dim transition-all"
+            (click)="navigateTo('/auth/login')"
+          >
+            Sign In
           </button>
         </div>
 
-        <!-- Trust chips -->
+        <!-- Feature chips -->
         <div class="flex flex-wrap justify-center gap-4 text-xs text-on-surface-variant font-bold tracking-wider uppercase">
           <div class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-green-500 text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-            No credit card required
+            <span class="material-symbols-outlined text-lp-primary text-sm" style="font-variation-settings: 'FILL' 1;">edit_note</span>
+            Gherkin BDD Editor
           </div>
           <div class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-green-500 text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-            14-day free trial
+            <span class="material-symbols-outlined text-lp-secondary text-sm" style="font-variation-settings: 'FILL' 1;">psychology</span>
+            Mistral AI Quality Analyzer
           </div>
           <div class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-green-500 text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-            Cancel anytime
+            <span class="material-symbols-outlined text-lp-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+            Playwright Test Execution
           </div>
         </div>
       </div>
@@ -647,36 +392,21 @@
         </div>
       </div>
 
-      <!-- Product -->
+      <!-- Navigation -->
       <div>
-        <div class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4">Product</div>
+        <div class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4">Platform</div>
         <ul class="space-y-3">
           <li><button class="text-sm text-on-surface hover:text-lp-primary transition-colors font-medium" (click)="scrollToSection('features')">Features</button></li>
           <li><button class="text-sm text-on-surface hover:text-lp-primary transition-colors font-medium" (click)="scrollToSection('how-it-works')">How It Works</button></li>
-          <li><button class="text-sm text-on-surface hover:text-lp-primary transition-colors font-medium" (click)="scrollToSection('compare')">Comparison</button></li>
-          <li><button class="text-sm text-on-surface hover:text-lp-primary transition-colors font-medium">Pricing</button></li>
         </ul>
       </div>
 
-      <!-- Company -->
+      <!-- Account -->
       <div>
-        <div class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4">Company</div>
+        <div class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4">Account</div>
         <ul class="space-y-3">
-          <li><button class="text-sm text-on-surface hover:text-lp-primary transition-colors font-medium" (click)="navigateTo('/about')">About</button></li>
-          <li><button class="text-sm text-on-surface hover:text-lp-primary transition-colors font-medium">Blog</button></li>
-          <li><button class="text-sm text-on-surface hover:text-lp-primary transition-colors font-medium">Careers</button></li>
-          <li><button class="text-sm text-on-surface hover:text-lp-primary transition-colors font-medium">Contact</button></li>
-        </ul>
-      </div>
-
-      <!-- Legal -->
-      <div>
-        <div class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4">Legal</div>
-        <ul class="space-y-3">
-          <li><button class="text-sm text-on-surface hover:text-lp-primary transition-colors font-medium">Privacy Policy</button></li>
-          <li><button class="text-sm text-on-surface hover:text-lp-primary transition-colors font-medium">Terms of Service</button></li>
-          <li><button class="text-sm text-on-surface hover:text-lp-primary transition-colors font-medium">Security</button></li>
-          <li><button class="text-sm text-on-surface hover:text-lp-primary transition-colors font-medium">Status</button></li>
+          <li><button class="text-sm text-on-surface hover:text-lp-primary transition-colors font-medium" (click)="navigateTo('/auth/login')">Login</button></li>
+          <li><button class="text-sm text-on-surface hover:text-lp-primary transition-colors font-medium" (click)="navigateTo('/auth/register')">Register</button></li>
         </ul>
       </div>
     </div>

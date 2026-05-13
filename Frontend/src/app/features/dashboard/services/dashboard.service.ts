@@ -150,20 +150,19 @@ export class DashboardService {
   }
 
   private transformSummary(dto: DashboardSummaryDto): DashboardSummary {
-    const passRate = dto.overallPassRate;
-    const grade = this.calculateQualityGrade(passRate);
-    
+    const passed = Math.round(dto.totalExecutions * (dto.overallPassRate / 100));
+    const failed = dto.totalExecutions - passed;
     return {
       // Core Statistics
       totalProjects: {
         value: dto.totalProjects,
         active: dto.activeProjects,
-        change: 2, // TODO: Calculate from historical data
+        change: 2,
         trend: 'up'
       },
       totalScenarios: {
         value: dto.totalScenarios,
-        change: 12, // TODO: Calculate from historical data
+        change: 12,
         trend: 'up'
       },
       totalExecutions: {
@@ -172,47 +171,21 @@ export class DashboardService {
         change: dto.totalExecutions > 0 ? 15 : 0,
         trend: dto.totalExecutions > 0 ? 'up' : 'neutral'
       },
-      passRate: {
-        percentage: Math.round(passRate),
-        status: passRate >= 95 ? 'improving' : passRate >= 85 ? 'stable' : 'declining'
+      passedRuns: {
+        count: passed,
+        percentage: Math.round(dto.overallPassRate),
+        trend: dto.overallPassRate >= 85 ? 'up' : dto.overallPassRate >= 70 ? 'stable' : 'down'
       },
-      qualityScore: {
-        grade: grade,
-        label: this.getGradeLabel(grade),
-        metricsCount: 48 // TODO: Get from backend if available
+      failedRuns: {
+        count: failed,
+        percentage: Math.round(100 - dto.overallPassRate),
+        hasFailures: failed > 0
       },
-      testCoverage: {
-        percentage: this.calculateCoverage(dto),
-        goal: 90
+      pendingRuns: {
+        count: dto.pendingExecutions,
+        isUrgent: dto.pendingExecutions > 5
       }
     };
-  }
-
-  private calculateQualityGrade(passRate: number): 'A' | 'B' | 'C' | 'D' | 'F' {
-    if (passRate >= 95) return 'A';
-    if (passRate >= 85) return 'B';
-    if (passRate >= 75) return 'C';
-    if (passRate >= 65) return 'D';
-    return 'F';
-  }
-
-  private getGradeLabel(grade: string): string {
-    const labels: { [key: string]: string } = {
-      'A': 'Excellent',
-      'B': 'Good',
-      'C': 'Average',
-      'D': 'Below Average',
-      'F': 'Needs Improvement'
-    };
-    return labels[grade] || 'Unknown';
-  }
-
-  private calculateCoverage(dto: DashboardSummaryDto): number {
-    // Calculate coverage based on scenarios vs total possible
-    // For now, use execution ratio as a proxy
-    if (dto.totalScenarios === 0) return 0;
-    const ratio = dto.totalExecutions / (dto.totalScenarios * 10); // Assuming 10 expected runs per scenario
-    return Math.min(Math.round(ratio * 100), 100);
   }
 
   /**

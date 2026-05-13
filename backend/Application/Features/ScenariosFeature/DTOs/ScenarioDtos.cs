@@ -17,6 +17,9 @@ namespace Application.Features.ScenariosFeature.DTOs
         public int StepCount { get; set; }
         public List<string> Tags { get; set; } = new();
         public string? LastTestStatus { get; set; }
+        public int? QualityScore { get; set; }
+        public string? QualityLabel { get; set; }
+        public DateTime? LastAnalyzedAt { get; set; }
     }
 
     public class ScenarioDetailDto
@@ -40,6 +43,9 @@ namespace Application.Features.ScenariosFeature.DTOs
         public List<ScenarioVersionDto> Versions { get; set; } = new();
         public List<string> Tags { get; set; } = new();
         public string? LastTestStatus { get; set; }
+        public int? QualityScore { get; set; }
+        public string? QualityLabel { get; set; }
+        public DateTime? LastAnalyzedAt { get; set; }
     }
 
     public class StepDto

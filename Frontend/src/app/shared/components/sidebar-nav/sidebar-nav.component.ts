@@ -58,7 +58,7 @@ export class SidebarNavComponent {
 
       this.bottomNavItems = this.authService.canManageUsers()
         ? [...this.allBottomNavItems]
-        : this.allBottomNavItems.filter(item => item.label === 'Profile');
+        : this.allBottomNavItems.filter(item => item.route === '/profile');
     });
 
     this.router.events.pipe(

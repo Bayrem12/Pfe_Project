@@ -36,11 +36,12 @@ class AnalyzeFailureResponse(BaseModel):
     is_test_issue: bool
     suggested_fix: str
     confidence: float
+    analysis_method: str = "regex"
 
 
 @router.post("/analyze-failure", response_model=AnalyzeFailureResponse)
 async def analyze_failure(req: AnalyzeFailureRequest) -> AnalyzeFailureResponse:
-    """Run the rule-based failure analyzer on a single failed step."""
+    """Run the 4-stage ML cascade failure analyzer on a single failed step."""
     analysis = analyze_step_failure(
         step_text=req.step_text,
         error_message=req.error_message,

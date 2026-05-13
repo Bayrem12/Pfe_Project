@@ -132,6 +132,8 @@ export interface ScenarioQualityResult {
   suggestions: string[];
   improved_steps: { keyword: string; text: string }[];
   best_practices: string[];
+  using_llm: boolean;
+  analysis_method?: string;  // regex | semantic-ai | zero-shot-ai | llm-ai
 }
 
 // ── Failure analysis models ───────────────────────────────────────────────
@@ -154,4 +156,5 @@ export interface FailureAnalysisResult {
   is_test_issue: boolean;
   suggested_fix: string;
   confidence: number;        // 0..1
+  analysis_method?: string;  // regex | semantic-ai | zero-shot-ai | llm-ai | fallback
 }

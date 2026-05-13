@@ -1,0 +1,29 @@
+# Runtime data mounted as Docker volumes — never bake into the image
+runs/
+data/
+trained_models/
+reports/
+
+# Dev artifacts
+notebooks/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+
+# Test artifacts
+tests/
+.pytest_cache/
+htmlcov/
+.coverage
+
+# IDE / OS
+.git/
+.gitignore
+.env
+*.log

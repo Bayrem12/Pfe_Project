@@ -43,6 +43,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   selectedRoles: string[] = [];
 
   showInviteModal = false;
+  inviteError = '';
   inviteForm: CreateUserDto = {
     firstName: '',
     lastName: '',
@@ -307,20 +308,23 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   openInviteModal(): void {
     this.inviteForm = { firstName: '', lastName: '', email: '', password: '' };
+    this.inviteError = '';
     this.showInviteModal = true;
   }
 
   closeInviteModal(): void {
+    this.inviteError = '';
     this.showInviteModal = false;
   }
 
   submitInviteUser(): void {
     if (!this.inviteForm.firstName.trim() || !this.inviteForm.lastName.trim() ||
         !this.inviteForm.email.trim() || !this.inviteForm.password.trim()) {
-      this.errorMessage = 'Please fill all invite user fields.';
+      this.inviteError = 'Please fill all fields before submitting.';
       return;
     }
 
+    this.inviteError = '';
     this.userService.inviteUser(this.inviteForm)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -331,10 +335,19 @@ export class UsersComponent implements OnInit, OnDestroy {
             return;
           }
 
-          this.errorMessage = response.fail_Messages || 'Failed to invite user.';
+          this.inviteError = response.fail_Messages || 'Failed to invite user.';
         },
         error: (error) => {
-          this.errorMessage = error.message || 'Failed to invite user.';
+          const body = error?.error;
+          if (body?.errors) {
+            this.inviteError = (Object.values(body.errors) as string[][]).flat().join(' ');
+          } else if (body?.message) {
+            this.inviteError = body.message;
+          } else if (typeof body === 'string' && body.trim()) {
+            this.inviteError = body;
+          } else {
+            this.inviteError = 'Failed to create user. Check email and password requirements.';
+          }
         }
       });
   }

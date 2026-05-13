@@ -1,0 +1,15 @@
+# Never copy node_modules — the npm ci step in the Dockerfile handles deps
+node_modules/
+
+# Build output (generated inside Docker)
+dist/
+
+# IDE / OS
+.git/
+.gitignore
+.env
+*.log
+
+# Test artifacts
+coverage/
+.nyc_output/

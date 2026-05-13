@@ -1020,8 +1020,8 @@
   'action.saving':                    'Saving...',
 
   // ── Project list polish ─────────────────────────────────────────────
-  'project.list.newCard.title':       'New Test Suite',
-  'project.list.newCard.subtitle':    'Initialize a new project with AI-driven Gherkin scaffolding',
+  'project.list.newCard.title':       'New Project',
+  'project.list.newCard.subtitle':    'Create a new project to organize your test suites and scenarios',
   'project.list.updated':             'Updated',
   'project.list.noRunsYet':           'No runs yet',
   'project.list.emptyHint':           'Create your first project to start building automated test suites.',

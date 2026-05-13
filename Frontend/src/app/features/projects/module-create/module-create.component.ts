@@ -100,8 +100,9 @@ export class ModuleCreateComponent implements OnInit {
       error: (error) => {
         console.error('Erreur lors de la création du module:', error);
         this.errorMessage =
+          error?.error?.failMessages ||
           error?.error?.fail_Messages ||
-          error?.error?.Fail_Messages ||
+          error?.error?.FailMessages ||
           'Failed to create module. Please try again.';
         this.isSubmitting = false;
       }

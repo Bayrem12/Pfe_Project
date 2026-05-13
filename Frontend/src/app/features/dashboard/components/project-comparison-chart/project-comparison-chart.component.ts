@@ -90,8 +90,7 @@ export class ProjectComparisonChartComponent implements OnInit, OnChanges {
         Math.round(project.passRate),
         Math.round((project.scenarioCount / maxScenarios) * 100),
         Math.round((project.executionCount / maxExecutions) * 100),
-        Math.round(100 - (project.avgExecutionTime / maxTime) * 100), // Inverse: lower time = better
-        Math.round(project.passRate * 0.7 + (project.executionCount / maxExecutions) * 30) // Composite health score
+        Math.round(100 - (project.avgExecutionTime / maxTime) * 100) // Inverse: lower time = better
       ]
     }));
 
@@ -105,7 +104,7 @@ export class ProjectComparisonChartComponent implements OnInit, OnChanges {
       },
       colors: colors.slice(0, this.projects.length),
       xaxis: {
-        categories: ['Pass Rate', 'Scenarios', 'Executions', 'Speed', 'Health'],
+        categories: ['Pass Rate', 'Scenarios', 'Executions', 'Speed'],
         labels: {
           style: { colors: '#64748b', fontSize: '11px' }
         }

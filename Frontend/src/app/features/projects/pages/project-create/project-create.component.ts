@@ -30,7 +30,7 @@ type CreateProjectResponse = ResponseHttp<Project & { Id?: string }> & {
 })
 export class ProjectCreateComponent {
     get isViewerOrManager(): boolean {
-      return this.currentRole === 'viewer' || this.currentRole === 'manager';
+      return this.currentRole === 'viewer';
     }
   projectForm: FormGroup;
   isSubmitting = false;
@@ -131,7 +131,7 @@ export class ProjectCreateComponent {
         console.log('Réponse création:', response);
 
         // Le controller retourne Ok() même pour les erreurs métier (nom/URL déjà existant)
-        const errorMsg = (response as any)?.fail_Messages || (response as any)?.Fail_Messages;
+        const errorMsg = (response as any)?.failMessages || (response as any)?.fail_Messages || (response as any)?.Fail_Messages;
         if (errorMsg) {
           this.createProjectError = this.mapCreateProjectError(errorMsg);
           this.isSubmitting = false;

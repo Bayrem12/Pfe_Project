@@ -340,6 +340,7 @@
         <app-ai-scenario-analyzer
           [steps]="steps"
           [scenarioName]="scenarioForm.value.title || ''"
+          [scenarioId]="scenarioId"
           (improvedStepsApplied)="applyImprovedSteps($event)">
         </app-ai-scenario-analyzer>
       </div>

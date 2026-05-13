@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NlpService, ScenarioQualityResult, QualityIssue } from '../../../nlp/services/nlp.service';
+import { ScenarioService } from '../../../../core/services/scenario.service';
 import { finalize } from 'rxjs/operators';
 
 @Component({
@@ -19,7 +20,26 @@ import { finalize } from 'rxjs/operators';
           </div>
           <div>
             <p class="text-sm font-bold text-on-surface leading-none">AI Scenario Analyzer</p>
-            <p class="text-[10px] text-outline mt-0.5">Quality check before execution</p>
+            <p class="text-[10px] text-outline mt-0.5" *ngIf="!result">Quality check before execution</p>
+            <!-- Analysis method badge (shown after analysis) -->
+            <ng-container *ngIf="result">
+              <span *ngIf="result.analysis_method === 'regex'"
+                class="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                ⚙ Rule Engine
+              </span>
+              <span *ngIf="result.analysis_method === 'semantic-ai'"
+                class="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700 border border-blue-200">
+                ✦ Semantic AI
+              </span>
+              <span *ngIf="result.analysis_method === 'zero-shot-ai'"
+                class="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-violet-100 text-violet-700 border border-violet-200">
+                ✦ Zero-Shot AI
+              </span>
+              <span *ngIf="result.analysis_method === 'llm-ai'"
+                class="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-700 border border-amber-200">
+                ✦✦ LLM Enhanced
+              </span>
+            </ng-container>
           </div>
         </div>
 
@@ -77,9 +97,22 @@ import { finalize } from 'rxjs/operators';
 
         <!-- ── Issues List ────────────────────────────────────── -->
         <div *ngIf="result.issues.length > 0">
-          <p class="text-[10px] font-extrabold text-outline uppercase tracking-widest mb-2">
-            Detected Issues ({{ result.issues.length }})
-          </p>
+          <div class="flex items-center gap-2 mb-2">
+            <p class="text-[10px] font-extrabold text-outline uppercase tracking-widest">Detected Issues</p>
+            <!-- Severity count pills -->
+            <span *ngIf="errorCount > 0"
+              class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-red-100 text-red-700 border border-red-200">
+              ● {{ errorCount }} error{{ errorCount > 1 ? 's' : '' }}
+            </span>
+            <span *ngIf="warningCount > 0"
+              class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-700 border border-amber-200">
+              ● {{ warningCount }} warning{{ warningCount > 1 ? 's' : '' }}
+            </span>
+            <span *ngIf="infoCount > 0"
+              class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700 border border-blue-200">
+              ● {{ infoCount }} info
+            </span>
+          </div>
           <div class="space-y-2">
             <div
               *ngFor="let issue of result.issues"
@@ -113,7 +146,25 @@ import { finalize } from 'rxjs/operators';
         <!-- ── Improved Scenario ──────────────────────────────── -->
         <div *ngIf="result.improved_steps.length > 0">
           <div class="flex items-center justify-between mb-2">
-            <p class="text-[10px] font-extrabold text-outline uppercase tracking-widest">Improved Scenario</p>
+            <div class="flex items-center gap-2">
+              <p class="text-[10px] font-extrabold text-outline uppercase tracking-widest">Improved Scenario</p>
+              <span *ngIf="result.analysis_method === 'llm-ai'"
+                class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-700 border border-amber-200">
+                ✦✦ LLM Rewritten
+              </span>
+              <span *ngIf="result.analysis_method === 'zero-shot-ai'"
+                class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-violet-100 text-violet-700 border border-violet-200">
+                ✦ AI-Assisted
+              </span>
+              <span *ngIf="result.analysis_method === 'semantic-ai'"
+                class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700 border border-blue-200">
+                ✦ Semantic Fix
+              </span>
+              <span *ngIf="!result.analysis_method || result.analysis_method === 'regex'"
+                class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                Auto-fixed
+              </span>
+            </div>
             <button
               (click)="applyImproved()"
               class="flex items-center gap-1 text-[10px] font-extrabold text-secondary hover:text-primary transition-colors">
@@ -156,11 +207,14 @@ export class AiScenarioAnalyzerComponent {
   @Input() steps: { keyword: string; text: string }[] = [];
   @Input() scenarioName = '';
   @Input() language = 'en';
+  /** When set, the quality score is automatically persisted to the DB after analysis. */
+  @Input() scenarioId: string = '';
 
   /** Emitted when the user clicks "Apply to editor" with the improved steps. */
   @Output() improvedStepsApplied = new EventEmitter<{ keyword: string; text: string }[]>();
 
   private nlpService = inject(NlpService);
+  private scenarioService = inject(ScenarioService);
 
   loading = false;
   result: ScenarioQualityResult | null = null;
@@ -172,7 +226,14 @@ export class AiScenarioAnalyzerComponent {
       .analyzeQuality(this.scenarioName, nonEmpty, this.language)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: r => (this.result = r),
+        next: r => {
+          this.result = r;
+          if (this.scenarioId) {
+            this.scenarioService
+              .saveQualityScore(this.scenarioId, r.quality_score, r.quality_label)
+              .subscribe();
+          }
+        },
         error: () => (this.result = null),
       });
   }
@@ -188,6 +249,18 @@ export class AiScenarioAnalyzerComponent {
     if (this.result.quality_score >= 75) return '#22c55e';
     if (this.result.quality_score >= 45) return '#f59e0b';
     return '#ef4444';
+  }
+
+  get errorCount(): number {
+    return this.result?.issues.filter(i => i.severity === 'error').length ?? 0;
+  }
+
+  get warningCount(): number {
+    return this.result?.issues.filter(i => i.severity === 'warning').length ?? 0;
+  }
+
+  get infoCount(): number {
+    return this.result?.issues.filter(i => i.severity === 'info').length ?? 0;
   }
 
   get qualityEmoji(): string {

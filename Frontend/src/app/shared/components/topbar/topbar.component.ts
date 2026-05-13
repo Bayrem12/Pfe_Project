@@ -40,7 +40,8 @@ export class TopbarComponent implements OnInit, OnDestroy {
   breadcrumbs: Breadcrumb[] = [];
   dynamicCrumb: DynamicBreadcrumb | null = null;
   dynamicCrumbs: DynamicBreadcrumb[] = [];
-  searchQuery = '';
+  today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  userName = '';
   userAvatar: string | null = null;
   userInitials = '?';
 
@@ -76,12 +77,14 @@ export class TopbarComponent implements OnInit, OnDestroy {
       .subscribe(u => {
         if (u?.id) {
           this.avatarService.setUser(u.id);
-          const f = (u.firstName || '').charAt(0);
-          const l = (u.lastName || '').charAt(0);
-          this.userInitials = ((f + l).toUpperCase()) || (u.email?.charAt(0).toUpperCase() ?? '?');
+          const f = u.firstName || '';
+          const l = u.lastName || '';
+          this.userInitials = ((f.charAt(0) + l.charAt(0)).toUpperCase()) || (u.email?.charAt(0).toUpperCase() ?? '?');
+          this.userName = [f, l].filter(Boolean).join(' ') || u.email || '';
         } else {
           this.avatarService.setUser(null);
           this.userInitials = '?';
+          this.userName = '';
         }
       });
 
@@ -123,11 +126,6 @@ export class TopbarComponent implements OnInit, OnDestroy {
     }
 
     return breadcrumbs;
-  }
-
-  onSearch(): void {
-    console.log('Search:', this.searchQuery);
-    // TODO: Implement search functionality
   }
 
   openNotifications(): void {
@@ -203,7 +201,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
   }
 
   openHistory(): void {
-    console.log('Open history');
+    this.router.navigate(['/test-runs']);
   }
 
   toggleSidebar(): void {

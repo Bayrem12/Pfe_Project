@@ -8,7 +8,7 @@
         <span class="material-symbols-outlined text-base">arrow_back</span>
         {{ 'testRun.detail.back' | translate }}
       </button>
-      <a *ngIf="run?.reportUrl" [href]="run!.reportUrl" target="_blank" rel="noopener"
+      <a *ngIf="run?.reportUrl && !isViewer" [href]="run!.reportUrl" target="_blank" rel="noopener"
          class="inline-flex items-center gap-2 rounded-xl border border-secondary/30 bg-secondary/5 px-4 py-2 text-sm font-bold text-secondary transition hover:bg-secondary/10">
         <span class="material-symbols-outlined text-base">open_in_new</span>
         {{ 'testRun.detail.openReport' | translate }}
@@ -180,7 +180,7 @@
           </section>
 
           <!-- AI Report CTA -->
-          <section *ngIf="run.reportUrl"
+          <section *ngIf="run.reportUrl && !isViewer"
                    class="flex flex-col gap-4 rounded-2xl border border-secondary/20 bg-gradient-to-br from-secondary/5 to-white p-6 shadow-sm">
             <div class="flex items-center gap-3">
               <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary/10">
@@ -224,7 +224,7 @@
           </section>
 
           <!-- No AI report placeholder -->
-          <section *ngIf="!run.reportUrl"
+          <section *ngIf="!run.reportUrl && !isViewer"
                    class="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center shadow-sm">
             <span class="material-symbols-outlined text-4xl text-slate-300">description_off</span>
             <p class="text-sm font-semibold text-slate-500">{{ 'testRun.detail.noReport' | translate }}</p>
@@ -273,7 +273,7 @@
             </h2>
           </div>
           <div class="divide-y divide-rose-100/70">
-            <div *ngFor="let step of failedStepsFlat" class="px-6 py-4">
+            <div *ngFor="let step of failedStepsFlat; trackBy: trackByStepId" class="px-6 py-4">
               <p class="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-rose-400">{{ step.scenarioName }}</p>
               <p class="text-sm font-semibold text-slate-800">{{ step.stepText }}</p>
               <p *ngIf="step.errorMessage"

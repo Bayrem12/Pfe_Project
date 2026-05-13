@@ -55,9 +55,19 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Create([FromBody] AddModulesCommand command)
         {
-            var moduleId = await _mediator.Send(command);
-
-            return Created($"api/modules/{moduleId}", moduleId);
+            try
+            {
+                var moduleId = await _mediator.Send(command);
+                return Created($"api/modules/{moduleId}", moduleId);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new ResponseHttp
+                {
+                    FailMessages = ex.Message,
+                    Status = StatusCodes.Status400BadRequest
+                });
+            }
         }
 
         /// <summary>

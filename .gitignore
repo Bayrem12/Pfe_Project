@@ -1,2 +1,12 @@
 backend/API/appsettings.Development.json
 backend/API/appsettings.json
+
+# Local secrets
+.env
+
+ProjectDesign
+Conception
+reporting
+.venv
+.codex
+.agents

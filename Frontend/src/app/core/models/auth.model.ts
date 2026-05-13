@@ -16,6 +16,7 @@ export interface LoginResult {
     modifiedDate: string | null;
   };
   token: string;
+  refreshToken: string;
 }
 
 export interface RegisterRequest {

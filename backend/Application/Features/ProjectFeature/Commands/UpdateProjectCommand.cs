@@ -39,6 +39,14 @@ namespace Application.Features.ProjectFeature.Commands
                     };
                 }
 
+                // Unicité du nom globale (excluding current project)
+                if (await _projectRepository.ExistsWithNameAsync(request.Name, request.ProjectId, cancellationToken))
+                    return new ResponseHttp
+                    {
+                        FailMessages = "A project with this name already exists. Please choose a different name.",
+                        Status = StatusCodes.Status400BadRequest
+                    };
+
                 project.Name = request.Name;
                 project.Description = request.Description;
                 project.Url = request.Url;

@@ -8,6 +8,7 @@ using Domain.Interfaces.Services;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Features.ScenariosFeature.Commands
 {
@@ -19,7 +20,8 @@ namespace Application.Features.ScenariosFeature.Commands
         string? ChangeDescription,
         Guid UpdatedById,
         ScenarioStatus? Status = null,
-        List<string>? Tags = null
+        List<string>? Tags = null,
+        bool IsSystemAdmin = false
     ) : IRequest<ResponseHttp>
     {
         public class UpdateScenarioCommandHandler : IRequestHandler<UpdateScenarioCommand, ResponseHttp>
@@ -29,19 +31,22 @@ namespace Application.Features.ScenariosFeature.Commands
             private readonly IGherkinParserService _gherkinParser;
             private readonly IMapper _mapper;
             private readonly ITestTestAutoumatisationContext _context;
+            private readonly ILogger<UpdateScenarioCommandHandler> _logger;
 
             public UpdateScenarioCommandHandler(
                 IScenarioRepository scenarioRepository,
                 IProjectRepository projectRepository,
                 IGherkinParserService gherkinParser,
                 IMapper mapper,
-                ITestTestAutoumatisationContext context)
+                ITestTestAutoumatisationContext context,
+                ILogger<UpdateScenarioCommandHandler> logger)
             {
                 _scenarioRepository = scenarioRepository;
                 _projectRepository = projectRepository;
                 _gherkinParser = gherkinParser;
                 _mapper = mapper;
                 _context = context;
+                _logger = logger;
             }
 
             public async Task<ResponseHttp> Handle(UpdateScenarioCommand request, CancellationToken cancellationToken)
@@ -80,7 +85,8 @@ namespace Application.Features.ScenariosFeature.Commands
                         };
                     }
 
-                    var isMember = project.UserId == request.UpdatedById ||
+                    var isMember = request.IsSystemAdmin ||
+                        project.UserId == request.UpdatedById ||
                         project.Members.Any(m =>
                         m.UserId == request.UpdatedById && !m.IsDeleted);
 
@@ -200,11 +206,11 @@ namespace Application.Features.ScenariosFeature.Commands
                 }
                 catch (Exception ex)
                 {
-                    var innerMessage = ex.InnerException?.Message ?? ex.Message;
+                    _logger.LogError(ex, "Error updating scenario {ScenarioId}", request.Id);
                     return new ResponseHttp
                     {
-                        FailMessages = innerMessage,
-                        Status = StatusCodes.Status400BadRequest
+                        FailMessages = "An unexpected error occurred while updating the scenario.",
+                        Status = StatusCodes.Status500InternalServerError
                     };
                 }
             }

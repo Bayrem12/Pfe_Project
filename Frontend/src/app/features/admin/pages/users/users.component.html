@@ -313,6 +313,13 @@
         </div>
       </div>
 
+      @if (inviteError) {
+        <div class="mt-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <span class="material-symbols-outlined text-base shrink-0 mt-0.5">error</span>
+          <p class="font-medium">{{ inviteError }}</p>
+        </div>
+      }
+
       <div class="flex gap-3 mt-8">
         <button (click)="closeInviteModal()"
                 class="flex-1 py-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors" type="button">

@@ -251,6 +251,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
           id: feature.id,
           moduleId: module.id,
           name: feature.name,
+          description: feature.description,
           expanded: moduleIndex === 0 && featureIndex === 0,
           children: featureScenarios.map((scenario) => ({
             id: scenario.id,
@@ -264,6 +265,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
       return {
         id: module.id,
         name: module.name,
+        description: module.description,
         expanded: moduleIndex === 0,
         children: hierarchyFeatures
       };
@@ -441,12 +443,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
           .sort((a, b) => a.name.localeCompare(b.name));
         this.isTagsLoading = false;
       },
-      error: (error) => {
-        console.error('Erreur lors du chargement des tags:', error);
-        this.tagsError =
-          error?.error?.fail_Messages ||
-          error?.error?.Fail_Messages ||
-          'Unable to load project tags.';
+      error: () => {
         this.tags = [];
         this.isTagsLoading = false;
       }
@@ -896,6 +893,7 @@ interface StepDto {
 interface HierarchyModule {
   id: string;
   name: string;
+  description?: string;
   expanded: boolean;
   children: HierarchyFeature[];
 }
@@ -904,6 +902,7 @@ interface HierarchyFeature {
   id: string;
   moduleId: string;
   name: string;
+  description?: string;
   expanded: boolean;
   children: HierarchyScenario[];
 }

@@ -259,9 +259,38 @@ class ExecutorService:
 
         os.makedirs(settings.SCREENSHOTS_DIR, exist_ok=True)
 
+        # When headless=False (Watch Run), Playwright needs a display.
+        # Prefer the host X11 display forwarded via the DISPLAY env var
+        # (set in docker-compose.yml via X11 socket mount).  If no host
+        # display is available, fall back to a local Xvfb virtual display.
+        headless = request.headless if request.headless is not None else settings.HEADLESS
+        xvfb_proc = None
+        if not headless:
+            if not os.environ.get("DISPLAY"):
+                # No host display forwarded — try Xvfb as last resort.
+                import subprocess, shutil
+                if shutil.which("Xvfb"):
+                    display = ":99"
+                    xvfb_proc = subprocess.Popen(
+                        ["Xvfb", display, "-screen", "0", "1280x720x24", "-ac"],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                    )
+                    os.environ["DISPLAY"] = display
+            # else: DISPLAY is already set from X11 forwarding — use it directly.
+
+        try:
+            result = await self._execute_internal(request, test_id, headless, steps_results, screenshots, start)
+        finally:
+            if xvfb_proc is not None:
+                xvfb_proc.terminate()
+                xvfb_proc.wait()
+        return result
+
+    async def _execute_internal(self, request, test_id, headless, steps_results, screenshots, start) -> TestExecutionResponse:
         async with async_playwright() as pw:
             browser = await pw.chromium.launch(
-                headless=request.headless if request.headless is not None else settings.HEADLESS,
+                headless=headless,
                 slow_mo=settings.SLOW_MO_MS,
             )
             page = await browser.new_page()

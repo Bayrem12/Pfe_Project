@@ -38,17 +38,12 @@
     </nav>
   </div>
 
-  <!-- Right Side: Search & User Actions -->
+  <!-- Right Side: Date & User Actions -->
   <div class="topbar-actions">
-    <!-- Search Bar -->
-    <div class="search-container">
-      <span class="material-symbols-outlined search-icon">search</span>
-      <input 
-        [(ngModel)]="searchQuery"
-        (keyup.enter)="onSearch()"
-        class="search-input" 
-        [placeholder]="'topbar.searchPh' | translate" 
-        type="text"/>
+    <!-- Date chip -->
+    <div class="date-chip">
+      <span class="material-symbols-outlined date-chip-icon">calendar_today</span>
+      <span class="date-chip-label">{{ today }}</span>
     </div>
 
     <!-- Action Buttons -->
@@ -159,16 +154,17 @@
         </div>
       </div>
 
-      <!-- History -->
-      <button (click)="openHistory()" class="action-btn">
+      <!-- Test Runs History -->
+      <button (click)="openHistory()" class="action-btn" title="Test Runs">
         <span class="material-symbols-outlined icon">history</span>
       </button>
 
       <!-- Divider -->
       <div class="divider"></div>
 
-      <!-- User Avatar -->
+      <!-- User Name + Avatar -->
       <button type="button" (click)="goToProfile()" class="user-avatar-btn" aria-label="Open profile">
+        <span *ngIf="userName" class="user-name-label">{{ userName }}</span>
         <img *ngIf="userAvatar" [src]="userAvatar" alt="User profile avatar" class="user-avatar" />
         <span *ngIf="!userAvatar" class="user-avatar user-avatar-fallback">{{ userInitials }}</span>
       </button>

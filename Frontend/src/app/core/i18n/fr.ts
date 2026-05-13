@@ -1069,8 +1069,8 @@ export const fr: Record<string, string> = {
   'action.saving':                    'Enregistrement...',
 
   // ── Project list polish ─────────────────────────────────────────────
-  'project.list.newCard.title':       'Nouvelle suite de tests',
-  'project.list.newCard.subtitle':    'Initialiser un nouveau projet avec un échafaudage Gherkin piloté par IA',
+  'project.list.newCard.title':       'Nouveau Projet',
+  'project.list.newCard.subtitle':    'Créez un nouveau projet pour organiser vos suites de tests et scénarios',
   'project.list.updated':             'Mis à jour',
   'project.list.noRunsYet':           'Aucune exécution',
   'project.list.emptyHint':           'Créez votre premier projet pour commencer à construire des suites de tests automatisées.',

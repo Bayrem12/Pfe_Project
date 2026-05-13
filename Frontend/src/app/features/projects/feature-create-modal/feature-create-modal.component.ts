@@ -119,6 +119,11 @@ export class FeatureCreateModalComponent implements OnInit {
       }))
       .subscribe({
         next: (response: any) => {
+          const errorMsg = response?.failMessages ?? response?.FailMessages ?? null;
+          if (errorMsg) {
+            this.errorMessage = errorMsg;
+            return;
+          }
           const created = response?.resultat ?? response?.Resultat ?? null;
           this.featureCreated.emit({
             id: created?.id ?? '',

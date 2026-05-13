@@ -1,41 +1,33 @@
-#Start a build stage using .NET8 SDK image
-#AS build means give this stage a name "build"
+# ── Stage 1: Build ────────────────────────────────────────────────────────
+# Use the full .NET 8 SDK image to compile and publish the app.
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
-#set src as work directory in the container 
-WORKDIR /src 
+WORKDIR /src
 
-#copy API project file into /src
-COPY API/API.csproj API/
-
-#copy Application project file into /src
+# Copy only the .csproj files first so Docker can cache the restore layer.
+# If requirements don't change, this layer is reused even when code changes.
+COPY API/API.csproj         API/
 COPY Application/Application.csproj Application/
+COPY Domain/Domain.csproj   Domain/
+COPY Persistance/Persistance.csproj Persistance/
 
-#copy Domain project file into /src
-COPY Domain/Domain.csproj Domain/
-
-#copy Persistance project file into /src
-Copy Persistance/Persistance.csproj Persistance/
-
-#restore NuGet packages for the API project
 RUN dotnet restore API/API.csproj
 
-#Copy the rest of the backend source-code into the container
+# Now copy the full source and publish in Release mode.
 COPY . .
-
-#Build & publish the API in release mode into /app/publish
 RUN dotnet publish API/API.csproj -c Release -o /app/publish --no-restore
 
-#start a second, smaller runtime-only image used to run the app
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 
+# ── Stage 2: Runtime ──────────────────────────────────────────────────────
+# Use the smaller ASP.NET runtime image (no SDK, ~200 MB smaller).
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
-#set app as the runtime directory
 WORKDIR /app
 
-#copy the published app from the build stage into the runtime stage
+# Copy only the published artifacts from stage 1.
 COPY --from=build /app/publish .
 
-#Tell the container to start the app with dotnet API.dll
+EXPOSE 5288
+
 ENTRYPOINT ["dotnet", "API.dll"]
 
 

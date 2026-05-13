@@ -40,7 +40,7 @@ export class ProjectService {
       return of([]);
     }
     return this.http.get<ResponseHttp>(`${this.apiUrl}?userId=${userId}&pageNumber=${pageNumber}&pageSize=${pageSize}`).pipe(
-      map(response => response?.resultat?.items || [])
+      map(response => (response?.resultat?.items || []).filter((p: any) => p.isActive !== false))
     );
   }
 

@@ -13,6 +13,7 @@ using Application.Setting;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Features.NlpFeature.Commands
 {
@@ -29,6 +30,7 @@ namespace Application.Features.NlpFeature.Commands
         {
             private readonly IHttpClientFactory _httpFactory;
             private readonly string _agentBaseUrl;
+            private readonly ILogger<AnalyzeFailureCommandHandler> _logger;
 
             private static readonly JsonSerializerOptions _jsonOptions = new()
             {
@@ -38,10 +40,12 @@ namespace Application.Features.NlpFeature.Commands
 
             public AnalyzeFailureCommandHandler(
                 IHttpClientFactory httpFactory,
-                IConfiguration configuration)
+                IConfiguration configuration,
+                ILogger<AnalyzeFailureCommandHandler> logger)
             {
                 _httpFactory = httpFactory;
                 _agentBaseUrl = (configuration["IAAgent:BaseUrl"] ?? "http://localhost:8000").TrimEnd('/');
+                _logger = logger;
             }
 
             public async Task<ResponseHttp> Handle(AnalyzeFailureCommand request, CancellationToken cancellationToken)
@@ -58,7 +62,9 @@ namespace Application.Features.NlpFeature.Commands
                         retry_count = request.RetryCount,
                     };
 
+                    // Failure analysis runs a 4-stage ML cascade — allow up to 3 minutes.
                     var client = _httpFactory.CreateClient();
+                    client.Timeout = TimeSpan.FromMinutes(3);
                     var agentUrl = $"{_agentBaseUrl}/api/ia/analyze-failure";
 
                     var response = await client.PostAsJsonAsync(agentUrl, payload, cancellationToken);
@@ -66,10 +72,11 @@ namespace Application.Features.NlpFeature.Commands
                     if (!response.IsSuccessStatusCode)
                     {
                         var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                        _logger.LogError("IA Agent failure analysis returned {StatusCode}: {Body}", (int)response.StatusCode, errorBody);
                         return new ResponseHttp
                         {
                             Status = StatusCodes.Status502BadGateway,
-                            Fail_Messages = $"IA Agent returned {(int)response.StatusCode}: {errorBody}"
+                            FailMessages = "The failure analysis service is temporarily unavailable."
                         };
                     }
 
@@ -84,18 +91,20 @@ namespace Application.Features.NlpFeature.Commands
                 }
                 catch (HttpRequestException httpEx)
                 {
+                    _logger.LogError(httpEx, "Could not reach IA Agent for failure analysis.");
                     return new ResponseHttp
                     {
                         Status = StatusCodes.Status502BadGateway,
-                        Fail_Messages = $"Could not reach IA Agent: {httpEx.Message}"
+                        FailMessages = "The failure analysis service is temporarily unavailable."
                     };
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError(ex, "Unexpected error during failure analysis.");
                     return new ResponseHttp
                     {
                         Status = StatusCodes.Status500InternalServerError,
-                        Fail_Messages = $"Unexpected error during failure analysis: {ex.Message}"
+                        FailMessages = "An unexpected error occurred during failure analysis."
                     };
                 }
             }

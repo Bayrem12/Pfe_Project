@@ -35,19 +35,20 @@ namespace Application.Features.ProjectFeature.Commands
                         };
                     }
 
-                    if (member.Role == ProjectRole.Admin)
+                    if (member.Role == ProjectRole.Admin || member.Role == ProjectRole.Manager)
                     {
                         var projectMembers = await _projectRepository.GetProjectMembersAsync(request.ProjectId, cancellationToken);
 
-                        var remainingAdminsCount = projectMembers.Count(m =>
-                            m.Role == ProjectRole.Admin &&
+                        // Count all remaining members who can manage the project (Admin OR Manager)
+                        var remainingManagingCount = projectMembers.Count(m =>
+                            (m.Role == ProjectRole.Admin || m.Role == ProjectRole.Manager) &&
                             m.UserId != request.UserId);
 
-                        if (remainingAdminsCount == 0)
+                        if (remainingManagingCount == 0)
                         {
                             return new ResponseHttp
                             {
-                                FailMessages = "Cannot remove the last owner of the project",
+                                FailMessages = "Cannot remove the last manager of the project. Assign another manager first.",
                                 Status = StatusCodes.Status400BadRequest,
                             };
                         }

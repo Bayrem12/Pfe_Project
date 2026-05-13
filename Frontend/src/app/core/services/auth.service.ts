@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 import {
   LoginRequest,
   LoginResult,
+  RefreshTokenRequest,
   ChangePasswordResponse,
   ForgotPasswordResponse,
   ResetPasswordResponse
@@ -27,6 +28,10 @@ export class AuthService {
   );
   public currentUser$ = this.currentUserSubject.asObservable();
 
+  // Token refresh state — used by error.interceptor to queue concurrent 401s
+  isRefreshing = false;
+  refreshTokenSubject = new BehaviorSubject<string | null>(null);
+
   login(credentials: LoginRequest): Observable<ResponseHttp<LoginResult>> {
     return this.http.post<ResponseHttp<LoginResult>>(
       `${environment.apiUrl}/auth/login`,
@@ -35,6 +40,7 @@ export class AuthService {
       tap(response => {
         if (response.status === 200 && response.resultat) {
           this.setToken(response.resultat.token);
+          this.setRefreshToken(response.resultat.refreshToken);
           const tokenUser = this.getUserFromToken();
           const userFromApi = response.resultat.user;
           const roles = userFromApi?.roles?.length ? userFromApi.roles : (tokenUser?.roles ?? []);
@@ -101,6 +107,24 @@ export class AuthService {
     return localStorage.getItem('access_token');
   }
 
+  getRefreshToken(): string | null {
+    return localStorage.getItem('refresh_token');
+  }
+
+  refreshTokens(): Observable<ResponseHttp<LoginResult>> {
+    return this.http.post<ResponseHttp<LoginResult>>(
+      `${environment.apiUrl}/auth/refresh`,
+      { refreshToken: this.getRefreshToken() ?? '' } satisfies RefreshTokenRequest
+    ).pipe(
+      tap(response => {
+        if (response.status === 200 && response.resultat) {
+          this.setToken(response.resultat.token);
+          this.setRefreshToken(response.resultat.refreshToken);
+        }
+      })
+    );
+  }
+
   isTokenExpired(): boolean {
     const token = this.getAccessToken();
     if (!token) return true;
@@ -124,6 +148,10 @@ export class AuthService {
     localStorage.setItem('access_token', token);
   }
 
+  private setRefreshToken(token: string): void {
+    localStorage.setItem('refresh_token', token);
+  }
+
   private setUserData(user: LoginResult['user']): void {
     localStorage.setItem('user_data', JSON.stringify(user));
   }
@@ -142,6 +170,7 @@ export class AuthService {
 
   private clearTokens(): void {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     localStorage.removeItem('user_data');
   }
 
@@ -231,7 +260,7 @@ export class AuthService {
   }
 
   canViewAuditLogs(): boolean {
-    return this.hasAnyRole(['Admin', 'Manager', 'Tester']);
+    return this.hasAnyRole(['Admin']);
   }
 
   extractApiErrorMessage(

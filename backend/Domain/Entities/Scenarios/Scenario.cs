@@ -16,6 +16,11 @@ namespace Domain.Entities.Scenarios
         public ScenarioStatus Status { get; set; } = ScenarioStatus.Draft;
         public int CurrentVersion { get; set; } = 1;
 
+        // AI quality analysis
+        public int? QualityScore { get; set; }
+        public string? QualityLabel { get; set; }
+        public DateTime? LastAnalyzedAt { get; set; }
+
         // Navigation
         public Feature Feature { get; set; } = null!;
         public User? User { get; set; } = null!;

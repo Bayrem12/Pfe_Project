@@ -10,6 +10,7 @@ import { TestRunService } from '../../../../core/services/test-run.service';
 import { TestRunDetail, TestRunScenarioResult, TestRunStepResult } from '../../../../core/models/test-run.model';
 import { environment } from '../../../../../environments/environment';
 import { AiFailureAnalyzerComponent } from '../../components/ai-failure-analyzer.component';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-test-run-detail-page',
@@ -31,8 +32,13 @@ export class TestRunDetailPageComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private testRunService: TestRunService,
-    private breadcrumbService: BreadcrumbService
+    private breadcrumbService: BreadcrumbService,
+    private authService: AuthService
   ) {}
+
+  get isViewer(): boolean {
+    return this.authService.hasRole('Viewer');
+  }
 
 
   ngOnInit(): void {
@@ -137,6 +143,10 @@ export class TestRunDetailPageComponent implements OnInit, OnDestroy {
 
   trackByResultId(_: number, result: TestRunScenarioResult): string {
     return result.id;
+  }
+
+  trackByStepId(_: number, step: TestRunStepResult & { scenarioName: string }): string {
+    return step.id;
   }
 
   isAiRun(run: TestRunDetail): boolean {

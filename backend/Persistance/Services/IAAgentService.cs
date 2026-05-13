@@ -408,13 +408,14 @@ namespace Persistance.Services
                     if (!string.IsNullOrWhiteSpace(path))
                     {
                         // Convert the local file-system path returned by the IA agent
-                        // (e.g. "reports/screenshots/xxx.png") to a publicly-accessible
-                        // URL served by the agent's static /reports mount — the same
-                        // pattern used for HTML reports so the frontend can embed them.
+                        // (e.g. "reports/screenshots/xxx.png") to a root-relative URL
+                        // served via nginx → ia-agent static /reports mount.
+                        // Using a relative path avoids embedding the internal Docker
+                        // hostname (ia-agent:8000) which is not resolvable by the browser.
                         var screenshotRelative = path.Replace('\\', '/').TrimStart('/');
                         var screenshotUrl = screenshotRelative.StartsWith("reports/", StringComparison.OrdinalIgnoreCase)
-                            ? $"{_agentBaseUrl}/{screenshotRelative}"
-                            : $"{_agentBaseUrl}/reports/{screenshotRelative}";
+                            ? $"/{screenshotRelative}"
+                            : $"/reports/{screenshotRelative}";
 
                         _db.Screenshots.Add(new Screenshot
                         {
@@ -441,8 +442,8 @@ namespace Persistance.Services
                 // Strip a leading "reports/" segment if present, since the static mount
                 // is exposed at "/reports".
                 var reportUrl = reportRelative.StartsWith("reports/", StringComparison.OrdinalIgnoreCase)
-                    ? $"{_agentBaseUrl}/{reportRelative}"
-                    : $"{_agentBaseUrl}/reports/{reportRelative}";
+                    ? $"/{reportRelative}"
+                    : $"/reports/{reportRelative}";
 
                 _db.Reports.Add(new Domain.Entities.Reporting.Report
                 {
@@ -462,8 +463,8 @@ namespace Persistance.Services
             {
                 var ttRel = agent.TechnicalTracePath.Replace('\\', '/').TrimStart('/');
                 var ttUrl = ttRel.StartsWith("reports/", StringComparison.OrdinalIgnoreCase)
-                    ? $"{_agentBaseUrl}/{ttRel}"
-                    : $"{_agentBaseUrl}/reports/{ttRel}";
+                    ? $"/{ttRel}"
+                    : $"/reports/{ttRel}";
                 _db.Reports.Add(new Domain.Entities.Reporting.Report
                 {
                     Id = Guid.NewGuid(),
