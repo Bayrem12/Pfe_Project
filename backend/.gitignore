@@ -366,4 +366,4 @@ FodyWeavers.xsd
 
 .env
 # Local development secrets — use dotnet user-secrets instead
-appsettings.json
+.appsettings.json
