@@ -24,21 +24,25 @@ namespace API.Controllers
 
         /// <summary>
         /// GET /api/dashboard/summary
-        /// Returns global platform statistics: total projects, scenarios, executions, pass rate.
+        /// Returns statistics scoped to projects the authenticated user owns or is a member of.
         /// </summary>
         [HttpGet("summary")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> GetSummary()
         {
             try
             {
-                var result = await _mediator.Send(new GetDashboardSummaryQuery());
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (!Guid.TryParse(userIdClaim, out var userId))
+                    return Unauthorized(new ResponseHttp { FailMessages = "Invalid user token.", Status = StatusCodes.Status401Unauthorized });
+
+                var result = await _mediator.Send(new GetDashboardSummaryQuery(userId));
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error processing request.");
                 _logger.LogError(ex, "Error retrieving dashboard summary");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHttp { FailMessages = "An error occurred while processing the request.", Status = StatusCodes.Status500InternalServerError });
             }

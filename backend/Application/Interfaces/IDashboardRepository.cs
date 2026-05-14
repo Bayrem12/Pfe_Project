@@ -16,9 +16,9 @@ namespace Application.Interfaces
     public interface IDashboardRepository
     {
         /// <summary>
-        /// Gets the global dashboard summary (total projects, scenarios, executions, pass rate).
+        /// Gets dashboard summary scoped to a specific user's projects (owned or member of).
         /// </summary>
-        Task<DashboardSummaryDto> GetSummaryAsync(CancellationToken cancellationToken);
+        Task<DashboardSummaryDto> GetSummaryAsync(Guid userId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets statistics for a specific project (pass/fail counts, average execution time, etc.).

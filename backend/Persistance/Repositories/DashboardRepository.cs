@@ -31,49 +31,59 @@ namespace Persistance.Repositories
         }
 
         /// <summary>
-        /// Aggregates global platform statistics.
-        /// Counts projects, scenarios, executions, and calculates overall pass rate.
+        /// Aggregates dashboard statistics scoped to the projects the user owns or is a member of.
         /// </summary>
-        public async Task<DashboardSummaryDto> GetSummaryAsync(CancellationToken cancellationToken)
+        public async Task<DashboardSummaryDto> GetSummaryAsync(Guid userId, CancellationToken cancellationToken)
         {
-            // Count non-deleted projects
-            var totalProjects = await _context.Projects
+            // Base query: projects the user owns or is a member of (not deleted)
+            var userProjectIds = await _context.Projects
                 .AsNoTracking()
-                .CountAsync(p => !p.IsDeleted, cancellationToken);
+                .Where(p => !p.IsDeleted && (
+                    p.UserId == userId ||
+                    p.Members.Any(m => m.UserId == userId)
+                ))
+                .Select(p => p.Id)
+                .ToListAsync(cancellationToken);
 
-            // Count active projects (IsActive = true AND not deleted)
+            var totalProjects = userProjectIds.Count;
+
+            // Count active projects from user's project list
             var activeProjects = await _context.Projects
                 .AsNoTracking()
-                .CountAsync(p => p.IsActive && !p.IsDeleted, cancellationToken);
+                .CountAsync(p => userProjectIds.Contains(p.Id) && p.IsActive, cancellationToken);
 
-            // Count non-deleted scenarios
+            // Count scenarios in user's projects (Scenario → Feature → Module → Project)
             var totalScenarios = await _context.Scenarios
                 .AsNoTracking()
-                .CountAsync(s => !s.IsDeleted, cancellationToken);
+                .CountAsync(s => !s.IsDeleted && userProjectIds.Contains(s.Feature!.Module!.ProjectId), cancellationToken);
 
-            // Count non-deleted test executions
+            // Count executions in user's projects
             var totalExecutions = await _context.TestExecutions
                 .AsNoTracking()
-                .CountAsync(e => !e.IsDeleted, cancellationToken);
+                .CountAsync(e => !e.IsDeleted && userProjectIds.Contains(e.Scenario!.Feature!.Module!.ProjectId), cancellationToken);
 
-            // Count pending/running executions
+            // Count pending/running executions in user's projects
             var pendingExecutions = await _context.TestExecutions
                 .AsNoTracking()
                 .CountAsync(e => !e.IsDeleted &&
-                    (e.Status == ExecutionStatus.Pending || e.Status == ExecutionStatus.Running),
+                    (e.Status == ExecutionStatus.Pending || e.Status == ExecutionStatus.Running) &&
+                    userProjectIds.Contains(e.Scenario!.Feature!.Module!.ProjectId),
                     cancellationToken);
 
-            // Calculate overall pass rate from TestResults
-            // Pass rate = (passed tests / total tests) * 100
+            // Pass rate from test results belonging to user's executions
+            var userExecutionIds = _context.TestExecutions
+                .AsNoTracking()
+                .Where(e => !e.IsDeleted && userProjectIds.Contains(e.Scenario!.Feature!.Module!.ProjectId))
+                .Select(e => e.Id);
+
             var totalResults = await _context.TestResults
                 .AsNoTracking()
-                .CountAsync(r => !r.IsDeleted, cancellationToken);
+                .CountAsync(r => !r.IsDeleted && userExecutionIds.Contains(r.ExecutionId), cancellationToken);
 
             var passedResults = await _context.TestResults
                 .AsNoTracking()
-                .CountAsync(r => !r.IsDeleted && r.Status == TestStatus.Passed, cancellationToken);
+                .CountAsync(r => !r.IsDeleted && r.Status == TestStatus.Passed && userExecutionIds.Contains(r.ExecutionId), cancellationToken);
 
-            // Avoid division by zero: if no results, pass rate is 0
             var overallPassRate = totalResults > 0
                 ? Math.Round((double)passedResults / totalResults * 100, 2)
                 : 0;

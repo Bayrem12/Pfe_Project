@@ -11,11 +11,9 @@ using Microsoft.AspNetCore.Http;
 namespace Application.Features.DashboardFeature.Queries
 {
     /// <summary>
-    /// Query to get the global dashboard summary.
-    /// No parameters needed — it returns platform-wide statistics.
-    /// "record" with no properties = a parameterless query.
+    /// Query to get the dashboard summary scoped to a specific user's projects.
     /// </summary>
-    public record GetDashboardSummaryQuery() : IRequest<ResponseHttp>
+    public record GetDashboardSummaryQuery(Guid UserId) : IRequest<ResponseHttp>
     {
         public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSummaryQuery, ResponseHttp>
         {
@@ -30,8 +28,8 @@ namespace Application.Features.DashboardFeature.Queries
             {
                 try
                 {
-                    // The repository handles the complex aggregation queries
-                    var summary = await _dashboardRepository.GetSummaryAsync(cancellationToken);
+                    // The repository handles the complex aggregation queries filtered by userId
+                    var summary = await _dashboardRepository.GetSummaryAsync(request.UserId, cancellationToken);
 
                     return new ResponseHttp
                     {
