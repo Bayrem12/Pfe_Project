@@ -7,6 +7,6 @@ export const environment = {
   production: true,
   apiUrl: '/api',   // nginx → http://api:5288/api/...
   iaAgentUrl: '',   // nginx handles /api/ia/ and /reports/ transparently
-  googleClientId: '232300559122-lb3stgmbsjpg51f8reo9umbgc87rsk09.apps.googleusercontent.com',
+  googleClientId: '791628194427-al7sf7ttuqougi8ge9nu8rif92qjf1jn.apps.googleusercontent.com',
   githubClientId: 'Ov23lio1dA7ti2vJd9c6'
 };

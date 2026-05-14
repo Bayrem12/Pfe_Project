@@ -65,6 +65,14 @@ namespace Application.Features.AuthFeature.Commands
                         };
                         await _userRepository.CreateWithDefaultRoleAsync(user);
                     }
+                    else if (!user.IsActive)
+                    {
+                        return new ResponseHttp
+                        {
+                            Status = StatusCodes.Status403Forbidden,
+                            FailMessages = "Your account has been deactivated. Please contact an administrator."
+                        };
+                    }
 
                     // 3. Générer le JWT — même logique que AddUserLogin
                     // ✅ Critique 1 — Inclure le rôle dans le JWT

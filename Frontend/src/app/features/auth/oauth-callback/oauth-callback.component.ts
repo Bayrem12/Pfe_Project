@@ -64,12 +64,13 @@ export class OauthCallbackComponent implements OnInit {
           );
           this.router.navigate(['/dashboard']);
         } else {
-          this.message = response.fail_Messages || 'Login failed. Redirecting…';
+          this.message = response.failMessages || 'Login failed. Redirecting…';
           setTimeout(() => this.router.navigate(['/auth/login']), 2000);
         }
       },
-      error: () => {
-        this.message = 'Server error. Redirecting…';
+      error: (err) => {
+        const msg = err?.error?.failMessages;
+        this.message = msg || 'Server error. Redirecting…';
         setTimeout(() => this.router.navigate(['/auth/login']), 2000);
       }
     });
